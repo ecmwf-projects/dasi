@@ -32,8 +32,8 @@ public: // methods
 
     virtual void print(std::ostream& s) const;
 
-    template <typename TVisitor>
-    void walk(const Key& key, TVisitor& visitor) const;
+    template <typename TRequest, typename TVisitor>
+    void walk(const TRequest& key, TVisitor& visitor) const;
 
 protected: // members
 
@@ -59,8 +59,8 @@ public: // methods
 
     void print(std::ostream& s) const override;
 
-    template <typename TVisitor>
-    void walkChildren(const Key& key, TVisitor& visitor) const;
+    template <typename TRequest, typename TVisitor>
+    void walkChildren(const TRequest& key, TVisitor& visitor) const;
 
 private: // members
 
@@ -73,24 +73,24 @@ class SchemaRule3 : public SchemaRule<SchemaRule3> {
 public:
     using SchemaRule<SchemaRule3>::SchemaRule;
 
-    template <typename TVisitor>
-    void walkMatched(const Key& key, TVisitor& visitor) const;
+    template <typename TRequest, typename TVisitor>
+    void walkMatched(const TRequest& key, TVisitor& visitor) const;
 };
 
 class SchemaRule2 : public SchemaRuleParent<SchemaRule2, SchemaRule3> {
 public:
     using SchemaRuleParent<SchemaRule2, SchemaRule3>::SchemaRuleParent;
 
-    template <typename TVisitor>
-    void walkMatched(const Key& key, TVisitor& visitor) const;
+    template <typename TRequest, typename TVisitor>
+    void walkMatched(const TRequest& key, TVisitor& visitor) const;
 };
 
 class SchemaRule1 : public SchemaRuleParent<SchemaRule1, SchemaRule2> {
 public:
     using SchemaRuleParent<SchemaRule1, SchemaRule2>::SchemaRuleParent;
 
-    template <typename TVisitor>
-    void walkMatched(const Key& key, TVisitor& visitor) const;
+    template <typename TRequest, typename TVisitor>
+    void walkMatched(const TRequest& key, TVisitor& visitor) const;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -103,9 +103,10 @@ public: // methods
     Schema(std::vector<SchemaRule1>&& rules);
 
     static Schema parse(std::istream& s);
+    static Schema parse(const char* s);
 
-    template <typename TVisitor>
-    void walk(const Key& key, TVisitor& visitor);
+    template <typename TRequest, typename TVisitor>
+    void walk(const TRequest& key, TVisitor& visitor) const;
 
 private: // methods
 
@@ -123,8 +124,8 @@ private: // members
 
 //----------------------------------------------------------------------------------------------------------------------
 
-template <typename TVisitor>
-void Schema::walk(const Key& key, TVisitor& visitor) {
+template <typename TRequest, typename TVisitor>
+void Schema::walk(const TRequest& key, TVisitor& visitor) const {
 //    SplitKey matched;
     for (const auto& rule : rules_) {
 //        rule.walk(key, matched, visitor);
@@ -133,8 +134,8 @@ void Schema::walk(const Key& key, TVisitor& visitor) {
 }
 
 template <typename TSelf>
-template <typename TVisitor>
-void SchemaRule<TSelf>::walk(const Key& key, TVisitor& visitor) const {
+template <typename TRequest, typename TVisitor>
+void SchemaRule<TSelf>::walk(const TRequest& key, TVisitor& visitor) const {
     for (const auto& k : keys_) {
         if (!key.has(k)) {
             return;
@@ -145,27 +146,27 @@ void SchemaRule<TSelf>::walk(const Key& key, TVisitor& visitor) const {
 }
 
 template <typename TSelf, typename ChildRule>
-template <typename TVisitor>
-void SchemaRuleParent<TSelf, ChildRule>::walkChildren(const Key& key, TVisitor& visitor) const {
+template <typename TRequest, typename TVisitor>
+void SchemaRuleParent<TSelf, ChildRule>::walkChildren(const TRequest& key, TVisitor& visitor) const {
     for (const auto& child : children_) {
         child.walk(key, visitor);
     }
 }
 
-template <typename TVisitor>
-void SchemaRule1::walkMatched(const Key& key, TVisitor& visitor) const {
+template <typename TRequest, typename TVisitor>
+void SchemaRule1::walkMatched(const TRequest& key, TVisitor& visitor) const {
     std::cout << "Matched level 1" << std::endl;
     walkChildren(key, visitor);
 }
 
-template <typename TVisitor>
-void SchemaRule2::walkMatched(const Key& key, TVisitor& visitor) const {
+template <typename TRequest, typename TVisitor>
+void SchemaRule2::walkMatched(const TRequest& key, TVisitor& visitor) const {
     std::cout << "Matched level 2" << std::endl;
     walkChildren(key, visitor);
 }
 
-template <typename TVisitor>
-void SchemaRule3::walkMatched(const Key& key, TVisitor& visitor) const {
+template <typename TRequest, typename TVisitor>
+void SchemaRule3::walkMatched(const TRequest& key, TVisitor& visitor) const {
     std::cout << "Matched level 3" << std::endl;
 }
 

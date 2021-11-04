@@ -9,6 +9,7 @@
 
 #include <istream>
 #include <iostream>
+#include <sstream>
 
 namespace dasi {
 
@@ -146,6 +147,11 @@ Schema Schema::parse(std::istream& s) {
     }
 
     return {std::move(rules)};
+}
+
+Schema Schema::parse(const char* s) {
+    std::istringstream input(s);
+    return parse(input);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
