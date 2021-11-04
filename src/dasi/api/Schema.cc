@@ -1,6 +1,5 @@
 
 #include "dasi/api/Schema.h"
-#include "dasi/api/Key.h"
 
 #include "dasi/core/ContainerIostream.h"
 #include "dasi/core/IndentStream.h"
@@ -31,19 +30,6 @@ SchemaRule<TSelf>::SchemaRule(const YAML::Node& yml) {
     }
 }
 
-template <typename TSelf>
-void SchemaRule<TSelf>::walk(const Key& key) const {
-    for (const auto& k : keys_) {
-        if (!key.has(k)) {
-            return;
-        }
-    }
-
-    // We have found a match!
-    std::cout << "This matches: " << key << " : " << *this << std::endl;
-
-    static_cast<const TSelf&>(*this).walkChildren(key);
-}
 
 template <typename TSelf>
 void SchemaRule<TSelf>::print(std::ostream& s) const {
@@ -52,7 +38,7 @@ void SchemaRule<TSelf>::print(std::ostream& s) const {
 
 template <typename TSelf, typename ChildRule>
 SchemaRuleParent<TSelf, ChildRule>::SchemaRuleParent(std::initializer_list<std::string> keys, std::initializer_list<ChildRule> subrules) :
-    SchemaRule<SchemaRuleParent<TSelf, ChildRule>>(keys),
+    SchemaRule<TSelf>(keys),
     children_(subrules) {}
 
 template <typename TSelf, typename ChildRule>
@@ -84,13 +70,6 @@ void SchemaRuleParent<TSelf, ChildRule>::print(std::ostream& s) const {
         }
     }
     s << "]";
-}
-
-template <typename TSelf, typename ChildRule>
-void SchemaRuleParent<TSelf, ChildRule>::walkChildren(const Key& key) const {
-    for (const auto& child : children_) {
-        child.walk(key);
-    }
 }
 
 // Explicitly instantiate only these instances in this unit
@@ -167,12 +146,6 @@ Schema Schema::parse(std::istream& s) {
     }
 
     return {std::move(rules)};
-}
-
-void Schema::walk(const Key& key) {
-    for (const auto& rule : rules_) {
-        rule.walk(key);
-    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------

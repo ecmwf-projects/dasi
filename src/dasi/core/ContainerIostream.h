@@ -5,8 +5,10 @@
 #include <set>
 #include <vector>
 #include <map>
+#include <array>
 #include <unordered_map>
 #include <unordered_set>
+
 
 namespace dasi {
 namespace internal {
@@ -57,6 +59,12 @@ inline std::ostream& operator<<(std::ostream& s, const std::vector<T>& v) {
 
 template <typename T>
 inline std::ostream& operator<<(std::ostream& s, const std::set<T>& v) {
+    dasi::internal::print_list(s, v);
+    return s;
+}
+
+template <typename T, std::size_t N>
+inline std::ostream& operator<<(std::ostream& s, const std::array<T, N>& v) {
     dasi::internal::print_list(s, v);
     return s;
 }

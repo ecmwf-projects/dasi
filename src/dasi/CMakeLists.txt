@@ -15,8 +15,12 @@ ecbuild_add_library(
     SOURCES
         api/Key.cc
         api/Key.h
+        api/SplitKey.cc
+        api/SplitKey.h
         api/Query.cc
         api/Query.h
+        api/Request.cc
+        api/Request.h
         api/Schema.cc
         api/Schema.h
 

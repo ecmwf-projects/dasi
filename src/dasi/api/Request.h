@@ -1,27 +1,27 @@
 
 #pragma once
 
+#include <initializer_list>
+#include <iosfwd>
 #include <map>
 #include <string>
-#include <iosfwd>
-#include <initializer_list>
-#include <utility>
+#include <vector>
 
 namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class Key {
+class Request {
 
 public: // methods
 
-    Key() = default;
-    Key(std::initializer_list<std::pair<const std::string, std::string>>);
+    Request() = default;
+    Request(std::initializer_list<std::pair<const std::string, std::vector<std::string>>>);
 
     [[nodiscard]]
     bool has(const std::string_view& name) const;
 
-    void set(const std::string& k, const std::string_view& v);
+    void set(const std::string& k, std::initializer_list<std::string> v);
 
 private: // methods
 
@@ -29,7 +29,7 @@ private: // methods
 
 private: // friends
 
-    friend std::ostream& operator<<(std::ostream& s, const Key& k) {
+    friend std::ostream& operator<<(std::ostream& s, const Request& k) {
         k.print(s);
         return s;
     }
@@ -37,7 +37,7 @@ private: // friends
 private: // members
 
     // n.b. use of transparent comparator --> allow lookup with std::string_view as key
-    std::map<std::string, std::string, std::less<>> values_;
+    std::map<std::string, std::vector<std::string>, std::less<>> values_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

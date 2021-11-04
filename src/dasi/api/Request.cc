@@ -1,5 +1,5 @@
 
-#include "dasi/api/Key.h"
+#include "dasi/api/Request.h"
 
 #include "dasi/core/ContainerIostream.h"
 
@@ -7,19 +7,19 @@ namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-Key::Key(std::initializer_list<std::pair<const std::string, std::string>> l) :
+Request::Request(std::initializer_list<std::pair<const std::string, std::vector<std::string>>> l) :
     values_(l) {}
 
 
-void Key::print(std::ostream& s) const {
+void Request::print(std::ostream& s) const {
     s << values_;
 }
 
-bool Key::has(const std::string_view& name) const {
+bool Request::has(const std::string_view& name) const {
     return (values_.find(name) != values_.end());
 }
 
-void Key::set(const std::string& k, const std::string_view& v) {
+void Request::set(const std::string& k, std::initializer_list<std::string> v) {
     values_.insert_or_assign(k, v);
 }
 

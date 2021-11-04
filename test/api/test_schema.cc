@@ -134,8 +134,11 @@ CASE("Schema parsing") {
             {"key3B", "k333"},
     };
 
+    struct MyVisitor {};
+
     std::cout << "Walking..." << std::endl;
-    s.walk(k);
+    MyVisitor v;
+    s.walk(k, v);
 }
 
 
