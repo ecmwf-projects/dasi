@@ -1,16 +1,16 @@
 
-#include "dasi/core/Test.h"
+#include "dasi/util/Test.h"
 
-#include "dasi/api/Schema.h"
+#include "dasi/core/Schema.h"
 #include "dasi/api/Key.h"
-#include "dasi/api/Request.h"
+#include "dasi/api/Query.h"
 
 #include <sstream>
 #include <string>
 
 using dasi::Schema;
 using dasi::Key;
-using dasi::Request;
+using dasi::Query;
 using namespace std::string_literals;
 
 constexpr const char* TEST_SCHEMA = R"(
@@ -140,7 +140,11 @@ CASE("Visit schema with a key") {
             {"key3B", "k333"},
     };
 
-    struct MyVisitor {};
+    struct MyVisitor {
+        void firstLevel() { std::cout << "Key - FIRST" << std::endl; }
+//        void secondLevel() { std::cout << "Key - SECOND" << std::endl; }
+        void thirdLevel() { std::cout << "Key - THIRD" << std::endl; }
+    };
 
     std::cout << "Walking..." << std::endl;
     MyVisitor v;
@@ -150,7 +154,7 @@ CASE("Visit schema with a key") {
 CASE("Visit schema with a request") {
 
     auto s = Schema::parse(TEST_SCHEMA);
-    Request r {
+    Query r {
             {"key1", {"k1"}},
             {"key2", {"k2"}},
             {"key3", {"k3"}},
@@ -162,7 +166,11 @@ CASE("Visit schema with a request") {
             {"key3B", {"k333"}},
     };
 
-    struct MyVisitor {};
+    struct MyVisitor {
+//        void firstLevel() { std::cout << "Request -- FIRST" << std::endl; }
+        void secondLevel() { std::cout << "Request -- SECOND" << std::endl; }
+        void thirdLevel() { std::cout << "Request -- THIRD" << std::endl; }
+    };
 
     std::cout << "Walking..." << std::endl;
     MyVisitor v;

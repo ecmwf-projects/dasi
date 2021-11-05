@@ -1,8 +1,8 @@
 
 list( APPEND _api_tests
+    dasi
     key
-    request
-    schema
+    query
 )
 
 foreach( _test ${_api_tests} )

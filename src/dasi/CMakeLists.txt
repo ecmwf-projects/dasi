@@ -13,24 +13,30 @@ ecbuild_add_library(
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
     LINKER_LANGUAGE CXX
     SOURCES
+        api/Dasi.cc
+        api/Dasi.h
         api/Key.cc
         api/Key.h
         api/SplitKey.cc
         api/SplitKey.h
         api/Query.cc
         api/Query.h
-        api/Request.cc
-        api/Request.h
-        api/Schema.cc
-        api/Schema.h
+        api/Query.cc
+        api/Query.h
 
-        core/Colour.cc
-        core/Colour.h
-        core/ContainerIostream.h
-        core/Exceptions.cc
-        core/Exceptions.h
-        core/IndentStream.h
-        core/Test.h
+        core/ArchiveVisitor.cc
+        core/ArchiveVisitor.h
+        core/Schema.cc
+        core/Schema.h
+
+        util/Colour.cc
+        util/Colour.h
+        util/ContainerIostream.h
+        util/Exceptions.cc
+        util/Exceptions.h
+        util/IndentStream.h
+        util/Test.h
+        util/CartesianProduct.h
 )
 
 ecbuild_add_executable(

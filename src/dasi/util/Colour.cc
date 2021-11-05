@@ -1,4 +1,4 @@
-#include "dasi/core/Colour.h"
+#include "dasi/util/Colour.h"
 
 #include <iostream>
 #include <unistd.h>

@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "dasi/core/Exceptions.h"
-#include "dasi/core/Colour.h"
+#include "dasi/util/Exceptions.h"
+#include "dasi/util/Colour.h"
 
 #include <functional>
 #include <string>

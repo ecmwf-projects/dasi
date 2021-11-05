@@ -101,6 +101,8 @@ public: // methods
 
     Schema(std::initializer_list<SchemaRule1> rules);
     Schema(std::vector<SchemaRule1>&& rules);
+    Schema(const YAML::Node& config);
+    Schema(const std::vector<YAML::Node>& config);
 
     static Schema parse(std::istream& s);
     static Schema parse(const char* s);
@@ -153,20 +155,48 @@ void SchemaRuleParent<TSelf, ChildRule>::walkChildren(const TRequest& key, TVisi
     }
 }
 
+// This is built with concepts. We could do something SFINAE if necessary (i.e. c++17)
+
+//template <typename T>
+//concept reportFirstLevel = requires (T t) {
+//    { t.firstLevel() } -> std::same_as<void>;
+//};
+
+namespace detail {
+template<typename T, typename = void>
+struct has_first_level_fn : std::false_type {};
+template<typename T>
+struct has_first_level_fn<T, std::void_t<decltype(std::declval<T>().firstLevel())>> : std::true_type {};
+}
+
 template <typename TRequest, typename TVisitor>
 void SchemaRule1::walkMatched(const TRequest& key, TVisitor& visitor) const {
     std::cout << "Matched level 1" << std::endl;
+    if constexpr ( detail::has_first_level_fn<TVisitor>::value ) {
+        visitor.firstLevel();
+    }
     walkChildren(key, visitor);
+}
+
+namespace detail {
+template<typename T, typename = void>
+struct has_second_level_fn : std::false_type {};
+template<typename T>
+struct has_second_level_fn<T, std::void_t<decltype(std::declval<T>().secondLevel())>> : std::true_type {};
 }
 
 template <typename TRequest, typename TVisitor>
 void SchemaRule2::walkMatched(const TRequest& key, TVisitor& visitor) const {
     std::cout << "Matched level 2" << std::endl;
+    if constexpr ( detail::has_second_level_fn<TVisitor>::value ) {
+        visitor.secondLevel();
+    }
     walkChildren(key, visitor);
 }
 
 template <typename TRequest, typename TVisitor>
 void SchemaRule3::walkMatched(const TRequest& key, TVisitor& visitor) const {
+    visitor.thirdLevel();
     std::cout << "Matched level 3" << std::endl;
 }
 

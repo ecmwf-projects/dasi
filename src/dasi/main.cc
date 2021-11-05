@@ -2,7 +2,7 @@
 
 #include "dasi/api/Key.h"
 #include "dasi/api/Query.h"
-#include "dasi/api/Schema.h"
+#include "dasi/core/Schema.h"
 
 using namespace dasi;
 

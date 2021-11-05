@@ -1,5 +1,5 @@
 
-#include "dasi/core/Exceptions.h"
+#include "dasi/util/Exceptions.h"
 
 #include <iostream>
 #include <sstream>

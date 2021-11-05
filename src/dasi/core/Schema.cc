@@ -1,9 +1,9 @@
 
-#include "dasi/api/Schema.h"
+#include "dasi/core/Schema.h"
 
-#include "dasi/core/ContainerIostream.h"
-#include "dasi/core/IndentStream.h"
-#include "dasi/core/Exceptions.h"
+#include "dasi/util/ContainerIostream.h"
+#include "dasi/util/IndentStream.h"
+#include "dasi/util/Exceptions.h"
 
 #include "yaml-cpp/yaml.h"
 
@@ -89,6 +89,16 @@ Schema::Schema(std::initializer_list<SchemaRule1> rules) :
 Schema::Schema(std::vector<SchemaRule1>&& rules) :
         rules_(std::move(rules)) {}
 
+Schema::Schema(const YAML::Node& rules_yml) {
+    // TODO: If 'schema' specifies a filename, load that instead.
+    if (!rules_yml.IsSequence()) throw InvalidConfiguration("Schema configuration is not a sequence of rules", Here());
+    rules_.insert(rules_.end(), rules_yml.begin(), rules_yml.end());
+}
+
+Schema::Schema(const std::vector<YAML::Node>& rules_yml) {
+    rules_.insert(rules_.end(), rules_yml.begin(), rules_yml.end());
+}
+
 void Schema::print(std::ostream& o) const {
     o << "Schema[";
     {
@@ -138,15 +148,7 @@ int get_nonblank_stream_char(std::istream& s) {
 Schema Schema::parse(std::istream& s) {
 
     auto rules_yml = YAML::LoadAll(s);
-
-    std::vector<SchemaRule1> rules;
-    rules.reserve(rules_yml.size());
-
-    for (const auto& yml : rules_yml) {
-        rules.emplace_back(yml);
-    }
-
-    return {std::move(rules)};
+    return Schema(rules_yml);
 }
 
 Schema Schema::parse(const char* s) {

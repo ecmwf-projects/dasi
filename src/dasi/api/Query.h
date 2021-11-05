@@ -1,12 +1,11 @@
 
 #pragma once
 
-#include <map>
-#include <vector>
-#include <string>
-#include <iosfwd>
 #include <initializer_list>
-#include <utility>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <vector>
 
 namespace dasi {
 
@@ -16,7 +15,13 @@ class Query {
 
 public: // methods
 
+    Query() = default;
     Query(std::initializer_list<std::pair<const std::string, std::vector<std::string>>>);
+
+    [[nodiscard]]
+    bool has(const std::string_view& name) const;
+
+    void set(const std::string& k, std::initializer_list<std::string> v);
 
 private: // methods
 
@@ -24,14 +29,15 @@ private: // methods
 
 private: // friends
 
-    friend std::ostream& operator<<(std::ostream& s, const Query& q) {
-        q.print(s);
+    friend std::ostream& operator<<(std::ostream& s, const Query& k) {
+        k.print(s);
         return s;
     }
 
 private: // members
 
-    std::map<std::string, std::vector<std::string>> values_;
+    // n.b. use of transparent comparator --> allow lookup with std::string_view as key
+    std::map<std::string, std::vector<std::string>, std::less<>> values_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

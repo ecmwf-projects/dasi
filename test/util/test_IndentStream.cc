@@ -1,7 +1,7 @@
 
-#include "dasi/core/Test.h"
+#include "dasi/util/Test.h"
 
-#include "dasi/core/IndentStream.h"
+#include "dasi/util/IndentStream.h"
 
 #include <sstream>
 
