@@ -146,6 +146,7 @@ int get_nonblank_stream_char(std::istream& s) {
 }
 
 Schema Schema::parse(std::istream& s) {
+
     auto rules_yml = YAML::LoadAll(s);
     return Schema(rules_yml);
 }

@@ -100,7 +100,7 @@ inline void Assert(int code, const std::string& msg, const char* file, int line,
     }
 }
 
-#define ASSERT(a) ::eckit::Assert(!(a), #a, __FILE__, __LINE__, __func__)
+#define ASSERT(a) ::dasi::Assert(!(a), #a, __FILE__, __LINE__, __func__)
 
 //----------------------------------------------------------------------------------------------------------------------
 
