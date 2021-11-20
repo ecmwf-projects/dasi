@@ -80,8 +80,16 @@ private: // members
 
 //----------------------------------------------------------------------------------------------------------------------
 
+struct SeriousBug : public Exception {
+    SeriousBug(const std::string_view& msg, const CodeLocation& loc);
+};
+
 struct AssertionFailed : public Exception {
     AssertionFailed(const std::string_view& msg, const CodeLocation& loc);
+};
+
+struct BadValue : public Exception {
+    BadValue(const std::string_view& msg, const CodeLocation& loc);
 };
 
 struct UserError : public Exception {

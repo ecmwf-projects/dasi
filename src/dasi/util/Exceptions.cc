@@ -43,11 +43,17 @@ void Exception::print(std::ostream& out) const {
 AssertionFailed::AssertionFailed(const std::string_view& msg, const CodeLocation& loc) :
     Exception("Assertion failed: "s += msg, loc) {}
 
+SeriousBug::SeriousBug(const std::string_view& msg, const CodeLocation& loc) :
+        Exception("Serious bug: "s += msg, loc) {}
+
+BadValue::BadValue(const std::string_view& msg, const CodeLocation& loc) :
+        Exception("Bad value: "s += msg, loc) {}
+
 UserError::UserError(const std::string_view& msg, const CodeLocation& loc) :
-        Exception("Assertion failed: "s += msg, loc) {}
+        Exception("User error: "s += msg, loc) {}
 
 InvalidConfiguration::InvalidConfiguration(const std::string_view& msg, const CodeLocation& loc) :
-        UserError("Assertion failed: "s += msg, loc) {}
+        UserError("Invalid configuration: "s += msg, loc) {}
 
 //----------------------------------------------------------------------------------------------------------------------
 

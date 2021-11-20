@@ -29,6 +29,8 @@ private: // members
     std::vector<std::reference_wrapper<value_type>> output_;
 
     std::vector<size_t> indices_;
+    bool haveScalars_ = false;
+    bool returned_ = false;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -38,13 +40,20 @@ private: // members
 
 template <typename TContainer>
 void CartesianProduct<TContainer>::append(const TContainer& input, value_type& output) {
-    inputs_.push_back(std::cref(input));
-    output_.push_back(std::ref(output));
+    if (input.empty()) throw BadValue("Got empty list in cartesian product", Here());
+    if (input.size() == 1) {
+        haveScalars_ = true;
+        append(input[0], output);
+    } else {
+        inputs_.push_back(std::cref(input));
+        output_.push_back(std::ref(output));
+    }
 }
 
 template <typename TContainer>
 void CartesianProduct<TContainer>::append(const value_type& input, value_type& output) {
     output = input;
+    haveScalars_ = true;
 }
 
 template <typename TContainer>
@@ -53,7 +62,14 @@ bool CartesianProduct<TContainer>::next() {
     // If this is the first iteration, initialise
 
     if (indices_.empty()) {
-        ASSERT(!inputs_.empty());
+        if (inputs_.empty()) {
+            if (haveScalars_) {
+                returned_ = !returned_;
+                return returned_;
+            } else {
+                throw SeriousBug("Cannot generate cartesian product from empty", Here());
+            }
+        }
         ASSERT(inputs_.size() == output_.size());
         indices_.resize(inputs_.size(), 0);
         for (int depth = 0; depth < inputs_.size(); ++depth) {
