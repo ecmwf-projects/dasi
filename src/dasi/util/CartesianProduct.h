@@ -2,21 +2,68 @@
 
 #include "dasi/util/Exceptions.h"
 
+#include <functional>
+
 namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-template <typename TContainer>
+//template<typename T>
+//struct has_value_type {
+//    typedef int8_t  yes;
+//    typedef int16_t no;
+//
+//    template <typename S> static yes test(typename S::value_type);
+//    template <typename S> static no  test(...);
+//public:
+//    static const bool value = sizeof(test<T>(0)) == sizeof(yes);
+//};
+
+namespace detail {
+
+template <typename T, typename=void>
+struct has_value_type : std::false_type {};
+
+template <typename T>
+struct has_value_type<T, std::void_t<typename T::value_type>> : std::true_type {};
+
+template <typename T>
+struct is_container : std::conjunction<has_value_type<T>, std::negation<std::is_same<T, std::string>>> {};
+
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+// Implementation for purely scalars
+// --> Just return the set
+
+template <typename TContainer, typename=void>
 class CartesianProduct {
+public: // types
+    using value_type = TContainer;
+public: // methods
+    void append(const value_type& input, value_type& output) { output = input; }
+    bool next() {
+        returned_ = !returned_;
+        return returned_;
+    }
+private: // members
+    bool returned_ = false;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
+// Proper implementation
+
+template <typename TContainer>
+class CartesianProduct <TContainer, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>> {
 
 public: // types
 
     using value_type = typename TContainer::value_type;
 
 public: // methods
-
-    CartesianProduct() = default;
-    ~CartesianProduct() = default;
 
     void append(const TContainer& input, value_type& output);
     void append(const value_type& input, value_type& output);
@@ -39,7 +86,7 @@ private: // members
 //CartesianProduct<TContainer, TOutput>::CartesianProduct(TOutput& output) : output_(output) {}
 
 template <typename TContainer>
-void CartesianProduct<TContainer>::append(const TContainer& input, value_type& output) {
+void CartesianProduct<TContainer, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>>::append(const TContainer& input, value_type& output) {
     if (input.empty()) throw BadValue("Got empty list in cartesian product", Here());
     if (input.size() == 1) {
         haveScalars_ = true;
@@ -51,13 +98,13 @@ void CartesianProduct<TContainer>::append(const TContainer& input, value_type& o
 }
 
 template <typename TContainer>
-void CartesianProduct<TContainer>::append(const value_type& input, value_type& output) {
+void CartesianProduct<TContainer, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>>::append(const value_type& input, value_type& output) {
     output = input;
     haveScalars_ = true;
 }
 
 template <typename TContainer>
-bool CartesianProduct<TContainer>::next() {
+bool CartesianProduct<TContainer, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>>::next() {
 
     // If this is the first iteration, initialise
 

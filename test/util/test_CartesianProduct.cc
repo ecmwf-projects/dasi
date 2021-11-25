@@ -5,6 +5,8 @@
 #include "dasi/util/ContainerIostream.h"
 #include "dasi/util/Exceptions.h"
 
+using namespace std::string_literals;
+
 //----------------------------------------------------------------------------------------------------------------------
 
 CASE("Test output ordering") {
@@ -167,7 +169,79 @@ CASE("Entries are mandatory") {
     EXPECT_THROWS_AS(cp.next(), dasi::SeriousBug);
 }
 
+CASE("Testing a non-iterable cartesian product") {
+    std::vector<int> output(3);
 
+    dasi::CartesianProduct<int> cp;
+
+    cp.append(int(1), output[0]);
+    cp.append(int(4), output[2]);
+    cp.append(int(7), output[1]);
+
+    std::vector<std::vector<int>> expected_output {
+        {1, 7, 4}
+    };
+
+    int idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+    idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+}
+
+CASE("Works with strings") {
+    std::vector<std::string> output(3);
+
+    std::vector<std::string> v1 {"aa", "bb", "cc"};
+    std::vector<std::string> v3 {"dd", "ee", "ff"};
+
+    dasi::CartesianProduct<std::vector<std::string>> cp;
+
+    cp.append(v1, output[0]);
+    cp.append("gg", output[2]);
+    cp.append(v3, output[1]);
+
+    std::vector<std::vector<std::string>> expected_output {
+        {"aa", "dd", "gg"}, {"bb", "dd", "gg"}, {"cc", "dd", "gg"},
+        {"aa", "ee", "gg"}, {"bb", "ee", "gg"}, {"cc", "ee", "gg"},
+        {"aa", "ff", "gg"}, {"bb", "ff", "gg"}, {"cc", "ff", "gg"},
+    };
+
+    int idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+    idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+}
+
+CASE("Works with non-iterable string types") {
+    std::vector<std::string> output(3);
+
+    dasi::CartesianProduct<std::string> cp;
+
+    cp.append("testing"s, output[0]);
+    cp.append("gnitset"s, output[2]);
+    cp.append("again another string"s, output[1]);
+
+    std::vector<std::vector<std::string>> expected_output {
+        {"testing", "again another string", "gnitset"}
+    };
+
+    int idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+    idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
