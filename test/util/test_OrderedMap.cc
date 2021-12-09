@@ -159,7 +159,55 @@ CASE("string_view as values") {
 }
 
 CASE("insert_or_assign") {
-    EXPECT(false);
+    dasi::OrderedMap<std::string, std::string> om;
+    EXPECT(om.empty());
+
+    std::vector<std::pair<std::string, std::string>> expected {
+        {"zzzz", "zvalue"},
+        {"yyyy", "yvalue"},
+        {"xxxx", "xvalue"}
+    };
+
+
+    for (const auto& v : expected) {
+        auto r = om.insert_or_assign(v.first, v.second);
+        EXPECT(r.second);
+        EXPECT(r.first->first == v.first);
+        EXPECT(r.first->second == v.second);
+    }
+
+    EXPECT(om.size() == expected.size());
+    for (const auto& v : expected) {
+        EXPECT(om[v.first] == v.second);
+    }
+
+    int i = 0;
+    for (const auto& kv : om) {
+        EXPECT(kv.first == expected[i].first);
+        EXPECT(kv.second == expected[i++].second);
+    }
+
+    std::vector<std::pair<std::string, std::string>> expected2 {
+        {"zzzz", "zvalue"},
+        {"yyyy", "newval"},
+        {"xxxx", "xvalue"}
+    };
+
+    auto r = om.insert_or_assign("yyyy", "newval");
+    EXPECT(!r.second);
+    EXPECT(r.first->first == "yyyy");
+    EXPECT(r.first->second == "newval");
+
+    EXPECT(om.size() == expected2.size());
+    for (const auto& v : expected2) {
+        EXPECT(om[v.first] == v.second);
+    }
+
+    i = 0;
+    for (const auto& kv : om) {
+        EXPECT(kv.first == expected2[i].first);
+        EXPECT(kv.second == expected2[i++].second);
+    }
 }
 
 int main(int argc, char** argv) {
