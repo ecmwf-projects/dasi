@@ -41,6 +41,7 @@ ecbuild_add_library(
         util/Test.h
         util/CartesianProduct.h
         util/OrderedMap.h
+        util/LRUMap.h
 )
 
 ecbuild_add_executable(

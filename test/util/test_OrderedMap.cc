@@ -210,6 +210,11 @@ CASE("insert_or_assign") {
     }
 }
 
+CASE("test emplace") {
+    EXPECT(false);
+    // Then use emplace in the ordered key
+}
+
 int main(int argc, char** argv) {
     return ::dasi::run_tests();
 }

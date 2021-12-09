@@ -90,6 +90,8 @@ public: // methods
     size_type size() const { return values_.size(); }
 
     std::pair<iterator, bool> insert(const std::pair<Key, T>& val);
+    std::pair<iterator, bool> insert(std::pair<Key, T>&& val);
+    std::pair<iterator, bool> emplace(std::pair<Key, T>&& val);
 
     template <typename M>
     std::pair<iterator, bool> insert_or_assign(const Key&, M&& val);
@@ -136,6 +138,20 @@ void OrderedMap<Key, T, Compare, Allocator, VecAllocator>::print(std::ostream& s
 }
 
 template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::emplace(std::pair<Key, T>&& val) -> std::pair<iterator, bool> {
+    auto mp_ins = values_.insert(val);
+    if (mp_ins.second) {
+        keys_.push_back(mp_ins.first);
+    }
+    return std::make_pair(iterator(mp_ins.first), mp_ins.second);
+}
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::insert(std::pair<Key, T>&& val) -> std::pair<iterator, bool> {
+    return emplace(std::move(val));
+}
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
 auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::insert(const std::pair<Key, T>& val) -> std::pair<iterator, bool> {
     auto mp_ins = values_.insert(val);
     if (mp_ins.second) {
@@ -154,12 +170,4 @@ auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::insert_or_assign(cons
 
 //----------------------------------------------------------------------------------------------------------------------
 
-}
-
-namespace std {
-template<typename S, typename T, typename C, typename A>
-inline std::ostream& operator<<(std::ostream& s, const ::dasi::OrderedMap<S, T, C, A>& v) {
-    ::dasi::internal::print_map(s, v);
-    return s;
-}
 }

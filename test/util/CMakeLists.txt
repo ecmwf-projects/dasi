@@ -4,6 +4,7 @@ list( APPEND _util_tests
     CartesianProduct
     OrderedMap
     StringBuilder
+    LRUMap
 )
 
 foreach( _test ${_util_tests} )
