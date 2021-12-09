@@ -1,6 +1,8 @@
 
 list( APPEND _core_tests
-    schema
+    Schema
+    OrderedReferenceKey
+    SchemaKeyIterator
 )
 
 foreach( _test ${_core_tests} )

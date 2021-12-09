@@ -28,8 +28,8 @@ public:
 class Test {
 
 public:  // methods
-    Test(const std::string& description, std::function<void()> testFn) :
-        description_(description), testFn_(std::move(testFn)) {}
+    Test(std::string description, std::function<void()> testFn) :
+        description_(std::move(description)), testFn_(std::move(testFn)) {}
 
     bool run(std::vector<std::string>& failures) {
 
@@ -69,7 +69,8 @@ public:  // methods
         return success;
     }
 
-    std::string description() const {
+    [[ nodiscard ]]
+    const std::string& description() const {
         return description_;
     }
 
@@ -90,7 +91,7 @@ std::vector<Test>& specification() {
 class TestRegister {
 public:
     TestRegister(const std::string& description, void (*testFn)()) {
-        specification().push_back(Test(description, testFn));
+        specification().emplace_back(Test(description, testFn));
     }
 };
 
@@ -134,7 +135,8 @@ inline int run_tests() {
         std::cout << "\tFAILED: " << failures[i] << std::endl;
     }
 
-    return failures.size();
+    // narrow to the return type of main
+    return static_cast<int>(failures.size());
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -147,7 +149,8 @@ inline int run_tests() {
 #define UNIQUE_NAME(name, line) name##line
 
 #define CASE(description)                                                                                           \
-    void UNIQUE_NAME2(test_, __LINE__)();                                                    \
+    void UNIQUE_NAME2(test_, __LINE__)();                                                                           \
+    /* NOLINTNEXTLINE */ \
     static ::dasi::TestRegister UNIQUE_NAME2(test_registration_, __LINE__)(description,                     \
                                                                                    &UNIQUE_NAME2(test_, __LINE__)); \
     void UNIQUE_NAME2(test_, __LINE__)()

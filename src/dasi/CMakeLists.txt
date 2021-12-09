@@ -15,10 +15,7 @@ ecbuild_add_library(
     SOURCES
         api/Dasi.cc
         api/Dasi.h
-        api/Key.cc
         api/Key.h
-        api/SplitKey.cc
-        api/SplitKey.h
         api/Query.cc
         api/Query.h
         api/Query.cc
@@ -28,6 +25,11 @@ ecbuild_add_library(
         core/ArchiveVisitor.h
         core/Schema.cc
         core/Schema.h
+        core/KeyT.h
+        core/OrderedReferenceKey.h
+        core/SchemaKeyIterator.h
+        core/SplitReferenceKey.cc
+        core/SplitReferenceKey.h
 
         util/Colour.cc
         util/Colour.h
@@ -35,8 +37,10 @@ ecbuild_add_library(
         util/Exceptions.cc
         util/Exceptions.h
         util/IndentStream.h
+        util/StringBuilder.h
         util/Test.h
         util/CartesianProduct.h
+        util/OrderedMap.h
 )
 
 ecbuild_add_executable(

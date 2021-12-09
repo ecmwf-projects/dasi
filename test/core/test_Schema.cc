@@ -141,9 +141,9 @@ CASE("Visit schema with a key") {
     };
 
     struct MyVisitor {
-        void firstLevel() { std::cout << "Key - FIRST" << std::endl; }
-//        void secondLevel() { std::cout << "Key - SECOND" << std::endl; }
-        void thirdLevel() { std::cout << "Key - THIRD" << std::endl; }
+        void firstLevel(const dasi::SplitReferenceKey&) { std::cout << "Key - FIRST" << std::endl; }
+//        void secondLevel(const dasi::SplitReferenceKey&) { std::cout << "Key - SECOND" << std::endl; }
+        void thirdLevel(const dasi::SplitReferenceKey&) { std::cout << "Key - THIRD" << std::endl; }
     };
 
     std::cout << "Walking..." << std::endl;
@@ -167,9 +167,9 @@ CASE("Visit schema with a request") {
     };
 
     struct MyVisitor {
-//        void firstLevel() { std::cout << "Request -- FIRST" << std::endl; }
-        void secondLevel() { std::cout << "Request -- SECOND" << std::endl; }
-        void thirdLevel() { std::cout << "Request -- THIRD" << std::endl; }
+//        void firstLevel(const dasi::SplitReferenceKey&) { std::cout << "Request -- FIRST" << std::endl; }
+        void secondLevel(const dasi::SplitReferenceKey&) { std::cout << "Request -- SECOND" << std::endl; }
+        void thirdLevel(const dasi::SplitReferenceKey&) { std::cout << "Request -- THIRD" << std::endl; }
     };
 
     std::cout << "Walking..." << std::endl;

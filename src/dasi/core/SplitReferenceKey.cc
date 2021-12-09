@@ -1,5 +1,5 @@
 
-#include "dasi/api/SplitKey.h"
+#include "dasi/core/SplitReferenceKey.h"
 
 #include "dasi/util/ContainerIostream.h"
 
@@ -7,7 +7,7 @@ namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void SplitKey::print(std::ostream& s) const {
+void SplitReferenceKey::print(std::ostream& s) const {
     s << keys_;
 }
 

@@ -2,6 +2,8 @@
 #include "dasi/api/Query.h"
 
 #include "dasi/util/ContainerIostream.h"
+#include "dasi/util/Exceptions.h"
+#include "dasi/util/StringBuilder.h"
 
 namespace dasi {
 
@@ -21,6 +23,12 @@ bool Query::has(const std::string_view& name) const {
 
 void Query::set(const std::string& k, std::initializer_list<std::string> v) {
     values_.insert_or_assign(k, v);
+}
+
+auto Query::get(const std::string_view& name) const -> const value_type& {
+    auto it = values_.find(name);
+    if (it == values_.end()) throw KeyError((StringBuilder() << name << " not found in Query").str(), Here());
+    return it->second;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

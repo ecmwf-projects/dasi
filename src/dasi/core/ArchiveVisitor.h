@@ -5,6 +5,8 @@
 
 namespace dasi {
 
+class SplitReferenceKey;
+
 //----------------------------------------------------------------------------------------------------------------------
 
 class ArchiveVisitor {
@@ -14,9 +16,9 @@ public: // methods
     ArchiveVisitor(const void* data, size_t length);
     ~ArchiveVisitor() = default;
 
-    void firstLevel() {}
-    void secondLevel() {}
-    void thirdLevel() {}
+    void firstLevel(const SplitReferenceKey& key) {}
+    void secondLevel(const SplitReferenceKey& key) {}
+    void thirdLevel(const SplitReferenceKey& key) {}
 
 private: // members
 

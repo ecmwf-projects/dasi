@@ -2,6 +2,8 @@
 list( APPEND _util_tests
     IndentStream
     CartesianProduct
+    OrderedMap
+    StringBuilder
 )
 
 foreach( _test ${_util_tests} )

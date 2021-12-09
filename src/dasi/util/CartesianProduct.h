@@ -38,12 +38,13 @@ struct is_container : std::conjunction<has_value_type<T>, std::negation<std::is_
 // Implementation for purely scalars
 // --> Just return the set
 
-template <typename TContainer, typename=void>
+template <typename TContainer, typename OutputT=void, typename=void>
 class CartesianProduct {
 public: // types
     using value_type = TContainer;
+    using output_type = typename std::conditional<std::is_same<OutputT, void>::value, value_type, OutputT>::type;
 public: // methods
-    void append(const value_type& input, value_type& output) { output = input; }
+    void append(const value_type& input, output_type& output) { output = input; }
     bool next() {
         returned_ = !returned_;
         return returned_;
@@ -56,24 +57,25 @@ private: // members
 
 // Proper implementation
 
-template <typename TContainer>
-class CartesianProduct <TContainer, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>> {
+template <typename TContainer, typename OutputT>
+class CartesianProduct <TContainer, OutputT, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>> {
 
 public: // types
 
     using value_type = typename TContainer::value_type;
+    using output_type = typename std::conditional<std::is_same<OutputT, void>::value, value_type, OutputT>::type;
 
 public: // methods
 
-    void append(const TContainer& input, value_type& output);
-    void append(const value_type& input, value_type& output);
+    void append(const TContainer& input, output_type& output);
+    void append(const value_type& input, output_type& output);
 
     bool next();
 
 private: // members
 
     std::vector<std::reference_wrapper<const TContainer>> inputs_;
-    std::vector<std::reference_wrapper<value_type>> output_;
+    std::vector<std::reference_wrapper<output_type>> output_;
 
     std::vector<size_t> indices_;
     bool haveScalars_ = false;
@@ -85,11 +87,10 @@ private: // members
 //template <typename TContainer, typename TOutput>
 //CartesianProduct<TContainer, TOutput>::CartesianProduct(TOutput& output) : output_(output) {}
 
-template <typename TContainer>
-void CartesianProduct<TContainer, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>>::append(const TContainer& input, value_type& output) {
+template <typename TContainer, typename OutputT>
+void CartesianProduct<TContainer, OutputT, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>>::append(const TContainer& input, output_type& output) {
     if (input.empty()) throw BadValue("Got empty list in cartesian product", Here());
     if (input.size() == 1) {
-        haveScalars_ = true;
         append(input[0], output);
     } else {
         inputs_.push_back(std::cref(input));
@@ -97,14 +98,14 @@ void CartesianProduct<TContainer, std::void_t<std::enable_if_t<detail::is_contai
     }
 }
 
-template <typename TContainer>
-void CartesianProduct<TContainer, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>>::append(const value_type& input, value_type& output) {
+template <typename TContainer, typename OutputT>
+void CartesianProduct<TContainer, OutputT, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>>::append(const value_type& input, output_type& output) {
     output = input;
     haveScalars_ = true;
 }
 
-template <typename TContainer>
-bool CartesianProduct<TContainer, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>>::next() {
+template <typename TContainer, typename OutputT>
+bool CartesianProduct<TContainer, OutputT, std::void_t<std::enable_if_t<detail::is_container<TContainer>::value>>>::next() {
 
     // If this is the first iteration, initialise
 

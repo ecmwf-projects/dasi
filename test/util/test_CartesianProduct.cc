@@ -5,6 +5,8 @@
 #include "dasi/util/ContainerIostream.h"
 #include "dasi/util/Exceptions.h"
 
+#include <cstring>
+
 using namespace std::string_literals;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -220,6 +222,67 @@ CASE("Works with strings") {
     }
 }
 
+
+CASE("Works with c-style strings") {
+    std::vector<const char*> output(3);
+
+    std::vector<const char*> v1 {"aa", "bb", "cc"};
+    std::vector<const char*> v3 {"dd", "ee", "ff"};
+
+    dasi::CartesianProduct<std::vector<const char*>> cp;
+
+    cp.append(v1, output[0]);
+    cp.append("gg", output[2]);
+    cp.append(v3, output[1]);
+
+    std::vector<std::vector<std::string>> expected_output {
+        {"aa", "dd", "gg"}, {"bb", "dd", "gg"}, {"cc", "dd", "gg"},
+        {"aa", "ee", "gg"}, {"bb", "ee", "gg"}, {"cc", "ee", "gg"},
+        {"aa", "ff", "gg"}, {"bb", "ff", "gg"}, {"cc", "ff", "gg"},
+    };
+
+    int idx = 0;
+    while (cp.next()) {
+        for (int i = 0; i < output.size(); ++i) EXPECT(output[i] == expected_output[idx][i]);
+        ++idx;
+    }
+    idx = 0;
+    while (cp.next()) {
+        for (int i = 0; i < output.size(); ++i) EXPECT(output[i] == expected_output[idx][i]);
+        ++idx;
+    }
+}
+
+
+CASE("Works with string_viewss") {
+    std::vector<std::string_view> output(3);
+
+    std::vector<std::string> v1 {"aa", "bb", "cc"};
+    std::string v2("gg");
+    std::vector<std::string> v3 {"dd", "ee", "ff"};
+
+    dasi::CartesianProduct<std::vector<std::string>, std::string_view> cp;
+
+    cp.append(v1, output[0]);
+    cp.append(v2, output[2]);
+    cp.append(v3, output[1]);
+
+    std::vector<std::vector<std::string_view>> expected_output {
+        {"aa", "dd", "gg"}, {"bb", "dd", "gg"}, {"cc", "dd", "gg"},
+        {"aa", "ee", "gg"}, {"bb", "ee", "gg"}, {"cc", "ee", "gg"},
+        {"aa", "ff", "gg"}, {"bb", "ff", "gg"}, {"cc", "ff", "gg"},
+    };
+
+    int idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+    idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+}
+
 CASE("Works with non-iterable string types") {
     std::vector<std::string> output(3);
 
@@ -230,6 +293,58 @@ CASE("Works with non-iterable string types") {
     cp.append("again another string"s, output[1]);
 
     std::vector<std::vector<std::string>> expected_output {
+        {"testing", "again another string", "gnitset"}
+    };
+
+    int idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+    idx = 0;
+    while (cp.next()) {
+        EXPECT(output == expected_output[idx++]);
+    }
+}
+
+CASE("Works with non-iterable string types") {
+    std::vector<std::string_view> output(3);
+
+    dasi::CartesianProduct<const char*, std::string_view> cp;
+
+    cp.append("testing", output[0]);
+    cp.append("gnitset", output[2]);
+    cp.append("again another string", output[1]);
+
+    std::vector<std::vector<std::string>> expected_output {
+        {"testing", "again another string", "gnitset"}
+    };
+
+    int idx = 0;
+    while (cp.next()) {
+        for (int i = 0; i < output.size(); ++i) EXPECT(output[i] == expected_output[idx][i]);
+        ++idx;
+    }
+    idx = 0;
+    while (cp.next()) {
+        for (int i = 0; i < output.size(); ++i) EXPECT(output[i] == expected_output[idx][i]);
+        ++idx;
+    }
+}
+
+CASE("Works with non-iterable string_view types") {
+    std::vector<std::string_view> output(3);
+
+    dasi::CartesianProduct<std::string, std::string_view> cp;
+
+    std::string v1("testing");
+    std::string v2("gnitset");
+    std::string v3("again another string");
+
+    cp.append(v1, output[0]);
+    cp.append(v2, output[2]);
+    cp.append(v3, output[1]);
+
+    std::vector<std::vector<std::string_view>> expected_output {
         {"testing", "again another string", "gnitset"}
     };
 

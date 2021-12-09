@@ -84,12 +84,21 @@ struct SeriousBug : public Exception {
     SeriousBug(const std::string_view& msg, const CodeLocation& loc);
 };
 
+struct NotImplemented : public Exception {
+    NotImplemented(const std::string_view& msg, const CodeLocation& loc);
+    NotImplemented(const CodeLocation& loc);
+};
+
 struct AssertionFailed : public Exception {
     AssertionFailed(const std::string_view& msg, const CodeLocation& loc);
 };
 
 struct BadValue : public Exception {
     BadValue(const std::string_view& msg, const CodeLocation& loc);
+};
+
+struct KeyError : public Exception {
+    KeyError(const std::string_view& msg, const CodeLocation& loc);
 };
 
 struct UserError : public Exception {
@@ -108,7 +117,14 @@ inline void Assert(int code, const std::string& msg, const char* file, int line,
     }
 }
 
+inline void Assert(int code, const char* msg, const char* file, int line, const char* func) {
+    if (code != 0) {
+        throw AssertionFailed(msg, CodeLocation(file, line, func));
+    }
+}
+
 #define ASSERT(a) ::dasi::Assert(!(a), #a, __FILE__, __LINE__, __func__)
+#define NOTIMP throw ::dasi::NotImplemented(Here());
 
 //----------------------------------------------------------------------------------------------------------------------
 

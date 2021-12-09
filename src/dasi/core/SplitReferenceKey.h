@@ -5,17 +5,20 @@
 #include <iosfwd>
 #include <array>
 
-#include "dasi/api/Key.h"
+#include "dasi/core/OrderedReferenceKey.h"
 
 namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class SplitKey {
+class SplitReferenceKey {
 
 public: // methods
 
-    SplitKey() = default;
+    SplitReferenceKey() = default;
+
+    OrderedReferenceKey& operator[](int level) { return keys_[level]; }
+    const OrderedReferenceKey& operator[](int level) const { return keys_[level]; }
 
 private: // methods
 
@@ -23,14 +26,14 @@ private: // methods
 
 private: // friends
 
-    friend std::ostream& operator<<(std::ostream& s, const SplitKey& k) {
+    friend std::ostream& operator<<(std::ostream& s, const SplitReferenceKey& k) {
         k.print(s);
         return s;
     }
 
 private: // members
 
-    std::array<Key, 3> keys_;
+    std::array<OrderedReferenceKey, 3> keys_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

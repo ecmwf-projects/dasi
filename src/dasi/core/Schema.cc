@@ -9,18 +9,17 @@
 
 #include <istream>
 #include <iostream>
-#include <sstream>
 
 namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-template <typename TSelf>
-SchemaRule<TSelf>::SchemaRule(std::initializer_list<std::string> l) :
+template <typename TSelf, int LEVEL>
+SchemaRule<TSelf, LEVEL>::SchemaRule(std::initializer_list<std::string> l) :
     keys_(l) {}
 
-template <typename TSelf>
-SchemaRule<TSelf>::SchemaRule(const YAML::Node& yml) {
+template <typename TSelf, int LEVEL>
+SchemaRule<TSelf, LEVEL>::SchemaRule(const YAML::Node& yml) {
 
     if (!yml.IsSequence()) {
         throw InvalidConfiguration("Sequence not found in YAML schema", Here());
@@ -32,18 +31,18 @@ SchemaRule<TSelf>::SchemaRule(const YAML::Node& yml) {
 }
 
 
-template <typename TSelf>
-void SchemaRule<TSelf>::print(std::ostream& s) const {
+template <typename TSelf, int LEVEL>
+void SchemaRule<TSelf, LEVEL>::print(std::ostream& s) const {
     s << keys_;
 }
 
-template <typename TSelf, typename ChildRule>
-SchemaRuleParent<TSelf, ChildRule>::SchemaRuleParent(std::initializer_list<std::string> keys, std::initializer_list<ChildRule> subrules) :
-    SchemaRule<TSelf>(keys),
+template <typename TSelf, typename ChildRule, int LEVEL>
+SchemaRuleParent<TSelf, ChildRule, LEVEL>::SchemaRuleParent(std::initializer_list<std::string> keys, std::initializer_list<ChildRule> subrules) :
+    SchemaRule<TSelf, LEVEL>(keys),
     children_(subrules) {}
 
-template <typename TSelf, typename ChildRule>
-SchemaRuleParent<TSelf, ChildRule>::SchemaRuleParent(const YAML::Node& yml) {
+template <typename TSelf, typename ChildRule, int LEVEL>
+SchemaRuleParent<TSelf, ChildRule, LEVEL>::SchemaRuleParent(const YAML::Node& yml) {
 
     if (!yml.IsSequence()) {
         throw InvalidConfiguration("Sequence not found in YAML schema", Here());
@@ -58,8 +57,8 @@ SchemaRuleParent<TSelf, ChildRule>::SchemaRuleParent(const YAML::Node& yml) {
     }
 }
 
-template <typename TSelf, typename ChildRule>
-void SchemaRuleParent<TSelf, ChildRule>::print(std::ostream& s) const {
+template <typename TSelf, typename ChildRule, int LEVEL>
+void SchemaRuleParent<TSelf, ChildRule, LEVEL>::print(std::ostream& s) const {
     s << "[";
     {
         IndentStream indent(s, "  ");
@@ -75,11 +74,9 @@ void SchemaRuleParent<TSelf, ChildRule>::print(std::ostream& s) const {
 
 // Explicitly instantiate only these instances in this unit
 
-//template class SchemaRuleParent<SchemaRule3>;
-//template class SchemaRuleParent<SchemaRule2>;
-template class SchemaRule<SchemaRule3>;
-template class SchemaRuleParent<SchemaRule2, SchemaRule3>;
-template class SchemaRuleParent<SchemaRule1, SchemaRule2>;
+template class SchemaRule<SchemaRule3, 2>;
+template class SchemaRuleParent<SchemaRule2, SchemaRule3, 1>;
+template class SchemaRuleParent<SchemaRule1, SchemaRule2, 0>;
 
 // And the Schema proper
 
@@ -92,11 +89,17 @@ Schema::Schema(std::vector<SchemaRule1>&& rules) :
 Schema::Schema(const YAML::Node& rules_yml) {
     // TODO: If 'schema' specifies a filename, load that instead.
     if (!rules_yml.IsSequence()) throw InvalidConfiguration("Schema configuration is not a sequence of rules", Here());
-    rules_.insert(rules_.end(), rules_yml.begin(), rules_yml.end());
+    rules_.reserve(rules_yml.size());
+    for (const auto& y : rules_yml) {
+        rules_.emplace_back(SchemaRule1(y));
+    }
 }
 
 Schema::Schema(const std::vector<YAML::Node>& rules_yml) {
-    rules_.insert(rules_.end(), rules_yml.begin(), rules_yml.end());
+    rules_.reserve(rules_yml.size());
+    for (const auto& y : rules_yml) {
+        rules_.emplace_back(SchemaRule1(y));
+    }
 }
 
 void Schema::print(std::ostream& o) const {

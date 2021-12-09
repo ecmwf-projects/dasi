@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include "dasi/api/Key.h"
-#include "dasi/api/SplitKey.h"
+#include "dasi/core/SchemaKeyIterator.h"
 
 namespace YAML {
 class Node;
@@ -17,50 +17,52 @@ class Node;
 
 namespace dasi {
 
-class Key;
-
 //----------------------------------------------------------------------------------------------------------------------
 
-template <typename Tself>
+template <typename Tself, int LEVEL>
 class SchemaRule {
 
 public: // methods
 
     SchemaRule() = default;
     SchemaRule(std::initializer_list<std::string>);
-    SchemaRule(const YAML::Node& yml);
+    explicit SchemaRule(const YAML::Node& yml);
 
     virtual void print(std::ostream& s) const;
 
     template <typename TRequest, typename TVisitor>
-    void walk(const TRequest& key, TVisitor& visitor) const;
+    void walk(const TRequest& key,
+              SchemaKeyIterator<typename TRequest::value_type>& matched,
+              TVisitor& visitor) const;
 
 protected: // members
 
     std::vector<std::string> keys_;
 };
 
-template <typename T>
-inline std::ostream& operator<<(std::ostream& s, const SchemaRule<T>& r) {
+template <typename T, int L>
+inline std::ostream& operator<<(std::ostream& s, const SchemaRule<T, L>& r) {
     r.print(s);
     return s;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-template <typename TSelf, typename ChildRule>
-class SchemaRuleParent : public SchemaRule<TSelf> {
+template <typename TSelf, typename ChildRule, int LEVEL>
+class SchemaRuleParent : public SchemaRule<TSelf, LEVEL> {
 
 public: // methods
 
     SchemaRuleParent(std::initializer_list<std::string> keys,
                      std::initializer_list<ChildRule> subrules);
-    SchemaRuleParent(const YAML::Node& yml);
+    explicit SchemaRuleParent(const YAML::Node& yml);
 
     void print(std::ostream& s) const override;
 
     template <typename TRequest, typename TVisitor>
-    void walkChildren(const TRequest& key, TVisitor& visitor) const;
+    void walkMatched(const TRequest& key,
+                     SchemaKeyIterator<typename TRequest::value_type>& matched,
+                     TVisitor& visitor) const;
 
 private: // members
 
@@ -69,28 +71,24 @@ private: // members
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class SchemaRule3 : public SchemaRule<SchemaRule3> {
+class SchemaRule3 : public SchemaRule<SchemaRule3, 2> {
 public:
-    using SchemaRule<SchemaRule3>::SchemaRule;
+    using SchemaRule<SchemaRule3, 2>::SchemaRule;
 
     template <typename TRequest, typename TVisitor>
-    void walkMatched(const TRequest& key, TVisitor& visitor) const;
+    void walkMatched(const TRequest& key,
+                     SchemaKeyIterator<typename TRequest::value_type>& matched,
+                     TVisitor& visitor) const;
 };
 
-class SchemaRule2 : public SchemaRuleParent<SchemaRule2, SchemaRule3> {
+class SchemaRule2 : public SchemaRuleParent<SchemaRule2, SchemaRule3, 1> {
 public:
-    using SchemaRuleParent<SchemaRule2, SchemaRule3>::SchemaRuleParent;
-
-    template <typename TRequest, typename TVisitor>
-    void walkMatched(const TRequest& key, TVisitor& visitor) const;
+    using SchemaRuleParent<SchemaRule2, SchemaRule3, 1>::SchemaRuleParent;
 };
 
-class SchemaRule1 : public SchemaRuleParent<SchemaRule1, SchemaRule2> {
+class SchemaRule1 : public SchemaRuleParent<SchemaRule1, SchemaRule2, 0> {
 public:
-    using SchemaRuleParent<SchemaRule1, SchemaRule2>::SchemaRuleParent;
-
-    template <typename TRequest, typename TVisitor>
-    void walkMatched(const TRequest& key, TVisitor& visitor) const;
+    using SchemaRuleParent<SchemaRule1, SchemaRule2, 0>::SchemaRuleParent;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -100,9 +98,9 @@ class Schema {
 public: // methods
 
     Schema(std::initializer_list<SchemaRule1> rules);
-    Schema(std::vector<SchemaRule1>&& rules);
-    Schema(const YAML::Node& config);
-    Schema(const std::vector<YAML::Node>& config);
+    explicit Schema(std::vector<SchemaRule1>&& rules);
+    explicit Schema(const YAML::Node& config);
+    explicit Schema(const std::vector<YAML::Node>& config);
 
     static Schema parse(std::istream& s);
     static Schema parse(const char* s);
@@ -128,30 +126,37 @@ private: // members
 
 template <typename TRequest, typename TVisitor>
 void Schema::walk(const TRequest& key, TVisitor& visitor) const {
-//    SplitKey matched;
+    SchemaKeyIterator<typename TRequest::value_type> matched;
     for (const auto& rule : rules_) {
-//        rule.walk(key, matched, visitor);
-        rule.walk(key, visitor);
+        rule.walk(key, matched, visitor);
     }
 }
 
-template <typename TSelf>
+template <typename TSelf, int LEVEL>
 template <typename TRequest, typename TVisitor>
-void SchemaRule<TSelf>::walk(const TRequest& key, TVisitor& visitor) const {
+void SchemaRule<TSelf, LEVEL>::walk(const TRequest& key,
+                             SchemaKeyIterator<typename TRequest::value_type>& matched,
+                             TVisitor& visitor) const {
     for (const auto& k : keys_) {
         if (!key.has(k)) {
             return;
         }
     }
 
-    static_cast<const TSelf&>(*this).walkMatched(key, visitor);
+    for (const auto& k : keys_) {
+        matched.insert(LEVEL, k, key.get(k));
+    }
+
+    static_cast<const TSelf&>(*this).walkMatched(key, matched, visitor);
 }
 
-template <typename TSelf, typename ChildRule>
+template <typename TSelf, typename ChildRule, int LEVEL>
 template <typename TRequest, typename TVisitor>
-void SchemaRuleParent<TSelf, ChildRule>::walkChildren(const TRequest& key, TVisitor& visitor) const {
+void SchemaRuleParent<TSelf, ChildRule, LEVEL>::walkMatched(const TRequest& key,
+                                                            SchemaKeyIterator<typename TRequest::value_type>& matched,
+                                                            TVisitor& visitor) const {
     for (const auto& child : children_) {
-        child.walk(key, visitor);
+        child.walk(key, matched, visitor);
     }
 }
 
@@ -162,42 +167,13 @@ void SchemaRuleParent<TSelf, ChildRule>::walkChildren(const TRequest& key, TVisi
 //    { t.firstLevel() } -> std::same_as<void>;
 //};
 
-namespace detail {
-template<typename T, typename = void>
-struct has_first_level_fn : std::false_type {};
-template<typename T>
-struct has_first_level_fn<T, std::void_t<decltype(std::declval<T>().firstLevel())>> : std::true_type {};
-}
 
 template <typename TRequest, typename TVisitor>
-void SchemaRule1::walkMatched(const TRequest& key, TVisitor& visitor) const {
-    std::cout << "Matched level 1" << std::endl;
-    if constexpr ( detail::has_first_level_fn<TVisitor>::value ) {
-        visitor.firstLevel();
-    }
-    walkChildren(key, visitor);
-}
+void SchemaRule3::walkMatched(const TRequest& key,
+                              SchemaKeyIterator<typename TRequest::value_type>& matched,
+                              TVisitor& visitor) const {
 
-namespace detail {
-template<typename T, typename = void>
-struct has_second_level_fn : std::false_type {};
-template<typename T>
-struct has_second_level_fn<T, std::void_t<decltype(std::declval<T>().secondLevel())>> : std::true_type {};
-}
-
-template <typename TRequest, typename TVisitor>
-void SchemaRule2::walkMatched(const TRequest& key, TVisitor& visitor) const {
-    std::cout << "Matched level 2" << std::endl;
-    if constexpr ( detail::has_second_level_fn<TVisitor>::value ) {
-        visitor.secondLevel();
-    }
-    walkChildren(key, visitor);
-}
-
-template <typename TRequest, typename TVisitor>
-void SchemaRule3::walkMatched(const TRequest& key, TVisitor& visitor) const {
-    visitor.thirdLevel();
-    std::cout << "Matched level 3" << std::endl;
+    matched.visit(visitor);
 }
 
 
