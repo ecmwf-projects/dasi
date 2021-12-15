@@ -10,7 +10,8 @@
 #include <istream>
 #include <iostream>
 
-namespace dasi {
+
+namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -22,7 +23,7 @@ template <typename TSelf, int LEVEL>
 SchemaRule<TSelf, LEVEL>::SchemaRule(const YAML::Node& yml) {
 
     if (!yml.IsSequence()) {
-        throw InvalidConfiguration("Sequence not found in YAML schema", Here());
+        throw util::InvalidConfiguration("Sequence not found in YAML schema", Here());
     }
 
     for (const auto& elem : yml) {
@@ -45,7 +46,7 @@ template <typename TSelf, typename ChildRule, int LEVEL>
 SchemaRuleParent<TSelf, ChildRule, LEVEL>::SchemaRuleParent(const YAML::Node& yml) {
 
     if (!yml.IsSequence()) {
-        throw InvalidConfiguration("Sequence not found in YAML schema", Here());
+        throw util::InvalidConfiguration("Sequence not found in YAML schema", Here());
     }
 
     for (const auto& elem : yml) {
@@ -61,8 +62,8 @@ template <typename TSelf, typename ChildRule, int LEVEL>
 void SchemaRuleParent<TSelf, ChildRule, LEVEL>::print(std::ostream& s) const {
     s << "[";
     {
-        IndentStream indent(s, "  ");
-        ::dasi::internal::print_list(s, this->keys_, "", "");
+        util::IndentStream indent(s, "  ");
+        util::internal::print_list(s, this->keys_, "", "");
         s << "\n";
         for (const auto& r: children_) {
             r.print(s);
@@ -88,7 +89,7 @@ Schema::Schema(std::vector<SchemaRule1>&& rules) :
 
 Schema::Schema(const YAML::Node& rules_yml) {
     // TODO: If 'schema' specifies a filename, load that instead.
-    if (!rules_yml.IsSequence()) throw InvalidConfiguration("Schema configuration is not a sequence of rules", Here());
+    if (!rules_yml.IsSequence()) throw util::InvalidConfiguration("Schema configuration is not a sequence of rules", Here());
     rules_.reserve(rules_yml.size());
     for (const auto& y : rules_yml) {
         rules_.emplace_back(SchemaRule1(y));
@@ -108,7 +109,7 @@ void Schema::print(std::ostream& o) const {
         if (!rules_.empty()) o << "\n";
         for (const auto& r: rules_) {
             {
-                IndentStream indent(o, "   ");
+                util::IndentStream indent(o, "   ");
                 o << " - ";
                 r.print(o);
             }

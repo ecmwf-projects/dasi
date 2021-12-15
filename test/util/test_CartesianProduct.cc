@@ -18,7 +18,7 @@ CASE("Test output ordering") {
     std::vector<int> v2 {4, 5, 6};
     std::vector<int> v3 {7, 8, 9};
 
-    dasi::CartesianProduct<std::vector<int>> cp;
+    dasi::util::CartesianProduct<std::vector<int>> cp;
 
     cp.append(v1, output[0]);
     cp.append(v2, output[2]);
@@ -53,7 +53,7 @@ CASE("Test unit-sized vectors") {
     std::vector<int> v2 {4};
     std::vector<int> v3 {7, 8, 9};
 
-    dasi::CartesianProduct<std::vector<int>> cp;
+    dasi::util::CartesianProduct<std::vector<int>> cp;
 
     cp.append(v1, output[0]);
     cp.append(v2, output[2]);
@@ -81,7 +81,7 @@ CASE("Test scalar elements") {
     std::vector<int> v1 {1, 2, 3};
     std::vector<int> v3 {7, 8, 9};
 
-    dasi::CartesianProduct<std::vector<int>> cp;
+    dasi::util::CartesianProduct<std::vector<int>> cp;
 
     cp.append(v1, output[0]);
     cp.append(int(4), output[2]);
@@ -110,7 +110,7 @@ CASE("Test all unit-sized vectors") {
     std::vector<int> v2 {4};
     std::vector<int> v3 {7};
 
-    dasi::CartesianProduct<std::vector<int>> cp;
+    dasi::util::CartesianProduct<std::vector<int>> cp;
 
     cp.append(v1, output[0]);
     cp.append(v2, output[2]);
@@ -133,7 +133,7 @@ CASE("Test all unit-sized vectors") {
 CASE("Test all scalar elements") {
     std::vector<int> output(3);
 
-    dasi::CartesianProduct<std::vector<int>> cp;
+    dasi::util::CartesianProduct<std::vector<int>> cp;
 
     cp.append(int(1), output[0]);
     cp.append(int(4), output[2]);
@@ -160,21 +160,21 @@ CASE("Empty lists are invalid") {
     std::vector<int> v2 {};
     std::vector<int> v3 {7, 8, 9};
 
-    dasi::CartesianProduct<std::vector<int>> cp;
+    dasi::util::CartesianProduct<std::vector<int>> cp;
 
     cp.append(v1, output[0]);
-    EXPECT_THROWS_AS(cp.append(v2, output[2]), dasi::BadValue);
+    EXPECT_THROWS_AS(cp.append(v2, output[2]), dasi::util::BadValue);
 }
 
 CASE("Entries are mandatory") {
-    dasi::CartesianProduct<std::vector<int>> cp;
-    EXPECT_THROWS_AS(cp.next(), dasi::SeriousBug);
+    dasi::util::CartesianProduct<std::vector<int>> cp;
+    EXPECT_THROWS_AS(cp.next(), dasi::util::SeriousBug);
 }
 
 CASE("Testing a non-iterable cartesian product") {
     std::vector<int> output(3);
 
-    dasi::CartesianProduct<int> cp;
+    dasi::util::CartesianProduct<int> cp;
 
     cp.append(int(1), output[0]);
     cp.append(int(4), output[2]);
@@ -200,7 +200,7 @@ CASE("Works with strings") {
     std::vector<std::string> v1 {"aa", "bb", "cc"};
     std::vector<std::string> v3 {"dd", "ee", "ff"};
 
-    dasi::CartesianProduct<std::vector<std::string>> cp;
+    dasi::util::CartesianProduct<std::vector<std::string>> cp;
 
     cp.append(v1, output[0]);
     cp.append("gg", output[2]);
@@ -229,7 +229,7 @@ CASE("Works with c-style strings") {
     std::vector<const char*> v1 {"aa", "bb", "cc"};
     std::vector<const char*> v3 {"dd", "ee", "ff"};
 
-    dasi::CartesianProduct<std::vector<const char*>> cp;
+    dasi::util::CartesianProduct<std::vector<const char*>> cp;
 
     cp.append(v1, output[0]);
     cp.append("gg", output[2]);
@@ -261,7 +261,7 @@ CASE("Works with string_viewss") {
     std::string v2("gg");
     std::vector<std::string> v3 {"dd", "ee", "ff"};
 
-    dasi::CartesianProduct<std::vector<std::string>, std::string_view> cp;
+    dasi::util::CartesianProduct<std::vector<std::string>, std::string_view> cp;
 
     cp.append(v1, output[0]);
     cp.append(v2, output[2]);
@@ -286,7 +286,7 @@ CASE("Works with string_viewss") {
 CASE("Works with non-iterable string types") {
     std::vector<std::string> output(3);
 
-    dasi::CartesianProduct<std::string> cp;
+    dasi::util::CartesianProduct<std::string> cp;
 
     cp.append("testing"s, output[0]);
     cp.append("gnitset"s, output[2]);
@@ -309,7 +309,7 @@ CASE("Works with non-iterable string types") {
 CASE("Works with non-iterable string types") {
     std::vector<std::string_view> output(3);
 
-    dasi::CartesianProduct<const char*, std::string_view> cp;
+    dasi::util::CartesianProduct<const char*, std::string_view> cp;
 
     cp.append("testing", output[0]);
     cp.append("gnitset", output[2]);
@@ -334,7 +334,7 @@ CASE("Works with non-iterable string types") {
 CASE("Works with non-iterable string_view types") {
     std::vector<std::string_view> output(3);
 
-    dasi::CartesianProduct<std::string, std::string_view> cp;
+    dasi::util::CartesianProduct<std::string, std::string_view> cp;
 
     std::string v1("testing");
     std::string v2("gnitset");
@@ -361,5 +361,5 @@ CASE("Works with non-iterable string_view types") {
 //----------------------------------------------------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
-    return ::dasi::run_tests();
+    return ::dasi::util::run_tests();
 }

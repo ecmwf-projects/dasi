@@ -9,7 +9,7 @@
 #include <initializer_list>
 #include <utility>
 
-namespace dasi {
+namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -96,14 +96,14 @@ auto KeyT<MapType, V>::set(const std::string& k, const std::string_view& v) -> t
 template <template<typename, typename, typename> class MapType, typename V>
 auto KeyT<MapType, V>::get(const std::string& name) const -> const value_type& {
     auto it = values_.find(name);
-    if (it == values_.end()) throw KeyError((StringBuilder() << name << " not found in KeyT").str(), Here());
+    if (it == values_.end()) throw util::KeyError((util::StringBuilder() << name << " not found in KeyT").str(), Here());
     return it->second;
 }
 
 template <template<typename, typename, typename> class MapType, typename V>
 auto KeyT<MapType, V>::get(const std::string_view& name) const -> const value_type& {
     auto it = values_.find(name);
-    if (it == values_.end()) throw KeyError((StringBuilder() << name << " not found in KeyT").str(), Here());
+    if (it == values_.end()) throw util::KeyError((util::StringBuilder() << name << " not found in KeyT").str(), Here());
     return it->second;
 }
 

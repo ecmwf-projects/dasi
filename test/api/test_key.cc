@@ -10,7 +10,7 @@ using namespace std::string_literals;
 
 CASE("Construct from empty key") {
 
-    dasi::Key k;
+    dasi::api::Key k;
     EXPECT(!k.has("key1"));
     EXPECT(!k.has("key2"));
 
@@ -37,7 +37,7 @@ CASE("Construct from empty key") {
 
 CASE("Construct from initialiser list") {
 
-    dasi::Key k {
+    dasi::api::Key k {
         {"key1", "value1"},
         {"key2", "value2"},
         {"key3", "value3"},
@@ -55,7 +55,7 @@ CASE("Construct from initialiser list") {
 
 CASE("Modify existing key") {
 
-    dasi::Key k {
+    dasi::api::Key k {
         {"key1", "value1"},
         {"key2", "value2"},
         {"key3", "value3"},
@@ -78,5 +78,5 @@ CASE("Modify existing key") {
 }
 
 int main(int argc, char** argv) {
-    return ::dasi::run_tests();
+    return ::dasi::util::run_tests();
 }

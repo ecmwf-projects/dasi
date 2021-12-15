@@ -7,7 +7,7 @@
 
 #include "dasi/core/OrderedReferenceKey.h"
 
-namespace dasi {
+namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 

@@ -8,7 +8,7 @@
 #include <list>
 #include <initializer_list>
 
-namespace dasi {
+namespace dasi::util {
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -21,20 +21,13 @@ private: // types
 
     using TimeT = std::chrono::time_point<std::chrono::steady_clock>;
 
-    struct TimeRefT;
-    struct StoredT;
-    using ListT = std::list<TimeRefT>;
-    using MapT = std::map<Key, StoredT, Compare>;
-
-    struct StoredT {
-        typename ListT::const_iterator it;
-        T value;
-    };
-
-    struct TimeRefT {
+    struct DataT {
         TimeT time;
-        typename MapT::iterator it;
+        std::pair<Key, T> value;
     };
+
+    using ListT = std::list<DataT>;
+    using MapT = std::map<Key, typename ListT::const_iterator>;
 
     template <typename ValT, typename ListItT>
     class Iterator {
@@ -59,17 +52,17 @@ private: // types
             ++listIt_;
             return *this;
         }
-        reference operator*() const { return listIt_->it->second.value; }
-        pointer operator->() const { return &listIt_->it->second.value; }
+        reference operator*() const { return listIt_->value; }
+        pointer operator->() const { return &listIt_->value; }
     };
 
 public: // types
 
     using key_type = Key;
     using mapped_type = T;
-    using value_type = typename MapT::value_type;
-    using iterator = Iterator<typename MapT::value_type, typename ListT::iterator>;
-    using const_iterator = Iterator<const typename MapT::value_type, typename ListT::const_iterator>;
+    using value_type = decltype(DataT::value);
+    using iterator = Iterator<value_type, typename ListT::iterator>;
+    using const_iterator = Iterator<const value_type, typename ListT::const_iterator>;
     using size_type = typename MapT::size_type;
 
 public: // methods
@@ -77,24 +70,31 @@ public: // methods
     LRUMap(size_t maxSize);
     LRUMap(size_t maxSize, std::initializer_list<value_type>);
 
-    T& operator[](const Key& key) { return values_[key]; }
+    LRUMap(LRUMap&&) = delete;
+    LRUMap(const LRUMap&) = delete;
+    LRUMap& operator=(LRUMap&&) = delete;
+    LRUMap& operator=(const LRUMap&) = delete;
 
-    iterator begin() { return iterator(times_.begin()); }
-    iterator end() { return iterator(times_.end()); }
-    const_iterator begin() const { return const_iterator(times_.begin()); }
-    const_iterator end() const { return const_iterator(times_.end()); }
+    const T& operator[](const Key& key) const;
+
+    iterator begin() { return iterator(values_.begin()); }
+    iterator end() { return iterator(values_.end()); }
+    const_iterator begin() const { return const_iterator(values_.begin()); }
+    const_iterator end() const { return const_iterator(values_.end()); }
 
     template <typename LookupKey>
-    iterator find(const LookupKey& k) { return iterator(values_.find(k)->second.it); }
+    iterator find(const LookupKey& k) { return iterator(lookup_.find(k)->second.it); }
     template <typename LookupKey>
-    const_iterator find(const LookupKey& k) const { return const_iterator(values_.find(k)->second.it); }
+    const_iterator find(const LookupKey& k) const { return const_iterator(lookup_.find(k)->second.it); }
 
     [[ nodiscard ]]
-    bool empty() const { return values_.empty(); }
+    bool empty() const { return lookup_.empty(); }
 
     [[ nodiscard ]]
-    size_type size() const { return values_.size(); }
+    size_type size() const { return lookup_.size(); }
 
+    std::pair<iterator, bool> insert(const std::pair<Key, T>& val);
+    std::pair<iterator, bool> insert(std::pair<Key, T>&& val);
     std::pair<iterator, bool> emplace(std::pair<Key, T>&& val);
 
 private: // methods
@@ -111,8 +111,8 @@ private: // friends
 private: // members
 
     size_t maxSize_;
-    MapT values_;
-    ListT times_;
+    MapT lookup_;
+    ListT values_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -124,46 +124,86 @@ template <typename Key, typename T, typename Compare>
 LRUMap<Key, T, Compare>::LRUMap(size_t maxSize, std::initializer_list<value_type> values) :
     maxSize_(maxSize) {
     if (values.size() > maxSize_) throw SeriousBug("Too many elements for LRUMap on construction", Here());
-    times_.reserve(values.size());
     auto now = std::chrono::steady_clock::now();
     for (auto& kv : values) {
-        auto r = values_.emplace(std::make_pair(std::move(kv.first), {times_.end(), std::move(kv.second)}));
+        auto it = values_.emplace_back({now, std::move(kv)});
+        auto r = lookup_.emplace(std::make_pair(it->value.first, it));
         ASSERT(r.second);
-        auto it2 = times_.insert(times_.end(), {now, r.first});
-        r.first->it = it2;
     }
+}
+
+template <typename Key, typename T, typename Compare>
+const T& LRUMap<Key, T, Compare>::operator[](const Key& key) const {
+    auto it = lookup_.find(key);
+    if (it == lookup_.end()) throw KeyError("Invalid LRU value", Here());
+    return it->second->value.second;
 }
 
 template <typename Key, typename T, typename Compare>
 void LRUMap<Key, T, Compare>::print(std::ostream& s) const {
     s << "{";
     bool first = true;
-    for (const auto& elem : times_) {
+    for (const auto& elem : values_) {
         if (!first) s << ", ";
-        s << elem.it->first << ":" << elem.it->second;
+        s << elem.value.first << ":" << elem.value.second;
         first = false;
     }
     s << "}";
 }
 
 template <typename Key, typename T, typename Compare>
-auto LRUMap<Key, T, Compare>::emplace(std::pair<Key, T>&& val) -> std::pair<iterator, bool> {
+auto LRUMap<Key, T, Compare>::insert(const std::pair<Key, T>& val) -> std::pair<iterator, bool> {
 
-    auto ins = values_.emplace(std::make_pair(std::move(val.first), {times_.end(), std::move(val.second)}));
-    if (ins.second) {
-        auto it_times = times_.emplace_front({std::chrono::steady_clock::now(), ins.first});
-        ins.first->it = it_times;
+    bool inserted = false;
+    auto itlist = values_.end();
+
+    auto it = lookup_.find(val.first);
+    if (it == lookup_.end()) {
+        auto now = std::chrono::steady_clock::now();
+        itlist = values_.emplace(values_.begin(), DataT{now, val});
+        lookup_.emplace(val.first, itlist);
+        inserted = true;
     }
 
     // If we are full, remove the oldest entry.
-    if (values_.size() > maxSize_) {
-        auto ittime = times_.end();
-        auto itval = ittime->it;
-        values_.erase(itval);
-        times_.erase(ittime);
+    if (lookup_.size() > maxSize_) {
+        auto itlist = values_.end();
+        auto itlookup = lookup_.find(itlist->value.first);
+        values_.erase(itlist);
+        lookup_.erase(itlookup);
     }
 
-    return std::make_pair(iterator(ins.first), ins.second);
+    return std::make_pair(iterator(itlist), inserted);
+}
+
+template <typename Key, typename T, typename Compare>
+auto LRUMap<Key, T, Compare>::insert(std::pair<Key, T>&& val) -> std::pair<iterator, bool> {
+    emplace(std::move(val));
+}
+
+template <typename Key, typename T, typename Compare>
+auto LRUMap<Key, T, Compare>::emplace(std::pair<Key, T>&& val) -> std::pair<iterator, bool> {
+
+    bool inserted = false;
+    auto itlist = values_.end();
+
+    auto it = lookup_.find(val.first);
+    if (it == lookup_.end()) {
+        auto now = std::chrono::steady_clock::now();
+        itlist = values_.emplace(values_.begin(), {now, std::move(val)});
+        lookup_.emplace(val.first, itlist->value.first);
+        inserted = true;
+    }
+
+    // If we are full, remove the oldest entry.
+    if (lookup_.size() > maxSize_) {
+        auto itlist = values_.end();
+        auto itlookup = lookup_.find(itlist->value.first);
+        values_.erase(itlist);
+        lookup_.erase(itlookup);
+    }
+
+    return std::make_pair(iterator(itlist), inserted);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

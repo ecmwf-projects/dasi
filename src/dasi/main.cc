@@ -4,7 +4,7 @@
 #include "dasi/api/Query.h"
 #include "dasi/core/Schema.h"
 
-using namespace dasi;
+using namespace dasi::api;
 
 int main() {
 
@@ -26,15 +26,15 @@ int main() {
 
     std::cout << "query: " << q << std::endl;
 
-    SchemaRule3 r3 {"level3a", "level3b"};
+    dasi::core::SchemaRule3 r3 {"level3a", "level3b"};
     std::cout << "rule3: " << r3 << std::endl;
 
-    SchemaRule2 r2 {{"level2a", "level2b"},
+    dasi::core::SchemaRule2 r2 {{"level2a", "level2b"},
                     {{"level3a", "level3b"},
                      {"level3a", "level3b"}}};
     std::cout << "rule2: " << r2 << std::endl;
 
-    SchemaRule1 r1 {
+    dasi::core::SchemaRule1 r1 {
         {"level1a", "level1b"},
         {   {{"level2a", "level2b"},
              {   {"level3a", "level3b"},

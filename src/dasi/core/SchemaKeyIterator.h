@@ -4,7 +4,7 @@
 #include "dasi/core/SplitReferenceKey.h"
 #include "dasi/util/CartesianProduct.h"
 
-namespace dasi {
+namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ public: // methods
 private: // members
 
     SplitReferenceKey key_;
-    CartesianProduct<TContainer, std::string_view> products_[3];
+    util::CartesianProduct<TContainer, std::string_view> products_[3];
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -40,12 +40,12 @@ namespace detail {
 template<typename T, typename = void>
 struct has_first_level_fn : std::false_type {};
 template<typename T>
-struct has_first_level_fn<T, std::void_t<decltype(std::declval<T>().firstLevel(std::declval<dasi::SplitReferenceKey>()))>> : std::true_type {};
+struct has_first_level_fn<T, std::void_t<decltype(std::declval<T>().firstLevel(std::declval<SplitReferenceKey>()))>> : std::true_type {};
 
 template<typename T, typename = void>
 struct has_second_level_fn : std::false_type {};
 template<typename T>
-struct has_second_level_fn<T, std::void_t<decltype(std::declval<T>().secondLevel(std::declval<dasi::SplitReferenceKey>()))>> : std::true_type {};
+struct has_second_level_fn<T, std::void_t<decltype(std::declval<T>().secondLevel(std::declval<SplitReferenceKey>()))>> : std::true_type {};
 
 }
 

@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace dasi {
+namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ namespace dasi {
 // i) Maintains order (as constructed by Schema)
 // ii) Stores string_views, to avoid unecessary string copies
 
-using OrderedReferenceKey = KeyT<OrderedMap, std::string_view>;
+using OrderedReferenceKey = KeyT<util::OrderedMap, std::string_view>;
 
 //----------------------------------------------------------------------------------------------------------------------
 

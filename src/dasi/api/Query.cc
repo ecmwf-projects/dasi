@@ -5,7 +5,7 @@
 #include "dasi/util/Exceptions.h"
 #include "dasi/util/StringBuilder.h"
 
-namespace dasi {
+namespace dasi::api {
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -26,6 +26,8 @@ void Query::set(const std::string& k, std::initializer_list<std::string> v) {
 }
 
 auto Query::get(const std::string_view& name) const -> const value_type& {
+    using util::StringBuilder;
+    using util::KeyError;
     auto it = values_.find(name);
     if (it == values_.end()) throw KeyError((StringBuilder() << name << " not found in Query").str(), Here());
     return it->second;

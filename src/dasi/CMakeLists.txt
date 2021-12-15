@@ -21,8 +21,8 @@ ecbuild_add_library(
         api/Query.cc
         api/Query.h
 
-        core/ArchiveVisitor.cc
-        core/ArchiveVisitor.h
+        core/Archiver.cc
+        core/Archiver.h
         core/Schema.cc
         core/Schema.h
         core/KeyT.h
@@ -31,17 +31,18 @@ ecbuild_add_library(
         core/SplitReferenceKey.cc
         core/SplitReferenceKey.h
 
+        util/CartesianProduct.h
         util/Colour.cc
         util/Colour.h
         util/ContainerIostream.h
         util/Exceptions.cc
         util/Exceptions.h
         util/IndentStream.h
+        util/LRUMap.h
+        util/OrderedMap.h
+        util/ReverseAdapter.h
         util/StringBuilder.h
         util/Test.h
-        util/CartesianProduct.h
-        util/OrderedMap.h
-        util/LRUMap.h
 )
 
 ecbuild_add_executable(

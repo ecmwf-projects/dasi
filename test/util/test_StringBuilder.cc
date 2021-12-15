@@ -5,10 +5,10 @@
 
 
 CASE("construct some strings") {
-    EXPECT(dasi::StringBuilder().str().empty());
-    EXPECT((dasi::StringBuilder() << "Hello " << "there " << 1234).str() == "Hello there 1234");
+    EXPECT(dasi::util::StringBuilder().str().empty());
+    EXPECT((dasi::util::StringBuilder() << "Hello " << "there " << 1234).str() == "Hello there 1234");
 }
 
 int main(int argc, char** argv) {
-    return ::dasi::run_tests();
+    return ::dasi::util::run_tests();
 }

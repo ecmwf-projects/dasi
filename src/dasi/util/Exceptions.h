@@ -9,7 +9,7 @@
 #include <string_view>
 
 
-namespace dasi {
+namespace dasi::util {
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ private:  // members
     const char* func_;
 };
 
-#define Here() ::dasi::CodeLocation(__FILE__, __LINE__, __func__)
+#define Here() ::dasi::util::CodeLocation(__FILE__, __LINE__, __func__)
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -123,8 +123,8 @@ inline void Assert(int code, const char* msg, const char* file, int line, const 
     }
 }
 
-#define ASSERT(a) ::dasi::Assert(!(a), #a, __FILE__, __LINE__, __func__)
-#define NOTIMP throw ::dasi::NotImplemented(Here());
+#define ASSERT(a) ::dasi::util::Assert(!(a), #a, __FILE__, __LINE__, __func__)
+#define NOTIMP throw ::dasi::util::NotImplemented(Here());
 
 //----------------------------------------------------------------------------------------------------------------------
 

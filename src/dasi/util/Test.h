@@ -12,7 +12,7 @@
 #include <iostream>
 #include <set>
 
-namespace dasi {
+namespace dasi::util {
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -151,7 +151,7 @@ inline int run_tests() {
 #define CASE(description)                                                                                           \
     void UNIQUE_NAME2(test_, __LINE__)();                                                                           \
     /* NOLINTNEXTLINE */ \
-    static ::dasi::TestRegister UNIQUE_NAME2(test_registration_, __LINE__)(description,                     \
+    static ::dasi::util::TestRegister UNIQUE_NAME2(test_registration_, __LINE__)(description,                     \
                                                                                    &UNIQUE_NAME2(test_, __LINE__)); \
     void UNIQUE_NAME2(test_, __LINE__)()
 
@@ -159,7 +159,7 @@ inline int run_tests() {
 #define EXPECT(expr)                                                                 \
     do {                                                                             \
         if (!(expr)) {                                                               \
-            throw ::dasi::TestException("Condition failed: " #expr, Here()); \
+            throw ::dasi::util::TestException("Condition failed: " #expr, Here()); \
         }                                                                            \
     } while (false)
 
@@ -171,7 +171,7 @@ inline int run_tests() {
         catch (excpt&) {                                                                                     \
             break;                                                                                           \
         }                                                                                                    \
-        throw ::dasi::TestException("Expected exception (" #excpt ")not thrown in: " #expr, Here()); \
+        throw ::dasi::util::TestException("Expected exception (" #excpt ")not thrown in: " #expr, Here()); \
     } while (false)
 
 
@@ -184,10 +184,10 @@ inline int run_tests() {
         catch (std::exception & e) {                                                                \
             std::ostringstream oss;                                                                 \
             oss << "Unexpected exception caught: " << e.what();                                     \
-            throw ::dasi::TestException(oss.str(), Here());                                 \
+            throw ::dasi::util::TestException(oss.str(), Here());                                 \
         }                                                                                           \
         catch (...) {                                                                               \
-            throw ::dasi::TestException("Unexpected and unknown exception caught", Here()); \
+            throw ::dasi::util::TestException("Unexpected and unknown exception caught", Here()); \
         }                                                                                           \
     } while (false)
 
@@ -199,7 +199,7 @@ inline int run_tests() {
         catch (...) {                                                                         \
             break;                                                                            \
         }                                                                                     \
-        throw ::dasi::TestException("Exception expected but was not thrown", Here()); \
+        throw ::dasi::util::TestException("Exception expected but was not thrown", Here()); \
     } while (false)
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -6,7 +6,7 @@
 
 CASE("Construct an ordered map and add things to it") {
 
-    dasi::OrderedMap<std::string, std::string> om;
+    dasi::util::OrderedMap<std::string, std::string> om;
     EXPECT(om.empty());
 
     std::vector<std::pair<std::string, std::string>> expected{
@@ -33,7 +33,7 @@ CASE("Construct an ordered map and add things to it") {
 
 CASE("Construct an ordered map with an initialiser list") {
 
-    dasi::OrderedMap<std::string, std::string> om {
+    dasi::util::OrderedMap<std::string, std::string> om {
         {"zzzz", "zvalue"},
         {"yyyy", "yvalue"},
         {"xxxx", "xvalue"}
@@ -61,7 +61,7 @@ CASE("Construct an ordered map with an initialiser list") {
 
 CASE("We can iterate with mutable values") {
 
-    dasi::OrderedMap<std::string, std::string> om {
+    dasi::util::OrderedMap<std::string, std::string> om {
         {"zzzz", "zvalue"},
         {"yyyy", "yvalue"},
         {"xxxx", "xvalue"}
@@ -96,7 +96,7 @@ CASE("We can iterate with mutable values") {
 
 CASE("Check that we can search for values as well") {
 
-    dasi::OrderedMap<std::string, std::string> om {
+    dasi::util::OrderedMap<std::string, std::string> om {
             {"zzzz", "zvalue"},
             {"yyyy", "yvalue"},
             {"xxxx", "xvalue"}
@@ -116,7 +116,7 @@ CASE("Iterators obtained via 'find' are not iterable") {
     //      But lookups using 'find' use the values_ dict. Converting iterators between vector<>
     //      and map<> is not straightforward --> don't implement unless we really need it
 
-    dasi::OrderedMap<std::string, std::string> om {
+    dasi::util::OrderedMap<std::string, std::string> om {
         {"zzzz", "zvalue"},
         {"yyyy", "yvalue"},
         {"xxxx", "xvalue"}
@@ -126,12 +126,12 @@ CASE("Iterators obtained via 'find' are not iterable") {
     auto it = om.find("yyyy");
     EXPECT(it != om.end());
     EXPECT(it->second == "yvalue");
-    EXPECT_THROWS_AS(++it, dasi::NotImplemented);
+    EXPECT_THROWS_AS(++it, dasi::util::NotImplemented);
 }
 
 CASE("ordered map is printable") {
 
-    dasi::OrderedMap<std::string, std::string> om {
+    dasi::util::OrderedMap<std::string, std::string> om {
         {"zzzz", "zvalue"},
         {"yyyy", "yvalue"},
         {"xxxx", "xvalue"}
@@ -145,7 +145,7 @@ CASE("ordered map is printable") {
 
 CASE("string_view as values") {
 
-    dasi::OrderedMap<std::string, std::string_view> om {
+    dasi::util::OrderedMap<std::string, std::string_view> om {
         {"abcd", "efgh"},
         {"ijkl", "mnap"}
     };
@@ -159,7 +159,7 @@ CASE("string_view as values") {
 }
 
 CASE("insert_or_assign") {
-    dasi::OrderedMap<std::string, std::string> om;
+    dasi::util::OrderedMap<std::string, std::string> om;
     EXPECT(om.empty());
 
     std::vector<std::pair<std::string, std::string>> expected {
@@ -211,10 +211,32 @@ CASE("insert_or_assign") {
 }
 
 CASE("test emplace") {
-    EXPECT(false);
-    // Then use emplace in the ordered key
+
+    dasi::util::OrderedMap<std::string, std::string> om;
+    EXPECT(om.empty());
+
+    std::vector<std::pair<std::string, std::string>> expected{
+        {"zzzz", "zvalue"},
+        {"yyyy", "yvalue"},
+        {"xxxx", "xvalue"}
+    };
+
+    for (const auto& v : expected) {
+        om.insert(std::make_pair(v.first, v.second));
+    }
+
+    EXPECT(om.size() == expected.size());
+    for (const auto& v : expected) {
+        EXPECT(om[v.first] == v.second);
+    }
+
+    int i = 0;
+    for (const auto& kv : om) {
+        EXPECT(kv.first == expected[i].first);
+        EXPECT(kv.second == expected[i++].second);
+    }
 }
 
 int main(int argc, char** argv) {
-    return ::dasi::run_tests();
+    return ::dasi::util::run_tests();
 }

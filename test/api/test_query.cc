@@ -9,7 +9,7 @@ using namespace std::string_literals;
 
 CASE("Construct from empty request") {
 
-    dasi::Query r;
+    dasi::api::Query r;
     EXPECT(!r.has("key1"));
     EXPECT(!r.has("key2"));
 
@@ -43,7 +43,7 @@ CASE("Construct from empty request") {
 
 CASE("Construct from initialiser list") {
 
-    dasi::Query r {
+    dasi::api::Query r {
             {"key1", {}},
             {"key2", {"value2"}},
             {"key3", {"value3a", "value3b"}},
@@ -61,7 +61,7 @@ CASE("Construct from initialiser list") {
 
 CASE("Modify existing key") {
 
-    dasi::Query r {
+    dasi::api::Query r {
             {"key1", {"value1"}},
             {"key2", {"value2"}},
             {"key3", {"value3"}},
@@ -85,5 +85,5 @@ CASE("Modify existing key") {
 }
 
 int main(int argc, char** argv) {
-    return ::dasi::run_tests();
+    return ::dasi::util::run_tests();
 }

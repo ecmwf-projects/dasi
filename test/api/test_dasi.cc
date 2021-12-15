@@ -28,9 +28,9 @@ schema:
 
 
 CASE("Dasi simple archive") {
-    dasi::Dasi dasi(TEST_CONFIG);
+    dasi::api::Dasi dasi(TEST_CONFIG);
 
-    dasi::Key key {
+    dasi::api::Key key {
         {"key1", "value1"},
         {"key2", "value2"},
         {"key3", "value3"},
@@ -52,5 +52,5 @@ CASE("Dasi archive with invalid key") {
 
 
 int main(int argc, char** argv) {
-    return ::dasi::run_tests();
+    return ::dasi::util::run_tests();
 }

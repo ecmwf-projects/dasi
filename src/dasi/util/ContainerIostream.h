@@ -10,7 +10,7 @@
 #include <unordered_set>
 
 
-namespace dasi {
+namespace dasi::util {
 namespace internal {
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -53,37 +53,37 @@ namespace std {
 
 template <typename T>
 inline std::ostream& operator<<(std::ostream& s, const std::vector<T>& v) {
-    dasi::internal::print_list(s, v);
+    dasi::util::internal::print_list(s, v);
     return s;
 }
 
 template <typename T>
 inline std::ostream& operator<<(std::ostream& s, const std::set<T>& v) {
-    dasi::internal::print_list(s, v);
+    dasi::util::internal::print_list(s, v);
     return s;
 }
 
 template <typename T, std::size_t N>
 inline std::ostream& operator<<(std::ostream& s, const std::array<T, N>& v) {
-    dasi::internal::print_list(s, v);
+    dasi::util::internal::print_list(s, v);
     return s;
 }
 
 template <typename T>
 inline std::ostream& operator<<(std::ostream& s, const std::unordered_set<T>& v) {
-    dasi::internal::print_list(s, v);
+    dasi::util::internal::print_list(s, v);
     return s;
 }
 
 template <typename S, typename T, typename C, typename A>
 inline std::ostream& operator<<(std::ostream& s, const std::map<S,T,C,A>& v) {
-    dasi::internal::print_map(s, v);
+    dasi::util::internal::print_map(s, v);
     return s;
 }
 
 template <typename S, typename T, typename H, typename KE, typename A>
 inline std::ostream& operator<<(std::ostream& s, const std::unordered_map<S,T,H,KE,A>& v) {
-    dasi::internal::print_map(s, v);
+    dasi::util::internal::print_map(s, v);
     return s;
 }
 

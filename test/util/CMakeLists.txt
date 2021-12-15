@@ -5,6 +5,7 @@ list( APPEND _util_tests
     OrderedMap
     StringBuilder
     LRUMap
+    ReverseAdapter
 )
 
 foreach( _test ${_util_tests} )

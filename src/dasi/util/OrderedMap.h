@@ -7,7 +7,7 @@
 #include <vector>
 #include <initializer_list>
 
-namespace dasi {
+namespace dasi::util {
 
 //----------------------------------------------------------------------------------------------------------------------
 

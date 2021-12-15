@@ -2,7 +2,7 @@
 #include <streambuf>
 #include <string_view>
 
-namespace dasi {
+namespace dasi::util {
 
 //----------------------------------------------------------------------------------------------------------------------
 

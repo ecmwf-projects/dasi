@@ -3,7 +3,7 @@
 
 #include "dasi/util/ContainerIostream.h"
 
-namespace dasi {
+namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 

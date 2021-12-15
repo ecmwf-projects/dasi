@@ -8,9 +8,10 @@
 #include <sstream>
 #include <string>
 
-using dasi::Schema;
-using dasi::Key;
-using dasi::Query;
+using dasi::core::Schema;
+using dasi::core::SplitReferenceKey;
+using dasi::api::Key;
+using dasi::api::Query;
 using namespace std::string_literals;
 
 constexpr const char* TEST_SCHEMA = R"(
@@ -168,8 +169,8 @@ CASE("Visit schema with a request") {
 
     struct MyVisitor {
 //        void firstLevel(const dasi::SplitReferenceKey&) { std::cout << "Request -- FIRST" << std::endl; }
-        void secondLevel(const dasi::SplitReferenceKey&) { std::cout << "Request -- SECOND" << std::endl; }
-        void thirdLevel(const dasi::SplitReferenceKey&) { std::cout << "Request -- THIRD" << std::endl; }
+        void secondLevel(const SplitReferenceKey&) { std::cout << "Request -- SECOND" << std::endl; }
+        void thirdLevel(const SplitReferenceKey&) { std::cout << "Request -- THIRD" << std::endl; }
     };
 
     std::cout << "Walking..." << std::endl;
@@ -180,5 +181,5 @@ CASE("Visit schema with a request") {
 
 
 int main(int argc, char** argv) {
-    return ::dasi::run_tests();
+    return ::dasi::util::run_tests();
 }
