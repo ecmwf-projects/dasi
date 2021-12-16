@@ -93,6 +93,9 @@ public: // methods
     [[ nodiscard ]]
     size_type size() const { return lookup_.size(); }
 
+    [[ nodiscard ]]
+    size_type capacity() const { return maxSize_; }
+
     std::pair<iterator, bool> insert(const std::pair<Key, T>& val);
     std::pair<iterator, bool> insert(std::pair<Key, T>&& val);
     std::pair<iterator, bool> emplace(std::pair<Key, T>&& val);
@@ -167,10 +170,10 @@ auto LRUMap<Key, T, Compare>::insert(const std::pair<Key, T>& val) -> std::pair<
 
     // If we are full, remove the oldest entry.
     if (lookup_.size() > maxSize_) {
-        auto itlist = values_.end();
-        auto itlookup = lookup_.find(itlist->value.first);
-        values_.erase(itlist);
+        auto itlookup = lookup_.find(values_.back().value.first);
+        ASSERT(itlookup != lookup_.end());
         lookup_.erase(itlookup);
+        values_.pop_back();
     }
 
     return std::make_pair(iterator(itlist), inserted);
@@ -197,10 +200,10 @@ auto LRUMap<Key, T, Compare>::emplace(std::pair<Key, T>&& val) -> std::pair<iter
 
     // If we are full, remove the oldest entry.
     if (lookup_.size() > maxSize_) {
-        auto itlist = values_.end();
-        auto itlookup = lookup_.find(itlist->value.first);
-        values_.erase(itlist);
+        auto itlookup = lookup_.find(values_.back().value.first);
+        ASSERT(itlookup != lookup_.end());
         lookup_.erase(itlookup);
+        values_.pop_back();
     }
 
     return std::make_pair(iterator(itlist), inserted);
