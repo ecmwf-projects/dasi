@@ -3,6 +3,7 @@ list( APPEND _core_tests
     Schema
     OrderedReferenceKey
     SchemaKeyIterator
+    CatalogueFactory
 )
 
 foreach( _test ${_core_tests} )
