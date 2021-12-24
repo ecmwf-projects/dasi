@@ -23,10 +23,14 @@ ecbuild_add_library(
 
         core/Archiver.cc
         core/Archiver.h
-        core/Schema.cc
-        core/Schema.h
+        core/Catalogue.cc
+        core/Catalogue.h
+        core/DB.cc
+        core/DB.h
         core/KeyT.h
         core/OrderedReferenceKey.h
+        core/Schema.cc
+        core/Schema.h
         core/SchemaKeyIterator.h
         core/SplitReferenceKey.cc
         core/SplitReferenceKey.h

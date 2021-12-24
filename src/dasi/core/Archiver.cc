@@ -25,8 +25,9 @@ private: // members
 
 //----------------------------------------------------------------------------------------------------------------------
 
-Archiver::Archiver(const Schema& schema) :
-    schema_(schema) {}
+Archiver::Archiver(const Schema& schema, int lruSize) :
+    schema_(schema),
+    databases_(lruSize) {}
 
 void Archiver::archive(const api::Key& key, const void* data, size_t length) {
     ArchiveVisitor visitor(data, length);

@@ -2,6 +2,7 @@
 
 #include "dasi/util/Exceptions.h"
 #include "dasi/util/ContainerIostream.h"
+#include "dasi/util/StringBuilder.h"
 
 #include <chrono>
 #include <map>
@@ -22,12 +23,14 @@ private: // types
     using TimeT = std::chrono::time_point<std::chrono::steady_clock>;
 
     struct DataT {
+        DataT(TimeT&& t, std::pair<Key, T>&& v) : time(std::move(t)), value(std::move(v)) {}
+        DataT(const TimeT& t, const std::pair<Key, T>& v) : time(t), value(std::move(v)) {}
         TimeT time;
         std::pair<Key, T> value;
     };
 
     using ListT = std::list<DataT>;
-    using MapT = std::map<Key, typename ListT::const_iterator>;
+    using MapT = std::map<Key, typename ListT::iterator>;
 
     template <typename ValT, typename ListItT>
     class Iterator {
@@ -76,16 +79,15 @@ public: // methods
     LRUMap& operator=(const LRUMap&) = delete;
 
     const T& operator[](const Key& key) const;
+    T& operator[](const Key& key);
 
     iterator begin() { return iterator(values_.begin()); }
     iterator end() { return iterator(values_.end()); }
     const_iterator begin() const { return const_iterator(values_.begin()); }
     const_iterator end() const { return const_iterator(values_.end()); }
 
-    template <typename LookupKey>
-    iterator find(const LookupKey& k) { return iterator(lookup_.find(k)->second.it); }
-    template <typename LookupKey>
-    const_iterator find(const LookupKey& k) const { return const_iterator(lookup_.find(k)->second.it); }
+    template <typename LookupKey> iterator find(const LookupKey& k);
+    template <typename LookupKey> const_iterator find(const LookupKey& k) const;
 
     [[ nodiscard ]]
     bool empty() const { return lookup_.empty(); }
@@ -103,6 +105,8 @@ public: // methods
 private: // methods
 
     void print(std::ostream& s) const;
+
+    void markAccessed(const typename ListT::const_iterator& it);
 
 private: // friends
 
@@ -129,16 +133,25 @@ LRUMap<Key, T, Compare>::LRUMap(size_t maxSize, std::initializer_list<value_type
     if (values.size() > maxSize_) throw SeriousBug("Too many elements for LRUMap on construction", Here());
     auto now = std::chrono::steady_clock::now();
     for (auto& kv : values) {
-        auto it = values_.emplace_back({now, std::move(kv)});
-        auto r = lookup_.emplace(std::make_pair(it->value.first, it));
-        ASSERT(r.second);
+        auto it = values_.emplace(values_.end(), DataT{now, std::move(kv)});
+        auto r2 = lookup_.emplace(std::make_pair(it->value.first, it));
+        ASSERT(r2.second);
     }
 }
 
 template <typename Key, typename T, typename Compare>
 const T& LRUMap<Key, T, Compare>::operator[](const Key& key) const {
     auto it = lookup_.find(key);
-    if (it == lookup_.end()) throw KeyError("Invalid LRU value", Here());
+    if (it == lookup_.end()) throw KeyError((StringBuilder() << "Invalid LRU value: " << key).str(), Here());
+    markAccessed(it->second);
+    return it->second->value.second;
+}
+
+template <typename Key, typename T, typename Compare>
+T& LRUMap<Key, T, Compare>::operator[](const Key& key) {
+    auto it = lookup_.find(key);
+    if (it == lookup_.end()) throw KeyError((StringBuilder() << "Invalid LRU value: " << key).str(), Here());
+    markAccessed(it->second);
     return it->second->value.second;
 }
 
@@ -155,6 +168,31 @@ void LRUMap<Key, T, Compare>::print(std::ostream& s) const {
 }
 
 template <typename Key, typename T, typename Compare>
+template <typename LookupKey>
+auto LRUMap<Key, T, Compare>::find(const LookupKey& k) -> iterator {
+    auto it = lookup_.find(k);
+    if (it == lookup_.end()) return iterator(values_.end());
+    markAccessed(it->second);
+    return iterator(it->second);
+}
+
+template <typename Key, typename T, typename Compare>
+template <typename LookupKey>
+auto LRUMap<Key, T, Compare>::find(const LookupKey& k) const -> const_iterator {
+    auto it = lookup_.find(k);
+    if (it == lookup_.end()) return iterator(values_.end());
+    markAccessed(it->second);
+    return const_iterator(it->second);
+}
+
+template <typename Key, typename T, typename Compare>
+void LRUMap<Key, T, Compare>::markAccessed(const typename ListT::const_iterator& it) {
+    if (it != values_.begin()) {
+        values_.splice(values_.begin(), values_, it);
+    }
+}
+
+template <typename Key, typename T, typename Compare>
 auto LRUMap<Key, T, Compare>::insert(const std::pair<Key, T>& val) -> std::pair<iterator, bool> {
 
     bool inserted = false;
@@ -164,7 +202,7 @@ auto LRUMap<Key, T, Compare>::insert(const std::pair<Key, T>& val) -> std::pair<
     if (it == lookup_.end()) {
         auto now = std::chrono::steady_clock::now();
         itlist = values_.emplace(values_.begin(), DataT{now, val});
-        lookup_.emplace(val.first, itlist);
+        lookup_.emplace(std::make_pair(val.first, itlist));
         inserted = true;
     }
 
@@ -192,9 +230,11 @@ auto LRUMap<Key, T, Compare>::emplace(std::pair<Key, T>&& val) -> std::pair<iter
 
     auto it = lookup_.find(val.first);
     if (it == lookup_.end()) {
+        Key tmpkey = val.first;
         auto now = std::chrono::steady_clock::now();
-        itlist = values_.emplace(values_.begin(), {now, std::move(val)});
-        lookup_.emplace(val.first, itlist->value.first);
+        DataT newval(std::move(now), std::move(val));
+        itlist = values_.emplace(values_.begin(), std::move(newval));
+        lookup_.emplace(std::make_pair(std::move(tmpkey), std::move(itlist)));
         inserted = true;
     }
 

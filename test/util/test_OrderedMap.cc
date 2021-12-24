@@ -222,7 +222,7 @@ CASE("test emplace") {
     };
 
     for (const auto& v : expected) {
-        om.insert(std::make_pair(v.first, v.second));
+        om.emplace(std::make_pair(v.first, v.second));
     }
 
     EXPECT(om.size() == expected.size());

@@ -10,8 +10,7 @@
 #include <unordered_set>
 
 
-namespace dasi::util {
-namespace internal {
+namespace dasi::util::internal {
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -42,7 +41,6 @@ void print_map(std::ostream& s, const M& mp) {
 //----------------------------------------------------------------------------------------------------------------------
 
 }
-}
 
 // Overrides go into namespace std for name lookup purposes (specialisations for
 // templates in namespace std)
@@ -50,6 +48,12 @@ void print_map(std::ostream& s, const M& mp) {
 namespace std {
 
 //----------------------------------------------------------------------------------------------------------------------
+
+template <typename S, typename T>
+inline std::ostream& operator<<(std::ostream& s, const std::pair<S, T>& v) {
+    s << "<" << v.first << ", " << v.second << ">";
+    return s;
+}
 
 template <typename T>
 inline std::ostream& operator<<(std::ostream& s, const std::vector<T>& v) {

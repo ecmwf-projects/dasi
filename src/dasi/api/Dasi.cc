@@ -26,14 +26,34 @@ Dasi::Dasi(const char* config) :
     Dasi(parseCharStar(config)) {}
 
 Dasi::Dasi(const YAML::Node& config) :
-    schema_(config["schema"]) {
-    if (!config.IsMap()) throw util::InvalidConfiguration("Dasi configuration object not valid", Here());
+    config_(new YAML::Node(config)) {
+    if (!config_->IsMap()) throw util::InvalidConfiguration("Dasi configuration object not valid", Here());
+    if (!(*config_)["schema"].IsDefined()) throw util::InvalidConfiguration("Dasi schema not specified in config", Here());
 }
 
 Dasi::~Dasi() {}
 
+core::Schema& Dasi::schema() {
+    if (!schema_) schema_ = std::make_unique<core::Schema>((*config_)["schema"]);
+    return *schema_;
+}
+
 core::Archiver& Dasi::archiver() {
-    if (!archiver_) archiver_ = std::make_unique<core::Archiver>(schema_);
+
+    if (!archiver_) {
+
+        int archiverLRUsize = 20;
+        auto lru_node = (*config_)["archiveLRUsize"];
+        if (lru_node.IsDefined()) {
+            try {
+                archiverLRUsize = lru_node.as<int>();
+            } catch (YAML::BadConversion& e) {
+                throw util::InvalidConfiguration("archiveLRUsize not convertible to integer", Here());
+            }
+        }
+
+        archiver_ = std::make_unique<core::Archiver>(schema(), archiverLRUsize);
+    }
     return *archiver_;
 }
 

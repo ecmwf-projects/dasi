@@ -142,9 +142,9 @@ CASE("Visit schema with a key") {
     };
 
     struct MyVisitor {
-        void firstLevel(const dasi::SplitReferenceKey&) { std::cout << "Key - FIRST" << std::endl; }
+        void firstLevel(const dasi::core::SplitReferenceKey&) { std::cout << "Key - FIRST" << std::endl; }
 //        void secondLevel(const dasi::SplitReferenceKey&) { std::cout << "Key - SECOND" << std::endl; }
-        void thirdLevel(const dasi::SplitReferenceKey&) { std::cout << "Key - THIRD" << std::endl; }
+        void thirdLevel(const dasi::core::SplitReferenceKey&) { std::cout << "Key - THIRD" << std::endl; }
     };
 
     std::cout << "Walking..." << std::endl;

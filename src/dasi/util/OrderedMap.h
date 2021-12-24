@@ -71,7 +71,8 @@ public: // methods
     OrderedMap() = default;
     OrderedMap(std::initializer_list<value_type>);
 
-    T& operator[](const Key& key) { return values_[key]; }
+//    const T& operator[](const Key& key) const;
+    T& operator[](const Key& key);
 
     iterator begin() { return iterator(keys_.begin()); }
     iterator end() { return iterator(values_.end(), keys_.end()); }
@@ -124,6 +125,24 @@ OrderedMap<Key, T, Compare, Allocator, VecAllocator>::OrderedMap(std::initialize
         keys_.emplace_back(std::move(r.first));
     }
 }
+
+//template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+//const T& OrderedMap<Key, T, Compare, Allocator, VecAllocator>::operator[](const Key& key) const {
+//    auto it = values_.find(key);
+//    if (it == values_.end()) throw KeyError("Invalid OrderedMap key", Here());
+//    return it->second;
+//}
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+T& OrderedMap<Key, T, Compare, Allocator, VecAllocator>::operator[](const Key& key) {
+    auto it = values_.find(key);
+    if (it == values_.end()) {
+        insert(std::make_pair(key, T{}));
+    }
+    return it->second;
+}
+
+
 
 template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
 void OrderedMap<Key, T, Compare, Allocator, VecAllocator>::print(std::ostream& s) const {
