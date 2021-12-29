@@ -14,9 +14,6 @@ template <typename T, typename S>
 int checkExpected(const dasi::util::LRUMap<T, S>& lm,
                   const std::vector<std::pair<T, S>>& expected) {
 
-//    std::cout << "CHECK: " << std::endl;
-//    std::cout << lm << std::endl;
-//    std::cout << expected << std::endl;
     EXPECT(lm.size() == expected.size());
 
     int i = 0;
@@ -28,9 +25,7 @@ int checkExpected(const dasi::util::LRUMap<T, S>& lm,
     return i;
 }
 
-
-
-CASE("Construct comprehensive tests for LRUMap (not written yet!!!)") {
+CASE("Insert items into an LRU map") {
     dasi::util::LRUMap<std::string, std::string> lm(5);
     EXPECT(lm.empty());
 
@@ -43,6 +38,78 @@ CASE("Construct comprehensive tests for LRUMap (not written yet!!!)") {
     for (const auto& v : dasi::util::ReverseAdapter(expected)) {
         std::this_thread::sleep_for(10ms);
         lm.insert(v);
+    }
+
+    checkExpected(lm, expected);
+
+    EXPECT(lm.size() == expected.size());
+    for (const auto& v : expected) {
+        EXPECT(lm[v.first] == v.second);
+    }
+}
+
+CASE("Emplace items into an LRU map") {
+    dasi::util::LRUMap<std::string, std::string> lm(5);
+    EXPECT(lm.empty());
+
+    std::vector<std::pair<std::string, std::string>> expected{
+        {"zzzz", "zvalue"},
+        {"yyyy", "yvalue"},
+        {"xxxx", "xvalue"}
+    };
+
+    for (const auto& v : dasi::util::ReverseAdapter(expected)) {
+        std::this_thread::sleep_for(10ms);
+        std::pair<std::string, std::string> vv(v);
+        lm.emplace(std::move(vv));
+    }
+
+    checkExpected(lm, expected);
+
+    EXPECT(lm.size() == expected.size());
+    for (const auto& v : expected) {
+        EXPECT(lm[v.first] == v.second);
+    }
+}
+
+CASE("Insert items into an LRU map with 2-argument inserter") {
+    dasi::util::LRUMap<std::string, std::string> lm(5);
+    EXPECT(lm.empty());
+
+    std::vector<std::pair<std::string, std::string>> expected{
+        {"zzzz", "zvalue"},
+        {"yyyy", "yvalue"},
+        {"xxxx", "xvalue"}
+    };
+
+    for (const auto& v : dasi::util::ReverseAdapter(expected)) {
+        std::this_thread::sleep_for(10ms);
+        lm.insert(v.first, v.second);
+    }
+
+    checkExpected(lm, expected);
+
+    EXPECT(lm.size() == expected.size());
+    for (const auto& v : expected) {
+        EXPECT(lm[v.first] == v.second);
+    }
+}
+
+CASE("Emplace items into an LRU map with 2-argument inserter") {
+    dasi::util::LRUMap<std::string, std::string> lm(5);
+    EXPECT(lm.empty());
+
+    std::vector<std::pair<std::string, std::string>> expected{
+        {"zzzz", "zvalue"},
+        {"yyyy", "yvalue"},
+        {"xxxx", "xvalue"}
+    };
+
+    for (const auto& v : dasi::util::ReverseAdapter(expected)) {
+        std::this_thread::sleep_for(10ms);
+        std::string a(v.first);
+        std::string b(v.second);
+        lm.emplace(std::move(a), std::move(b));
     }
 
     checkExpected(lm, expected);

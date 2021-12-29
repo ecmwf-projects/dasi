@@ -1,13 +1,23 @@
 
 #pragma once
 
+#include "dasi/core/OrderedReferenceKey.h"
+
+#include "dasi/core/OrderedKey.h"
+
 #include <mutex>
 #include <map>
 #include <string>
 #include <iosfwd>
+#include <memory>
 
+namespace dasi::api {
+class Config;
+}
 
 namespace dasi::core {
+
+class SplitReferenceKey;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -15,8 +25,21 @@ class Catalogue {
 
 public: // methods
 
-    Catalogue() = default;
+    explicit Catalogue(const OrderedReferenceKey& dbkey, const api::Config& config);
     virtual ~Catalogue() = default;
+
+    [[ nodiscard ]]
+    const OrderedKey& dbkey() const { return dbkey_; };
+
+    [[ nodiscard ]]
+    const api::Config& config() const { return config_; }
+
+    virtual void archive(const SplitReferenceKey& key, const void* data, size_t length) { NOTIMP; }
+
+private: // members
+
+    OrderedKey dbkey_;
+    const api::Config& config_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -31,7 +54,10 @@ protected: // methods
 public: // methods
 
     [[ nodiscard ]]
-    virtual Catalogue* make() const = 0;
+    virtual std::unique_ptr<Catalogue> makeReader(const OrderedReferenceKey& key, const api::Config& config) const = 0;
+
+    [[ nodiscard ]]
+    virtual std::unique_ptr<Catalogue> makeWriter(const OrderedReferenceKey& key, const api::Config& config) const = 0;
 
 private: // members
 
@@ -40,18 +66,26 @@ private: // members
 
 //----------------------------------------------------------------------------------------------------------------------
 
-template <typename CATALOGUE>
+template <typename CATALOGUE_READER, typename CATALOGUE_WRITER=CATALOGUE_READER>
 class CatalogueBuilder : public CatalogueBuilderBase {
 
 public: // methods
 
-    explicit CatalogueBuilder() : CatalogueBuilderBase(CATALOGUE::name) {}
+    CatalogueBuilder() : CatalogueBuilderBase(CATALOGUE_READER::name) {}
+    explicit CatalogueBuilder(const char* name) : CatalogueBuilderBase(name) {}
     ~CatalogueBuilder() override = default;
 
 private: // methods
 
     [[ nodiscard ]]
-    Catalogue* make() const override { return new CATALOGUE{}; }
+    std::unique_ptr<Catalogue> makeReader(const OrderedReferenceKey& key, const api::Config& config) const override {
+        return std::make_unique<CATALOGUE_READER>(key, config);
+    }
+
+    [[ nodiscard ]]
+    std::unique_ptr<Catalogue> makeWriter(const OrderedReferenceKey& key, const api::Config& config) const override {
+        return std::make_unique<CATALOGUE_WRITER>(key, config);
+    }
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -65,7 +99,12 @@ public: // methods
     void enregister(const char* name, const CatalogueBuilderBase* builder);
     void deregister(const char* name);
 
-    Catalogue* build(const std::string& name);
+    std::unique_ptr<Catalogue> buildReader(const std::string& name,
+                                           const OrderedReferenceKey& key,
+                                           const api::Config& config);
+    std::unique_ptr<Catalogue> buildWriter(const std::string& name,
+                                           const OrderedReferenceKey& key,
+                                           const api::Config& config);
 
     void list(std::ostream& s, const char* sep=", ");
 

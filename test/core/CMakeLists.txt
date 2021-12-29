@@ -1,6 +1,7 @@
 
 list( APPEND _core_tests
     Schema
+    OrderedKey
     OrderedReferenceKey
     SchemaKeyIterator
     CatalogueFactory

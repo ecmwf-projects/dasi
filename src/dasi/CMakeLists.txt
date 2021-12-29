@@ -20,6 +20,8 @@ ecbuild_add_library(
         api/Query.h
         api/Query.cc
         api/Query.h
+        api/Config.h
+        api/Config.cc
 
         core/Archiver.cc
         core/Archiver.h

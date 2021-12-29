@@ -98,9 +98,12 @@ public: // methods
     [[ nodiscard ]]
     size_type capacity() const { return maxSize_; }
 
+    template <typename KK, typename TT>
+    std::pair<iterator, bool> insert(KK&& k, TT&& t);
     std::pair<iterator, bool> insert(const std::pair<Key, T>& val);
     std::pair<iterator, bool> insert(std::pair<Key, T>&& val);
     std::pair<iterator, bool> emplace(std::pair<Key, T>&& val);
+    std::pair<iterator, bool> emplace(Key&& k, T&& val);
 
 private: // methods
 
@@ -193,6 +196,13 @@ void LRUMap<Key, T, Compare>::markAccessed(const typename ListT::const_iterator&
 }
 
 template <typename Key, typename T, typename Compare>
+template <typename KK, typename TT>
+auto LRUMap<Key, T, Compare>::insert(KK&& k, TT&& t) -> std::pair<iterator, bool> {
+    std::pair<Key, T> val(std::forward<KK>(k), std::forward<TT>(t));
+    return emplace(std::move(val));
+}
+
+template <typename Key, typename T, typename Compare>
 auto LRUMap<Key, T, Compare>::insert(const std::pair<Key, T>& val) -> std::pair<iterator, bool> {
 
     bool inserted = false;
@@ -220,6 +230,11 @@ auto LRUMap<Key, T, Compare>::insert(const std::pair<Key, T>& val) -> std::pair<
 template <typename Key, typename T, typename Compare>
 auto LRUMap<Key, T, Compare>::insert(std::pair<Key, T>&& val) -> std::pair<iterator, bool> {
     emplace(std::move(val));
+}
+
+template <typename Key, typename T, typename Compare>
+auto LRUMap<Key, T, Compare>::emplace(Key&& k, T&& val) -> std::pair<iterator, bool> {
+    return emplace(std::make_pair(std::move(k), std::move(val)));
 }
 
 template <typename Key, typename T, typename Compare>

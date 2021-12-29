@@ -2,6 +2,7 @@
 #pragma once
 
 #include "dasi/api/Key.h"
+#include "dasi/api/Config.h"
 
 #include <iosfwd>
 #include <memory>
@@ -31,16 +32,12 @@ public: // methods
 
 private: // methods
 
-    Dasi(const YAML::Node& config);
-
     core::Schema& schema();
     core::Archiver& archiver();
 
 private: // members
 
-    // This is only a unique_ptr so that we don't have to include yaml-cpp/yaml.h here
-    // We don't want that to be a required part of the API. Should be internal to the library.
-    std::unique_ptr<YAML::Node> config_;
+    Config config_;
 
     std::unique_ptr<core::Schema> schema_;
     std::unique_ptr<core::Archiver> archiver_;

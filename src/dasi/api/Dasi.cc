@@ -6,35 +6,20 @@
 
 #include "yaml-cpp/yaml.h"
 
-#include <istream>
-
 namespace dasi::api {
-
-namespace {
-    YAML::Node parseCharStar(const char* config) {
-        std::istringstream iss(config);
-        return YAML::Load(iss);
-    }
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 
 Dasi::Dasi(std::istream& iss) :
-    Dasi(YAML::Load(iss)) {}
+    config_(iss) {}
 
 Dasi::Dasi(const char* config) :
-    Dasi(parseCharStar(config)) {}
-
-Dasi::Dasi(const YAML::Node& config) :
-    config_(new YAML::Node(config)) {
-    if (!config_->IsMap()) throw util::InvalidConfiguration("Dasi configuration object not valid", Here());
-    if (!(*config_)["schema"].IsDefined()) throw util::InvalidConfiguration("Dasi schema not specified in config", Here());
-}
+    config_(config) {}
 
 Dasi::~Dasi() {}
 
 core::Schema& Dasi::schema() {
-    if (!schema_) schema_ = std::make_unique<core::Schema>((*config_)["schema"]);
+    if (!schema_) schema_ = std::make_unique<core::Schema>(config_.value("schema"));
     return *schema_;
 }
 
@@ -42,17 +27,8 @@ core::Archiver& Dasi::archiver() {
 
     if (!archiver_) {
 
-        int archiverLRUsize = 20;
-        auto lru_node = (*config_)["archiveLRUsize"];
-        if (lru_node.IsDefined()) {
-            try {
-                archiverLRUsize = lru_node.as<int>();
-            } catch (YAML::BadConversion& e) {
-                throw util::InvalidConfiguration("archiveLRUsize not convertible to integer", Here());
-            }
-        }
-
-        archiver_ = std::make_unique<core::Archiver>(schema(), archiverLRUsize);
+        long archiverLRUsize = config_.getLong("archiveLRUsize", 20);
+        archiver_ = std::make_unique<core::Archiver>(config_, schema(), archiverLRUsize);
     }
     return *archiver_;
 }

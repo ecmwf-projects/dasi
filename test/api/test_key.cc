@@ -33,6 +33,8 @@ CASE("Construct from empty key") {
         ss << k;
         EXPECT(ss.str() == "{key1:value1, key2:value2}");
     }
+
+    EXPECT(k.size() == 2);
 }
 
 CASE("Construct from initialiser list") {
@@ -47,6 +49,8 @@ CASE("Construct from initialiser list") {
     EXPECT(k.has("key2"));
     EXPECT(k.has("key3"));
     EXPECT(!k.has("other"));
+
+    EXPECT(k.size() == 3);
 
     std::ostringstream ss;
     ss << k;
@@ -75,6 +79,31 @@ CASE("Modify existing key") {
         ss << k;
         EXPECT(ss.str() == "{key1:VALUE1a, key2:value2, key3:VALUE3b}");
     }
+
+    EXPECT(k.size() == 3);
+}
+
+CASE("Test that clear() works") {
+
+    dasi::api::Key k {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},
+    };
+
+    EXPECT(k.size() == 3);
+    k.clear();
+    EXPECT(k.size() == 0);
+
+    for (const auto& kv : k) {
+        EXPECT(false);
+    }
+
+    k.set("key4", "value4");
+    k.set("key2", "value2");
+    k.set("key5", "value5");
+
+    EXPECT(k.size() == 3);
 }
 
 int main(int argc, char** argv) {

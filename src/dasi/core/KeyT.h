@@ -37,11 +37,20 @@ public: // methods
 
     typename map_type::iterator set(const std::string& k, const std::string_view& v);
 
+    typename map_type::const_iterator begin() const;
+    typename map_type::const_iterator end() const;
+
     const value_type& get(const std::string& k) const;
     const value_type& get(const std::string_view& k) const;
 
     template <template<typename, typename, typename> class MapType2, typename V2>
     bool operator==(const KeyT<MapType2, V2>& rhs) const;
+
+    template <template<typename, typename, typename> class MapType2, typename V2>
+    bool operator<(const KeyT<MapType2, V2>& rhs) const;
+
+    typename map_type::size_type size() const;
+    void clear();
 
 private: // methods
 
@@ -108,6 +117,26 @@ auto KeyT<MapType, V>::get(const std::string_view& name) const -> const value_ty
 }
 
 template <template<typename, typename, typename> class MapType, typename V>
+void KeyT<MapType, V>::clear() {
+    values_.clear();
+}
+
+template <template<typename, typename, typename> class MapType, typename V>
+auto KeyT<MapType, V>::size() const -> typename map_type::size_type {
+    return values_.size();
+}
+
+template <template<typename, typename, typename> class MapType, typename V>
+auto KeyT<MapType, V>::begin() const -> typename map_type::const_iterator {
+    return values_.begin();
+}
+
+template <template<typename, typename, typename> class MapType, typename V>
+auto KeyT<MapType, V>::end() const -> typename map_type::const_iterator {
+    return values_.end();
+}
+
+template <template<typename, typename, typename> class MapType, typename V>
 template <template<typename, typename, typename> class MapType2, typename V2>
 bool KeyT<MapType, V>::operator==(const KeyT<MapType2, V2>& rhs) const {
     if (values_.size() != rhs.values_.size()) return false;
@@ -117,6 +146,12 @@ bool KeyT<MapType, V>::operator==(const KeyT<MapType2, V2>& rhs) const {
         if (kv.second != it->second) return false;
     }
     return true;
+}
+
+template <template<typename, typename, typename> class MapType, typename V>
+template <template<typename, typename, typename> class MapType2, typename V2>
+bool KeyT<MapType, V>::operator<(const KeyT<MapType2, V2>& rhs) const {
+    return values_ < rhs.values_;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

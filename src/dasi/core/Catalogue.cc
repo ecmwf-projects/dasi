@@ -3,13 +3,18 @@
 
 #include "dasi/util/Exceptions.h"
 
-#include <sstream>
 #include <iostream>
+
+using dasi::api::Config;
 
 
 namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
+
+Catalogue::Catalogue(const OrderedReferenceKey& dbkey, const Config& config) :
+    dbkey_(dbkey),
+    config_(config) {}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -41,7 +46,9 @@ void CatalogueFactory::deregister(const char* name) {
     builders_.erase(it);
 }
 
-Catalogue* CatalogueFactory::build(const std::string& name) {
+std::unique_ptr<Catalogue> CatalogueFactory::buildReader(const std::string& name,
+                                                         const OrderedReferenceKey& key,
+                                                         const Config& config) {
     std::lock_guard<std::mutex> lock(m_);
     auto it = builders_.find(name);
     if (it == builders_.end()) {
@@ -49,7 +56,20 @@ Catalogue* CatalogueFactory::build(const std::string& name) {
         ss << "Unknown catalogue builder '" << name << "' not known";
         throw util::SeriousBug(ss.str(), Here());
     }
-    return it->second->make();
+    return it->second->makeReader(key, config);
+}
+
+std::unique_ptr<Catalogue> CatalogueFactory::buildWriter(const std::string& name,
+                                                         const OrderedReferenceKey& key,
+                                                         const Config& config) {
+    std::lock_guard<std::mutex> lock(m_);
+    auto it = builders_.find(name);
+    if (it == builders_.end()) {
+        std::ostringstream ss;
+        ss << "Unknown catalogue builder '" << name << "' not known";
+        throw util::SeriousBug(ss.str(), Here());
+    }
+    return it->second->makeWriter(key, config);
 }
 
 void CatalogueFactory::list(std::ostream& s, const char* sep) {

@@ -87,6 +87,8 @@ public: // methods
     [[ nodiscard ]]
     bool empty() const { return values_.empty(); }
 
+    void clear();
+
     [[ nodiscard ]]
     size_type size() const { return values_.size(); }
 
@@ -142,8 +144,6 @@ T& OrderedMap<Key, T, Compare, Allocator, VecAllocator>::operator[](const Key& k
     return it->second;
 }
 
-
-
 template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
 void OrderedMap<Key, T, Compare, Allocator, VecAllocator>::print(std::ostream& s) const {
     s << "{";
@@ -171,6 +171,12 @@ auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::insert(std::pair<Key,
 }
 
 template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+void OrderedMap<Key, T, Compare, Allocator, VecAllocator>::clear() {
+    values_.clear();
+    keys_.clear();
+}
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
 auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::insert(const std::pair<Key, T>& val) -> std::pair<iterator, bool> {
     auto mp_ins = values_.insert(val);
     if (mp_ins.second) {
@@ -182,7 +188,7 @@ auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::insert(const std::pai
 template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
 template <typename M>
 auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::insert_or_assign(const Key& key, M&& val) -> std::pair<iterator, bool> {
-    auto ins_ret = insert(std::make_pair(key, val));
+    auto ins_ret = insert(std::make_pair(key, T{std::forward<M>(val)}));
     if (!ins_ret.second) ins_ret.first->second = val;
     return ins_ret;
 }
