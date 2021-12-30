@@ -38,6 +38,17 @@ public: // methods
 
 private: // members
 
+    virtual void print(std::ostream& s) const { s << "Catalogue[UNKNOWN]"; }
+
+private: // friend
+
+    friend std::ostream& operator<<(std::ostream& s, const Catalogue& c) {
+        c.print(s);
+        return s;
+    }
+
+private: // members
+
     OrderedKey dbkey_;
     const api::Config& config_;
 };

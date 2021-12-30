@@ -74,6 +74,10 @@ public: // methods
 //    const T& operator[](const Key& key) const;
     T& operator[](const Key& key);
 
+    [[ nodiscard ]] bool operator==(const OrderedMap& rhs) const;
+    [[ nodiscard ]] bool operator!=(const OrderedMap& rhs) const;
+    [[ nodiscard ]] bool operator<(const OrderedMap& rhs) const;
+
     iterator begin() { return iterator(keys_.begin()); }
     iterator end() { return iterator(values_.end(), keys_.end()); }
     const_iterator begin() const { return const_iterator(keys_.begin()); }
@@ -183,6 +187,31 @@ auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::insert(const std::pai
         keys_.push_back(mp_ins.first);
     }
     return std::make_pair(iterator(mp_ins.first), mp_ins.second);
+}
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+bool OrderedMap<Key, T, Compare, Allocator, VecAllocator>::operator==(const OrderedMap& rhs) const {
+    return values_ == rhs.values_ && keys_ == rhs.keys_;
+}
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+bool OrderedMap<Key, T, Compare, Allocator, VecAllocator>::operator!=(const OrderedMap& rhs) const {
+    return !this->operator==(rhs);
+}
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+bool OrderedMap<Key, T, Compare, Allocator, VecAllocator>::operator<(const OrderedMap& rhs) const {
+
+    if (values_ < rhs.values_) return true;
+    if (values_ > rhs.values_) return false;
+
+    // Compare the order of the keys, only if otherwise equal
+    auto compare_fn = [](const typename MapT::iterator& lhs, const typename MapT::iterator& rhs) -> bool {
+        return lhs->first < rhs->first;
+    };
+    return std::lexicographical_compare(keys_.begin(), keys_.end(),
+                                        rhs.keys_.begin(), rhs.keys_.end(),
+                                        compare_fn);
 }
 
 template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>

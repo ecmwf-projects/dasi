@@ -4,6 +4,8 @@
 
 #include "dasi/api/Config.h"
 
+#include <iostream>
+
 using dasi::api::Config;
 
 
@@ -19,6 +21,9 @@ DB::DB(const OrderedReferenceKey& dbkey, const Config& config, bool reader) {
         catalogue_ = CatalogueFactory::instance().buildWriter(engine, dbkey, config);
     }
 }
+
+DB::DB(DB&& rhs) noexcept:
+    catalogue_(std::move(rhs.catalogue_)) {}
 
 DB::~DB() {}
 

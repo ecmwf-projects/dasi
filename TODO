@@ -4,3 +4,6 @@
     - Can be used for the Keys in various Maps
     - Remove the need for the ReferenceKey types
     - Or is this made unecessary by the small-string optimisations
+
+* Test SplitReferenceKey
+* Test SplitKey

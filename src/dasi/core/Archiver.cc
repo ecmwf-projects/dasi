@@ -42,14 +42,15 @@ void Archiver::archive(const api::Key& key, const void* data, size_t length) {
 }
 
 DB& Archiver::database(const OrderedReferenceKey& dbkey) {
-    //auto it = databases_.find(dbkey);
-    //if (it == databases_.end()) {
-    //    bool reader = false;
-    //    auto ins = databases_.insert(dbkey, DB(dbkey, config_, reader));
-    //    ASSERT(ins.second);
-    //    it = ins.first;
-    //}
-    //return it->second;
+    auto it = databases_.find(dbkey);
+    if (it == databases_.end()) {
+        bool reader = false;
+        OrderedKey insertKey{dbkey};
+        auto ins = databases_.insert(std::move(insertKey), DB(dbkey, config_, reader));
+        ASSERT(ins.second);
+        it = ins.first;
+    }
+    return it->second;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 
 #include "dasi/core/Schema.h"
 #include "dasi/core/DB.h"
-#include "dasi/core/OrderedReferenceKey.h"
+#include "dasi/core/OrderedKey.h"
 
 #include "dasi/util/LRUMap.h"
 
@@ -16,6 +16,7 @@ namespace dasi::core {
 
 class SplitReferenceKey;
 class ArchiveVisitor;
+class OrderedReferenceKey;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -35,7 +36,7 @@ private: // members
     const api::Config& config_;
     const Schema& schema_;
 
-    util::LRUMap<api::Key, DB, std::less<>> databases_;
+    util::LRUMap<core::OrderedKey, DB, std::less<>> databases_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -171,35 +171,7 @@ inline int run_tests() {
         catch (excpt&) {                                                                                     \
             break;                                                                                           \
         }                                                                                                    \
-        throw ::dasi::util::TestException("Expected exception (" #excpt ")not thrown in: " #expr, Here()); \
-    } while (false)
-
-
-// Convert to TestException
-#define EXPECT_NO_THROW(expr)                                                                       \
-    do {                                                                                            \
-        try {                                                                                       \
-            expr;                                                                                   \
-        }                                                                                           \
-        catch (std::exception & e) {                                                                \
-            std::ostringstream oss;                                                                 \
-            oss << "Unexpected exception caught: " << e.what();                                     \
-            throw ::dasi::util::TestException(oss.str(), Here());                                 \
-        }                                                                                           \
-        catch (...) {                                                                               \
-            throw ::dasi::util::TestException("Unexpected and unknown exception caught", Here()); \
-        }                                                                                           \
-    } while (false)
-
-#define EXPECT_THROWS(expr)                                                                   \
-    do {                                                                                      \
-        try {                                                                                 \
-            expr;                                                                             \
-        }                                                                                     \
-        catch (...) {                                                                         \
-            break;                                                                            \
-        }                                                                                     \
-        throw ::dasi::util::TestException("Exception expected but was not thrown", Here()); \
+        throw ::dasi::util::TestException("Expected exception (" #excpt ") not thrown in: " #expr, Here()); \
     } while (false)
 
 //----------------------------------------------------------------------------------------------------------------------

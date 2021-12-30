@@ -22,6 +22,7 @@ ecbuild_add_library(
         api/Query.h
         api/Config.h
         api/Config.cc
+        api/SplitKey.h
 
         core/Archiver.cc
         core/Archiver.h
@@ -34,9 +35,11 @@ ecbuild_add_library(
         core/Schema.cc
         core/Schema.h
         core/SchemaKeyIterator.h
-        core/SplitReferenceKey.cc
+        core/SplitKeyT.h
         core/SplitReferenceKey.h
 
+        util/Buffer.cc
+        util/Buffer.h
         util/CartesianProduct.h
         util/Colour.cc
         util/Colour.h
