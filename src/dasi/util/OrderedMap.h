@@ -11,6 +11,7 @@ namespace dasi::util {
 
 //----------------------------------------------------------------------------------------------------------------------
 
+// TODO: Can we do better by using Compare = std::less<>
 template <typename Key,
           typename T,
           typename Compare = std::less<Key>,
@@ -25,6 +26,7 @@ private: // types
 
     template <typename ValT, typename MapItT, typename VecItT>
     class Iterator {
+        friend class OrderedMap;
         bool iterable_ = false;
         MapItT mapIt_;
         VecItT vecIt_;
@@ -92,6 +94,10 @@ public: // methods
     bool empty() const { return values_.empty(); }
 
     void clear();
+
+    template <typename LookupKey>
+    void erase(const LookupKey& k);
+    void erase(iterator it);
 
     [[ nodiscard ]]
     size_type size() const { return values_.size(); }
@@ -220,6 +226,49 @@ auto OrderedMap<Key, T, Compare, Allocator, VecAllocator>::insert_or_assign(cons
     auto ins_ret = insert(std::make_pair(key, T{std::forward<M>(val)}));
     if (!ins_ret.second) ins_ret.first->second = val;
     return ins_ret;
+}
+
+// TODO: erase is horribly inefficient, due to the linear search.
+// TODO: Rework OrderedMap to use same layout schema as LRUMap
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+template <typename LookupKey>
+void OrderedMap<Key, T, Compare, Allocator, VecAllocator>::erase(const LookupKey& key) {
+    auto it = values_.find(key);
+    if (it == values_.end()) return;
+
+    for (auto it_keys = keys_.begin(); it_keys != keys_.end(); ++it_keys) {
+        if (*it_keys == it) {
+            values_.erase(it);
+            keys_.erase(it_keys);
+            return;
+        }
+    }
+
+    throw SeriousBug("Failed to erase key from ordered list", Here());
+}
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+void OrderedMap<Key, T, Compare, Allocator, VecAllocator>::erase(iterator it) {
+
+    if (it.iterable_) {
+        auto vec_it = it.vecIt_;
+        if (vec_it == keys_.end()) return;
+        auto map_it = *vec_it;
+        values_.erase(map_it);
+        keys_.erase(vec_it);
+    } else {
+        auto map_it = it.mapIt_;
+        if (map_it == values_.end()) return;
+        for (auto vec_it = keys_.begin(); vec_it != keys_.end(); ++vec_it) {
+            if (*vec_it == map_it) {
+                values_.erase(map_it);
+                keys_.erase(vec_it);
+                return;
+            }
+        }
+        throw SeriousBug("Failed to erase key from ordered list", Here());
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------

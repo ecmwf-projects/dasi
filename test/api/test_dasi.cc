@@ -118,19 +118,42 @@ CASE("Dasi archive with invalid key") {
 
     dasi::api::Dasi dasi(TEST_CONFIG);
 
-    // n.b. ey1a not provided
-    dasi::api::Key key {
+    dasi::api::Key valid_key {
         {"key1", "value1"},
         {"key2", "value2"},
         {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
         {"key2a", "value2a"},
         {"key1b", "value1b"},
         {"key2b", "value2b"},
         {"key3b", "value3b"},
     };
 
+    // key1a not provided
+
+    dasi::api::Key key1 {valid_key};
+    key1.erase("key1a");
+
+    // Extra keys provided
+
+    dasi::api::Key key2 {valid_key};
+    key2.set("invalid", "key");
+
+    // Key provided from another part of the schema
+
+    dasi::api::Key key3 {valid_key};
+    key3.set("key1A", "value1A");
+
+    dasi::api::Key key4 {valid_key};
+    key4.erase("key1a");
+    key4.set("key1A", "value1A");
+
     char test_data[] = "TESTING TESTING";
-    EXPECT_THROWS_AS(dasi.archive(key, test_data, sizeof(test_data)-1), util::SeriousBug);
+    dasi.archive(valid_key, test_data, sizeof(test_data)-1);
+
+    for (const auto& key : {key1, key2, key3}) {
+        EXPECT_THROWS_AS(dasi.archive(key, test_data, sizeof(test_data)-1), util::SeriousBug);
+    }
 }
 
 

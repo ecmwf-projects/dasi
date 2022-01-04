@@ -33,7 +33,7 @@ core::Archiver& Dasi::archiver() {
     return *archiver_;
 }
 
-void Dasi::archive(Key& key, const void* data, size_t length) {
+void Dasi::archive(const Key& key, const void* data, size_t length) {
     archiver().archive(key, data, length);
 }
 

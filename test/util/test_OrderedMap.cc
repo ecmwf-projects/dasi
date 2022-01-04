@@ -237,6 +237,76 @@ CASE("test emplace") {
     }
 }
 
+CASE("Test erase") {
+    dasi::util::OrderedMap<std::string, std::string> om {
+        {"zzzz", "zvalue"},
+        {"yyyy", "yvalue"},
+        {"xxxx", "xvalue"},
+        {"wwww", "wvalue"},
+        {"vvvv", "vvalue"},
+        {"uuuu", "uvalue"},
+    };
+    EXPECT(om.size() == 6);
+
+    om.erase("xxxx");
+    om.erase("zzzz");
+    om.erase("uuuu");
+
+    std::vector<std::pair<std::string, std::string>> expected{
+        {"yyyy", "yvalue"},
+        {"wwww", "wvalue"},
+        {"vvvv", "vvalue"},
+    };
+
+    EXPECT(om.size() == expected.size());
+    for (const auto& v : expected) {
+        EXPECT(om[v.first] == v.second);
+    }
+
+    int i = 0;
+    for (const auto& kv : om) {
+        EXPECT(kv.first == expected[i].first);
+        EXPECT(kv.second == expected[i++].second);
+    }
+}
+
+CASE("Test erase with iterators") {
+    dasi::util::OrderedMap<std::string, std::string> om {
+        {"zzzz", "zvalue"},
+        {"yyyy", "yvalue"},
+        {"xxxx", "xvalue"},
+        {"wwww", "wvalue"},
+        {"vvvv", "vvalue"},
+        {"uuuu", "uvalue"},
+    };
+    EXPECT(om.size() == 6);
+
+    for (const char* k : {"xxxx", "zzzz", "uuuu"}) {
+        auto it = om.find(k);
+        EXPECT(it != om.end());
+        om.erase(it);
+        it = om.find(k);
+        EXPECT(it == om.end());
+    }
+
+    std::vector<std::pair<std::string, std::string>> expected {
+        {"yyyy", "yvalue"},
+        {"wwww", "wvalue"},
+        {"vvvv", "vvalue"},
+    };
+
+    EXPECT(om.size() == expected.size());
+    for (const auto& v : expected) {
+        EXPECT(om[v.first] == v.second);
+    }
+
+    int i = 0;
+    for (const auto& kv : om) {
+        EXPECT(kv.first == expected[i].first);
+        EXPECT(kv.second == expected[i++].second);
+    }
+}
+
 int main(int argc, char** argv) {
     return ::dasi::util::run_tests();
 }

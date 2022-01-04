@@ -22,14 +22,14 @@ public: // methods
 
     OrderedKey(const OrderedReferenceKey& rhs) {
         for (const auto& kv : rhs) {
-            set(kv.first, kv.second);
+            set(kv.first, std::string(kv.second));
         }
     }
 
     OrderedKey& operator=(const OrderedReferenceKey& rhs) {
         clear();
         for (const auto& kv : rhs) {
-            set(kv.first, kv.second);
+            set(kv.first, std::string(kv.second));
         }
         return *this;
     }

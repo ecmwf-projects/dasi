@@ -35,13 +35,18 @@ public: // methods
     [[nodiscard]]
     bool has(const std::string& name) const;
 
-    typename map_type::iterator set(const std::string& k, const std::string_view& v);
+    typename map_type::iterator set(const std::string& k, const value_type& v);
 
     typename map_type::const_iterator begin() const;
     typename map_type::const_iterator end() const;
 
     const value_type& get(const std::string& k) const;
     const value_type& get(const std::string_view& k) const;
+    const value_type& get(const char* k) const;
+
+    void erase(const std::string& k);
+    void erase(const std::string_view& k);
+    void erase(const char* k);
 
     template <template<typename, typename, typename> class MapType2, typename V2>
     bool operator==(const KeyT<MapType2, V2>& rhs) const;
@@ -98,8 +103,13 @@ bool KeyT<MapType, V>::has(const std::string& name) const {
 }
 
 template <template<typename, typename, typename> class MapType, typename V>
-auto KeyT<MapType, V>::set(const std::string& k, const std::string_view& v) -> typename map_type::iterator {
+auto KeyT<MapType, V>::set(const std::string& k, const value_type& v) -> typename map_type::iterator {
     return values_.insert_or_assign(k, v).first;
+}
+
+template <template<typename, typename, typename> class MapType, typename V>
+auto KeyT<MapType, V>::get(const char* name) const -> const value_type& {
+    return get(std::string_view(name));
 }
 
 template <template<typename, typename, typename> class MapType, typename V>
@@ -114,6 +124,23 @@ auto KeyT<MapType, V>::get(const std::string_view& name) const -> const value_ty
     auto it = values_.find(name);
     if (it == values_.end()) throw util::KeyError((util::StringBuilder() << name << " not found in KeyT").str(), Here());
     return it->second;
+}
+
+template <template<typename, typename, typename> class MapType, typename V>
+void KeyT<MapType, V>::erase(const char* name) {
+    erase(std::string_view(name));
+}
+
+template <template<typename, typename, typename> class MapType, typename V>
+void KeyT<MapType, V>::erase(const std::string& name) {
+    auto it = values_.find(name);
+    if (it != values_.end()) values_.erase(it);
+}
+
+template <template<typename, typename, typename> class MapType, typename V>
+void KeyT<MapType, V>::erase(const std::string_view& name) {
+    auto it = values_.find(name);
+    if (it != values_.end()) values_.erase(it);
 }
 
 template <template<typename, typename, typename> class MapType, typename V>

@@ -28,7 +28,7 @@ public: // methods
     explicit Dasi(const char* config);
     ~Dasi();
 
-    void archive(Key& key, const void* data, size_t length);
+    void archive(const Key& key, const void* data, size_t length);
 
 private: // methods
 
