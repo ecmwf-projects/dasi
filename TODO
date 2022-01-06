@@ -7,3 +7,6 @@
 
 * Test SplitReferenceKey
 * Test SplitKey
+
+* api/Query with std::optional<> (i.e. for listing) --> can always do full match on schema
+* Throw exceptions on partial/incorrect matches on schema
