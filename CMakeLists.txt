@@ -17,7 +17,7 @@ else()
         yaml-cpp
         GIT_REPOSITORY    "https://github.com/jbeder/yaml-cpp"
         GIT_TAG           "yaml-cpp-0.6.0"
-        CONFIGURE_COMMAND cmake -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/contrib/yaml-cpp -DCMAKE_POSITION_INDEPENDENT_CODE=ON ${CMAKE_CURRENT_SOURCE_DIR}/contrib/yaml-cpp
+        CMAKE_ARGS        -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/contrib/yaml-cpp -DCMAKE_POSITION_INDEPENDENT_CODE=ON
         SOURCE_DIR        "${CMAKE_CURRENT_SOURCE_DIR}/contrib/yaml-cpp"
         BINARY_DIR        "${CMAKE_CURRENT_BINARY_DIR}/contrib-build/yaml-cpp"
         INSTALL_DIR       "${CMAKE_CURRENT_BINARY_DIR}/contrib/yaml-cpp"
