@@ -7,7 +7,7 @@ ecbuild_add_library(
     PRIVATE_LIBS
         "${YAML_CPP_LIBRARIES}"
     PRIVATE_INCLUDES
-        "${YAML_CPP_INCLUDE_DIRS}"
+        "${YAML_CPP_INCLUDE_DIR}"
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
