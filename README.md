@@ -4,6 +4,10 @@ A metadata-driven data store, developed as part of the [IO-SEA project](https://
 
 :warning: This project is under development, use at your own risk!
 
+## Authors
+
+Simon Smart, Olivier Iffrig (firstname.lastname @ecmwf.int)
+
 ## License
 
 [Apache License 2.0](LICENSE). In applying this licence, ECMWF does not waive
