@@ -49,6 +49,9 @@ ecbuild_add_library(
         core/SplitKeyT.h
         core/SplitReferenceKey.h
 
+        shelf/ShelfCatalogue.cc
+        shelf/ShelfCatalogue.h
+
         util/AutoCloser.h
         util/Buffer.cc
         util/Buffer.h
