@@ -2,6 +2,8 @@
 #include "dasi/util/Test.h"
 
 #include "dasi/api/Dasi.h"
+#include "dasi/api/Handle.h"
+#include "dasi/api/Query.h"
 #include "dasi/api/SplitKey.h"
 
 #include "dasi/core/Catalogue.h"
@@ -16,6 +18,51 @@
 namespace {
 
 using namespace dasi;
+
+class BufferHandle : public dasi::api::Handle {
+
+public: // methods
+
+    BufferHandle(const api::Key& key, const util::Buffer& buffer) :
+        key_(key),
+        buffer_(buffer),
+        pos_(0) {}
+
+    size_t read(void* buf, size_t len, bool stream = false) override {
+        if (pos_ >= buffer_.size()) {
+            return 0;
+        }
+
+        size_t toread = buffer_.size() - pos_;
+        if (len < toread) {
+            toread = len;
+        }
+
+        const char* start = static_cast<const char*>(buffer_.data()) + pos_;
+        std::memcpy(buf, start, toread);
+        pos_ += toread;
+        return toread;
+    }
+
+    const api::Key& currentKey() const override {
+        return key_;
+    }
+
+    void close() override {}
+
+private: // methods
+
+    void print(std::ostream& s) const override {
+        s << "BufferHandle";
+    }
+
+private: // members
+
+    const api::Key key_;
+    const util::Buffer& buffer_;
+    size_t pos_;
+
+};
 
 std::vector<std::pair<api::SplitKey, util::Buffer>> ARCHIVED_DATA;
 
@@ -36,6 +83,24 @@ private: // methods
         std::cout << "DBKEY: " << dbkey() << std::endl;
         std::cout << "ARCHIVE: " << key << std::endl;
         ARCHIVED_DATA.emplace_back(std::make_pair(api::SplitKey{key}, util::Buffer{data, length}));
+    }
+
+    api::Handle* retrieve(const core::SplitReferenceKey& key) override {
+        EXPECT(key[0] == dbkey());
+        std::cout << "DBKEY: " << dbkey() << std::endl;
+        std::cout << "RETRIEVE: " << key << std::endl;
+        auto matches_key = [&key](const auto& el){
+            return el.first == key;
+        };
+        auto it = std::find_if(ARCHIVED_DATA.begin(), ARCHIVED_DATA.end(), matches_key);
+        ASSERT(it != ARCHIVED_DATA.end());
+        api::Key key2;
+        for (int level = 0; level < 3; ++level) {
+            for (const auto& elem : key[level]) {
+                key2.set(elem.first, std::string{elem.second});
+            }
+        }
+        return new BufferHandle(key2, it->second);
     }
 
     void print(std::ostream& s) const override {
@@ -111,6 +176,42 @@ CASE("Dasi simple archive") {
     EXPECT(ARCHIVED_DATA[0].first == expected_archive_key);
     EXPECT(ARCHIVED_DATA[0].second.size() == sizeof(test_data)-1);
     EXPECT(::memcmp(ARCHIVED_DATA[0].second.data(), test_data, sizeof(test_data)-1) == 0);
+    ARCHIVED_DATA.clear();
+}
+
+CASE("Dasi simple retrieve") {
+    dasi::api::Dasi dasi(TEST_CONFIG);
+
+    dasi::api::Key key {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b"}},
+        {"key2b", {"value2b"}},
+        {"key3b", {"value3b"}},
+    };
+
+    char test_data[] = "TESTING TESTING";
+    dasi.archive(key, test_data, sizeof(test_data));
+
+    std::unique_ptr<api::Handle> handle(dasi.retrieve(query));
+    char res[sizeof(test_data)];
+    auto len = handle->read(res, sizeof(test_data));
+    EXPECT(len == sizeof(test_data));
+    EXPECT(::memcmp(res, test_data, len) == 0);
     ARCHIVED_DATA.clear();
 }
 

@@ -5,6 +5,7 @@
 
 namespace dasi::api {
 class Config;
+class Handle;
 }
 
 namespace dasi::core {
@@ -24,6 +25,7 @@ public: // methods
     virtual ~DB();
 
     void archive(const SplitReferenceKey& key, const void* data, size_t length);
+    api::Handle* retrieve(const SplitReferenceKey& key);
 
 private: // members
 

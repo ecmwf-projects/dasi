@@ -2,6 +2,7 @@
 #include "dasi/api/Dasi.h"
 
 #include "dasi/core/Archiver.h"
+#include "dasi/core/Retriever.h"
 #include "dasi/util/Exceptions.h"
 
 #include "yaml-cpp/yaml.h"
@@ -33,8 +34,22 @@ core::Archiver& Dasi::archiver() {
     return *archiver_;
 }
 
+core::Retriever& Dasi::retriever() {
+
+    if (!retriever_) {
+
+        long retrieverLRUsize = config_.getLong("retrieveRUsize", 20);
+        retriever_ = std::make_unique<core::Retriever>(config_, schema(), retrieverLRUsize);
+    }
+    return *retriever_;
+}
+
 void Dasi::archive(const Key& key, const void* data, size_t length) {
     archiver().archive(key, data, length);
+}
+
+Handle* Dasi::retrieve(const Query& query) {
+    return retriever().retrieve(query);
 }
 
 
