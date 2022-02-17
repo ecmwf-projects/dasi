@@ -19,6 +19,7 @@ public: // types
 public: // methods
 
     AggregatedHandle(const HandleList& handles);
+    ~AggregatedHandle();
 
     size_t read(void* buf, size_t len, bool stream = false) override;
     const api::Key& currentKey() const override;
