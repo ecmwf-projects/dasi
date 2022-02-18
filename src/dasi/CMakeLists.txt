@@ -37,6 +37,8 @@ ecbuild_add_library(
         core/Catalogue.h
         core/DB.cc
         core/DB.h
+        core/FileReadHandle.cc
+        core/FileReadHandle.h
         core/HandleFactory.cc
         core/HandleFactory.h
         core/KeyT.h

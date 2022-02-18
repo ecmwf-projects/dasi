@@ -24,6 +24,7 @@ public: // methods
 private: // methods
 
     void archive(const core::SplitReferenceKey& key, const void* data, size_t length) override;
+    api::ObjectLocation retrieve(const core::SplitReferenceKey& key) override;
 
     void print(std::ostream& s) const override {
         s << "ShelfCatalogue[root=" << root_ << "]";

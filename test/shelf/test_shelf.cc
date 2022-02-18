@@ -2,11 +2,16 @@
 #include "dasi/util/Test.h"
 
 #include "dasi/api/Dasi.h"
+#include "dasi/api/Query.h"
+#include "dasi/api/ReadHandle.h"
+
+#include "dasi/util/AutoCloser.h"
 
 #include <cstring>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <sstream>
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -91,6 +96,95 @@ CASE("Dasi simple archive") {
     char archived_data[sizeof(test_data) - 1];
     archive.read(archived_data, sizeof(test_data) - 1);
     EXPECT(std::memcmp(archived_data, test_data, sizeof(test_data) - 1) == 0);
+
+    std::filesystem::remove_all(root);
+}
+
+CASE("Dasi simple retrieve") {
+    std::filesystem::path root = test_dir("dasi_test_shelf");
+    std::cout << "data root: " << root << std::endl;
+
+    std::stringstream cfg;
+    cfg << "engine: shelf" << "\n";
+    cfg << "root: " << root << "\n";
+    cfg << TEST_SCHEMA;
+
+    dasi::api::Dasi dasi(cfg);
+
+    dasi::api::Key key {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b"}},
+        {"key2b", {"value2b"}},
+        {"key3b", {"value3b"}},
+    };
+
+    char test_data[] = "TESTING TESTING";
+    dasi.archive(key, test_data, sizeof(test_data));
+
+    dasi::api::RetrieveResult result(dasi.retrieve(query));
+    std::unique_ptr<dasi::api::ReadHandle> handle(result.toHandle());
+    char res[sizeof(test_data)];
+    handle->open();
+    dasi::util::AutoCloser closer(*handle);
+    auto len = handle->read(res, sizeof(test_data));
+    EXPECT(len == sizeof(test_data));
+    EXPECT(::memcmp(res, test_data, len) == 0);
+
+    std::filesystem::remove_all(root);
+}
+
+CASE("Dasi retrieve with no data matched") {
+    std::filesystem::path root = test_dir("dasi_test_shelf");
+    std::cout << "data root: " << root << std::endl;
+
+    std::stringstream cfg;
+    cfg << "engine: shelf" << "\n";
+    cfg << "root: " << root << "\n";
+    cfg << TEST_SCHEMA;
+
+    dasi::api::Dasi dasi(cfg);
+
+    dasi::api::Key key {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b"}},
+        {"key2b", {"value2b"}},
+        {"key3b", {"absent"}},
+    };
+
+    char test_data[] = "TESTING TESTING";
+    dasi.archive(key, test_data, sizeof(test_data));
+
+    EXPECT_THROWS_AS(dasi.retrieve(query), dasi::util::ObjectNotFound);
 
     std::filesystem::remove_all(root);
 }

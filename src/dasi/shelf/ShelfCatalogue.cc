@@ -3,6 +3,7 @@
 
 #include "dasi/api/Config.h"
 
+#include "dasi/core/FileReadHandle.h"
 #include "dasi/core/SplitReferenceKey.h"
 
 #include <cctype>
@@ -39,6 +40,17 @@ void ShelfCatalogue::archive(const core::SplitReferenceKey& key, const void* dat
     std::filesystem::create_directories(path.parent_path());
     std::ofstream fout(path, std::ios::out | std::ios::binary);
     fout.write(reinterpret_cast<const char*>(data), length);
+}
+
+api::ObjectLocation ShelfCatalogue::retrieve(const core::SplitReferenceKey& key) {
+    ASSERT(key[0] == dbkey());
+    auto path = buildPath(key);
+    if (!std::filesystem::exists(path)) {
+        std::ostringstream oss;
+        oss << key;
+        throw util::ObjectNotFound(oss.str(), Here());
+    }
+    return core::FileHandleBuilder::toLocation(path);
 }
 
 
