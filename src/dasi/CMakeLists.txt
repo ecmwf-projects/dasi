@@ -76,3 +76,15 @@ ecbuild_add_executable(
     SOURCES main.cc
     LIBS dasi
 )
+
+ecbuild_add_executable(
+    TARGET dasi-put
+    SOURCES tools/dasi_put.cc
+    LIBS dasi
+)
+
+ecbuild_add_executable(
+    TARGET dasi-get
+    SOURCES tools/dasi_get.cc
+    LIBS dasi
+)
