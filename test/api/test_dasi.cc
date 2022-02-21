@@ -139,6 +139,8 @@ schema:
 
 
 CASE("Dasi simple archive") {
+    ARCHIVED_DATA.clear();
+
     dasi::api::Dasi dasi(TEST_CONFIG);
 
     dasi::api::Key key {
@@ -176,10 +178,11 @@ CASE("Dasi simple archive") {
     EXPECT(ARCHIVED_DATA[0].first == expected_archive_key);
     EXPECT(ARCHIVED_DATA[0].second.size() == sizeof(test_data)-1);
     EXPECT(::memcmp(ARCHIVED_DATA[0].second.data(), test_data, sizeof(test_data)-1) == 0);
-    ARCHIVED_DATA.clear();
 }
 
 CASE("Dasi simple retrieve") {
+    ARCHIVED_DATA.clear();
+
     dasi::api::Dasi dasi(TEST_CONFIG);
 
     dasi::api::Key key {
@@ -212,10 +215,10 @@ CASE("Dasi simple retrieve") {
     auto len = handle->read(res, sizeof(test_data));
     EXPECT(len == sizeof(test_data));
     EXPECT(::memcmp(res, test_data, len) == 0);
-    ARCHIVED_DATA.clear();
 }
 
 CASE("Dasi archive with invalid key") {
+    ARCHIVED_DATA.clear();
 
     dasi::api::Dasi dasi(TEST_CONFIG);
 

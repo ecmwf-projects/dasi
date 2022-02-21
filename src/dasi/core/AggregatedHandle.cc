@@ -21,22 +21,22 @@ size_t AggregatedHandle::read(void* buf, size_t len, bool stream) {
         return 0;
     }
 
-    size_t read = 0;
+    size_t nread = 0;
     auto cur = static_cast<char*>(buf);
     
     do {
-        size_t chunk = (*current_)->read(static_cast<void*>(cur), len - read, stream);
+        size_t chunk = (*current_)->read(static_cast<void*>(cur), len - nread, stream);
         cur += chunk;
-        read += chunk;
+        nread += chunk;
 
-        if (stream && read < len) {
+        if (stream && nread < len) {
             if (!next()) {
-                return read;
+                return nread;
             }
         }
-    } while (stream && read < len);
+    } while (stream && nread < len);
 
-    return read;
+    return nread;
 }
 
 const api::Key& AggregatedHandle::currentKey() const {
