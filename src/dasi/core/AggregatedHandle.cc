@@ -7,8 +7,8 @@
 
 namespace dasi::core {
 
-AggregatedHandle::AggregatedHandle(const HandleList& handles) :
-    handles_(handles),
+AggregatedHandle::AggregatedHandle(const std::vector<Handle*>& handles) :
+    handles_(handles.begin(), handles.end()),
     current_(handles_.begin()) {}
 
 AggregatedHandle::~AggregatedHandle() {
@@ -52,7 +52,6 @@ bool AggregatedHandle::next() {
 void AggregatedHandle::close() {
     for (auto& h : handles_) {
         h->close();
-        delete h;
     }
 
     handles_.clear();
