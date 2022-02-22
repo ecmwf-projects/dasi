@@ -28,8 +28,8 @@ core::Archiver& Dasi::archiver() {
 
     if (!archiver_) {
 
-        long archiverLRUSize = config_.getLong("archiveLRUSize", 20);
-        archiver_ = std::make_unique<core::Archiver>(config_, schema(), archiverLRUSize);
+        long archiveLRUSize = config_.getLong("archiveLRUSize", 20);
+        archiver_ = std::make_unique<core::Archiver>(config_, schema(), archiveLRUSize);
     }
     return *archiver_;
 }
@@ -38,8 +38,8 @@ core::Retriever& Dasi::retriever() {
 
     if (!retriever_) {
 
-        long retrieverLRUSize = config_.getLong("retrieveLRUSize", 20);
-        retriever_ = std::make_unique<core::Retriever>(config_, schema(), retrieverLRUSize);
+        long retrieveLRUSize = config_.getLong("retrieveLRUSize", 20);
+        retriever_ = std::make_unique<core::Retriever>(config_, schema(), retrieveLRUSize);
     }
     return *retriever_;
 }
