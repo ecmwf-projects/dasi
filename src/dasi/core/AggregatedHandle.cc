@@ -3,6 +3,7 @@
 
 #include "dasi/util/Exceptions.h"
 
+#include <iostream>
 #include <ostream>
 
 namespace dasi::core {
@@ -12,7 +13,9 @@ AggregatedHandle::AggregatedHandle(const std::vector<Handle*>& handles) :
     current_(handles_.begin()) {}
 
 AggregatedHandle::~AggregatedHandle() {
-    close();
+    if (!handles_.empty()) {
+        std::cerr << "ERROR: " << *this << " has not been closed" << std::endl;
+    }
 }
 
 size_t AggregatedHandle::read(void* buf, size_t len, bool stream) {
