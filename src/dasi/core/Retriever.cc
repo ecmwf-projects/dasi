@@ -10,25 +10,52 @@ namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 
+class HandleAggregator {
+
+public: // methods
+
+    ~HandleAggregator() {
+        for(auto handle : handles_) {
+            delete handle;
+        }
+    }
+
+    void append(api::Handle* handle) {
+        handles_.push_back(handle);
+    }
+
+    api::Handle* toHandle() {
+        auto handle = new AggregatedHandle(handles_);
+        handles_.clear();
+        return handle;
+    }
+
+private: // members
+
+    std::vector<api::Handle*> handles_;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
 class RetrieveVisitor {
 
 public: // methods
 
-    RetrieveVisitor(Retriever& parent, std::vector<api::Handle*>& handles) :
+    RetrieveVisitor(Retriever& parent, HandleAggregator& agg) :
         parent_(parent),
-        handles_(handles) {}
+        agg_(agg) {}
 
     void thirdLevel(SplitReferenceKey& key) {
         std::cout << "Third level in retrieve!!!" << std::endl;
         DB& db = parent_.database(key[0]);
         auto result = db.retrieve(key);
-        handles_.push_back(result);
+        agg_.append(result);
     }
 
 private: // members
 
     Retriever& parent_;
-    std::vector<api::Handle*>& handles_;
+    HandleAggregator& agg_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -39,10 +66,10 @@ Retriever::Retriever(const Config& config, const Schema& schema, int lruSize) :
     databases_(lruSize) {}
 
 api::Handle* Retriever::retrieve(const api::Query& query) {
-    std::vector<api::Handle*> handles;
-    RetrieveVisitor visitor(*this, handles);
+    HandleAggregator agg;
+    RetrieveVisitor visitor(*this, agg);
     schema_.walk(query, visitor);
-    return new AggregatedHandle(handles);
+    return agg.toHandle();
 }
 
 DB& Retriever::database(const OrderedReferenceKey& dbkey) {
