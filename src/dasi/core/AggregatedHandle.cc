@@ -46,7 +46,15 @@ const api::Key& AggregatedHandle::currentKey() const {
 
 bool AggregatedHandle::next() {
     ++current_;
-    return current_ != handles_.end();
+    bool moreData = current_ != handles_.end();
+    if (moreData) {
+        open();
+    }
+    return moreData;
+}
+
+void AggregatedHandle::open() {
+    (*current_)->open();
 }
 
 void AggregatedHandle::close() {

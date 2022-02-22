@@ -21,6 +21,7 @@ public: // methods
     virtual const Key& currentKey() const = 0;
     virtual bool next() { return false; }
 
+    virtual void open() = 0;
     virtual void close() = 0;
 
 private: // methods

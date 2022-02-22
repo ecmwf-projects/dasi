@@ -27,6 +27,7 @@ public: // methods
     const api::Key& currentKey() const override;
     bool next() override;
 
+    void open() override;
     void close() override;
 
 private: // methods

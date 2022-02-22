@@ -48,6 +48,7 @@ public: // methods
         return key_;
     }
 
+    void open() override {}
     void close() override {}
 
 private: // methods
@@ -212,6 +213,7 @@ CASE("Dasi simple retrieve") {
 
     std::unique_ptr<api::Handle> handle(dasi.retrieve(query));
     char res[sizeof(test_data)];
+    handle->open();
     auto len = handle->read(res, sizeof(test_data));
     EXPECT(len == sizeof(test_data));
     EXPECT(::memcmp(res, test_data, len) == 0);
