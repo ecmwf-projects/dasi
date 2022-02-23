@@ -18,7 +18,6 @@ public: // methods
     virtual ~Handle() {}
 
     virtual size_t read(void* buf, size_t len, bool stream = false) = 0;
-    virtual const Key& currentKey() const = 0;
     virtual bool next() { return false; }
 
     virtual void open() = 0;

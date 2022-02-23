@@ -23,8 +23,7 @@ class BufferHandle : public dasi::api::Handle {
 
 public: // methods
 
-    BufferHandle(const api::Key& key, const util::Buffer& buffer) :
-        key_(key),
+    BufferHandle(const util::Buffer& buffer) :
         buffer_(buffer),
         pos_(0) {}
 
@@ -44,10 +43,6 @@ public: // methods
         return toread;
     }
 
-    const api::Key& currentKey() const override {
-        return key_;
-    }
-
     void open() override {}
     void close() override {}
 
@@ -59,7 +54,6 @@ private: // methods
 
 private: // members
 
-    const api::Key key_;
     const util::Buffer& buffer_;
     size_t pos_;
 
@@ -95,13 +89,7 @@ private: // methods
         };
         auto it = std::find_if(ARCHIVED_DATA.begin(), ARCHIVED_DATA.end(), matches_key);
         ASSERT(it != ARCHIVED_DATA.end());
-        api::Key key2;
-        for (int level = 0; level < 3; ++level) {
-            for (const auto& elem : key[level]) {
-                key2.set(elem.first, std::string{elem.second});
-            }
-        }
-        return new BufferHandle(key2, it->second);
+        return new BufferHandle(it->second);
     }
 
     void print(std::ostream& s) const override {

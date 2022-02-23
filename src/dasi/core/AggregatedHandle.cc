@@ -42,11 +42,6 @@ size_t AggregatedHandle::read(void* buf, size_t len, bool stream) {
     return nread;
 }
 
-const api::Key& AggregatedHandle::currentKey() const {
-    ASSERT(current_ != handles_.end());
-    return (*current_)->currentKey();
-}
-
 bool AggregatedHandle::next() {
     ++current_;
     bool moreData = current_ != handles_.end();

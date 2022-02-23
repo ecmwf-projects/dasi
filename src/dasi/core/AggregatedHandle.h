@@ -24,7 +24,6 @@ public: // methods
     ~AggregatedHandle();
 
     size_t read(void* buf, size_t len, bool stream = false) override;
-    const api::Key& currentKey() const override;
     bool next() override;
 
     void open() override;
