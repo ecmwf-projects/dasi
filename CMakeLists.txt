@@ -24,6 +24,6 @@ ecbuild_bundle_initialize()
 ecbuild_bundle( PROJECT eccodes      GIT "ssh://git@git.ecmwf.int/eccodes/eccodes"   BRANCH master UPDATE)
 ecbuild_bundle( PROJECT eckit        GIT "ssh://git@git.ecmwf.int/ecsdk/eckit"       BRANCH master UPDATE)
 ecbuild_bundle( PROJECT metkit       GIT "ssh://git@git.ecmwf.int/ecsdk/metkit"      BRANCH master UPDATE)
-ecbuild_bundle( PROJECT fdb5         GIT "ssh://git@git.ecmwf.int/mars/fdb5"         BRANCH hotfix/5.10.3 UPDATE)
+ecbuild_bundle( PROJECT fdb5         GIT "ssh://git@git.ecmwf.int/mars/fdb5"         BRANCH master UPDATE)
 
 ecbuild_bundle_finalize()
