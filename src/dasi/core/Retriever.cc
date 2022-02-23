@@ -1,5 +1,5 @@
 
-#include "dasi/api/Handle.h"
+#include "dasi/api/ReadHandle.h"
 #include "dasi/api/Query.h"
 #include "dasi/api/Result.h"
 
@@ -21,7 +21,7 @@ public: // methods
         }
     }
 
-    void append(const api::Key& key, api::Handle* handle) {
+    void append(const api::Key& key, api::ReadHandle* handle) {
         keys_.push_back(key);
         handles_.push_back(handle);
     }
@@ -33,7 +33,7 @@ public: // methods
 private: // members
 
     std::vector<api::Key> keys_;
-    std::vector<api::Handle*> handles_;
+    std::vector<api::ReadHandle*> handles_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

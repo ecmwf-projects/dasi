@@ -13,7 +13,7 @@
 
 namespace dasi::api {
 class Config;
-class Handle;
+class ReadHandle;
 }
 
 namespace dasi::core {
@@ -36,7 +36,7 @@ public: // methods
     const api::Config& config() const { return config_; }
 
     virtual void archive(const SplitReferenceKey& key, const void* data, size_t length) { NOTIMP; }
-    virtual api::Handle* retrieve(const SplitReferenceKey& key) { NOTIMP; }
+    virtual api::ReadHandle* retrieve(const SplitReferenceKey& key) { NOTIMP; }
 
 private: // members
 

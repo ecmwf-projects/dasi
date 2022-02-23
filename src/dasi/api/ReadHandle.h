@@ -11,11 +11,11 @@ namespace dasi::api {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class Handle {
+class ReadHandle {
 
 public: // methods
 
-    virtual ~Handle() {}
+    virtual ~ReadHandle() {}
 
     virtual size_t read(void* buf, size_t len) = 0;
     virtual bool next() { return false; }
@@ -29,7 +29,7 @@ private: // methods
 
 public: // friends
 
-    friend std::ostream& operator<<(std::ostream& s, const Handle& handle) {
+    friend std::ostream& operator<<(std::ostream& s, const ReadHandle& handle) {
         handle.print(s);
         return s;
     }

@@ -1,7 +1,7 @@
 
 #include "dasi/api/Result.h"
 
-#include "dasi/core/AggregatedHandle.h"
+#include "dasi/core/AggregatedReadHandle.h"
 
 namespace dasi::api {
 
@@ -16,8 +16,8 @@ Result::~Result() {
     }
 }
 
-Handle* Result::toHandle() {
-    auto handle = new dasi::core::AggregatedHandle(values_);
+ReadHandle* Result::toHandle() {
+    auto handle = new dasi::core::AggregatedReadHandle(values_);
     values_.clear();
     return handle;
 }

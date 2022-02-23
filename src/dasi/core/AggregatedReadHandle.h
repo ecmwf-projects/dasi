@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "dasi/api/Handle.h"
+#include "dasi/api/ReadHandle.h"
 
 #include <memory>
 #include <vector>
@@ -11,17 +11,17 @@ namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class AggregatedHandle : public api::Handle {
+class AggregatedReadHandle : public api::ReadHandle {
 
 private: // types
 
-    using Item = std::unique_ptr<Handle>;
+    using Item = std::unique_ptr<ReadHandle>;
     using HandleList = std::vector<Item>;
 
 public: // methods
 
-    AggregatedHandle(const std::vector<Handle*>& handles);
-    ~AggregatedHandle();
+    AggregatedReadHandle(const std::vector<ReadHandle*>& handles);
+    ~AggregatedReadHandle();
 
     size_t read(void* buf, size_t len) override;
     bool next() override;

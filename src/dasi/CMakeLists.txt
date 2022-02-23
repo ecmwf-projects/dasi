@@ -23,14 +23,14 @@ ecbuild_add_library(
         api/Config.h
         api/Config.cc
         api/SplitKey.h
-        api/Handle.h
+        api/ReadHandle.h
         api/Result.cc
         api/Result.h
 
         core/Archiver.cc
         core/Archiver.h
-        core/AggregatedHandle.cc
-        core/AggregatedHandle.h
+        core/AggregatedReadHandle.cc
+        core/AggregatedReadHandle.h
         core/Catalogue.cc
         core/Catalogue.h
         core/DB.cc

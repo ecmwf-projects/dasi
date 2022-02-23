@@ -2,7 +2,7 @@
 #include "dasi/util/Test.h"
 
 #include "dasi/api/Dasi.h"
-#include "dasi/api/Handle.h"
+#include "dasi/api/ReadHandle.h"
 #include "dasi/api/Query.h"
 #include "dasi/api/SplitKey.h"
 
@@ -19,11 +19,11 @@ namespace {
 
 using namespace dasi;
 
-class BufferHandle : public dasi::api::Handle {
+class BufferReadHandle : public dasi::api::ReadHandle {
 
 public: // methods
 
-    BufferHandle(const util::Buffer& buffer) :
+    BufferReadHandle(const util::Buffer& buffer) :
         buffer_(buffer),
         pos_(0) {}
 
@@ -49,7 +49,7 @@ public: // methods
 private: // methods
 
     void print(std::ostream& s) const override {
-        s << "BufferHandle";
+        s << "BufferReadHandle";
     }
 
 private: // members
@@ -80,7 +80,7 @@ private: // methods
         ARCHIVED_DATA.emplace_back(std::make_pair(api::SplitKey{key}, util::Buffer{data, length}));
     }
 
-    api::Handle* retrieve(const core::SplitReferenceKey& key) override {
+    api::ReadHandle* retrieve(const core::SplitReferenceKey& key) override {
         EXPECT(key[0] == dbkey());
         std::cout << "DBKEY: " << dbkey() << std::endl;
         std::cout << "RETRIEVE: " << key << std::endl;
@@ -89,7 +89,7 @@ private: // methods
         };
         auto it = std::find_if(ARCHIVED_DATA.begin(), ARCHIVED_DATA.end(), matches_key);
         ASSERT(it != ARCHIVED_DATA.end());
-        return new BufferHandle(it->second);
+        return new BufferReadHandle(it->second);
     }
 
     void print(std::ostream& s) const override {
@@ -200,7 +200,7 @@ CASE("Dasi simple retrieve") {
     dasi.archive(key, test_data, sizeof(test_data));
 
     api::Result result(dasi.retrieve(query));
-    std::unique_ptr<api::Handle> handle(result.toHandle());
+    std::unique_ptr<api::ReadHandle> handle(result.toHandle());
     char res[sizeof(test_data)];
     handle->open();
     dasi::api::AutoCloser closer(*handle);

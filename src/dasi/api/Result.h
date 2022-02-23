@@ -8,7 +8,7 @@
 
 namespace dasi::api {
 
-class Handle;
+class ReadHandle;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ class Result {
 
 public: // types
 
-    using item_type = Handle*;
+    using item_type = ReadHandle*;
     class const_iterator;
 
 public: // methods
@@ -28,7 +28,7 @@ public: // methods
     const_iterator end() const { return const_iterator{keys_.end(), values_.end()}; }
 
     const std::vector<Key>& keys() const { return keys_; }
-    Handle* toHandle();
+    ReadHandle* toHandle();
 
 private: // members
 
