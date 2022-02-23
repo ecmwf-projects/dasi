@@ -1,0 +1,17 @@
+.vscode
+*-local-config.cmake
+*.txt.user
+*workspace
+CMakeLists.txt.user
+ecbuild
+eccodes
+eckit
+odc
+metkit
+dhskit
+fdb5
+pmem
+mars-server
+mars-hpss
+mars-adsm
+.idea
