@@ -23,7 +23,7 @@ public: // methods
     AggregatedHandle(const std::vector<Handle*>& handles);
     ~AggregatedHandle();
 
-    size_t read(void* buf, size_t len, bool stream = false) override;
+    size_t read(void* buf, size_t len) override;
     bool next() override;
 
     void open() override;

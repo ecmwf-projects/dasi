@@ -27,7 +27,7 @@ public: // methods
         buffer_(buffer),
         pos_(0) {}
 
-    size_t read(void* buf, size_t len, bool stream = false) override {
+    size_t read(void* buf, size_t len) override {
         if (pos_ >= buffer_.size()) {
             return 0;
         }

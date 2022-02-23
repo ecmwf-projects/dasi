@@ -18,7 +18,7 @@ AggregatedHandle::~AggregatedHandle() {
     }
 }
 
-size_t AggregatedHandle::read(void* buf, size_t len, bool stream) {
+size_t AggregatedHandle::read(void* buf, size_t len) {
 
     if (current_ == handles_.end()) {
         return 0;
@@ -28,16 +28,16 @@ size_t AggregatedHandle::read(void* buf, size_t len, bool stream) {
     auto cur = static_cast<char*>(buf);
     
     do {
-        size_t chunk = (*current_)->read(static_cast<void*>(cur), len - nread, stream);
+        size_t chunk = (*current_)->read(static_cast<void*>(cur), len - nread);
         cur += chunk;
         nread += chunk;
 
-        if (stream && nread < len) {
+        if (nread < len) {
             if (!next()) {
                 return nread;
             }
         }
-    } while (stream && nread < len);
+    } while (nread < len);
 
     return nread;
 }
