@@ -24,6 +24,8 @@ ecbuild_add_library(
         api/Config.cc
         api/SplitKey.h
         api/Handle.h
+        api/Result.cc
+        api/Result.h
 
         core/Archiver.cc
         core/Archiver.h

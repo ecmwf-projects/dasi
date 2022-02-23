@@ -4,6 +4,7 @@
 #include "dasi/api/Key.h"
 #include "dasi/api/Config.h"
 #include "dasi/api/Query.h"
+#include "dasi/api/Result.h"
 
 #include <iosfwd>
 #include <memory>
@@ -20,8 +21,6 @@ class Schema;
 
 namespace dasi::api {
 
-class Handle;
-
 //----------------------------------------------------------------------------------------------------------------------
 
 class Dasi {
@@ -33,7 +32,7 @@ public: // methods
     ~Dasi();
 
     void archive(const Key& key, const void* data, size_t length);
-    Handle* retrieve(const Query& query);
+    Result retrieve(const Query& query);
 
 private: // methods
 

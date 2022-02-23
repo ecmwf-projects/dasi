@@ -211,7 +211,8 @@ CASE("Dasi simple retrieve") {
     char test_data[] = "TESTING TESTING";
     dasi.archive(key, test_data, sizeof(test_data));
 
-    std::unique_ptr<api::Handle> handle(dasi.retrieve(query));
+    api::Result result(dasi.retrieve(query));
+    std::unique_ptr<api::Handle> handle(result.toHandle());
     char res[sizeof(test_data)];
     handle->open();
     dasi::api::AutoCloser closer(*handle);

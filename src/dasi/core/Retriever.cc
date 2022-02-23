@@ -1,8 +1,9 @@
 
+#include "dasi/api/Handle.h"
 #include "dasi/api/Query.h"
+#include "dasi/api/Result.h"
 
 #include "dasi/core/Retriever.h"
-#include "dasi/core/AggregatedHandle.h"
 
 using dasi::api::Config;
 
@@ -10,28 +11,28 @@ namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class HandleAggregator {
+class ResultAggregator {
 
 public: // methods
 
-    ~HandleAggregator() {
+    ~ResultAggregator() {
         for(auto handle : handles_) {
             delete handle;
         }
     }
 
-    void append(api::Handle* handle) {
+    void append(const api::Key& key, api::Handle* handle) {
+        keys_.push_back(key);
         handles_.push_back(handle);
     }
 
-    api::Handle* toHandle() {
-        auto handle = new AggregatedHandle(handles_);
-        handles_.clear();
-        return handle;
+    api::Result toResult() {
+        return api::Result{std::move(keys_), std::move(handles_)};
     }
 
 private: // members
 
+    std::vector<api::Key> keys_;
     std::vector<api::Handle*> handles_;
 };
 
@@ -41,7 +42,7 @@ class RetrieveVisitor {
 
 public: // methods
 
-    RetrieveVisitor(Retriever& parent, HandleAggregator& agg) :
+    RetrieveVisitor(Retriever& parent, ResultAggregator& agg) :
         parent_(parent),
         agg_(agg) {}
 
@@ -49,13 +50,19 @@ public: // methods
         std::cout << "Third level in retrieve!!!" << std::endl;
         DB& db = parent_.database(key[0]);
         auto result = db.retrieve(key);
-        agg_.append(result);
+        api::Key key2;
+        for (int level = 0; level < 3; ++level) {
+            for (const auto& elem : key[level]) {
+                key2.set(elem.first, std::string{elem.second});
+            }
+        }
+        agg_.append(key2, result);
     }
 
 private: // members
 
     Retriever& parent_;
-    HandleAggregator& agg_;
+    ResultAggregator& agg_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -65,11 +72,11 @@ Retriever::Retriever(const Config& config, const Schema& schema, int lruSize) :
     schema_(schema),
     databases_(lruSize) {}
 
-api::Handle* Retriever::retrieve(const api::Query& query) {
-    HandleAggregator agg;
+api::Result Retriever::retrieve(const api::Query& query) {
+    ResultAggregator agg;
     RetrieveVisitor visitor(*this, agg);
     schema_.walk(query, visitor);
-    return agg.toHandle();
+    return agg.toResult();
 }
 
 DB& Retriever::database(const OrderedReferenceKey& dbkey) {
