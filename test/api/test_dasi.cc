@@ -12,6 +12,11 @@
 #include "dasi/util/Buffer.h"
 
 #include <cstring>
+#include <iomanip>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -88,7 +93,11 @@ private: // methods
             return el.first == key;
         };
         auto it = std::find_if(ARCHIVED_DATA.begin(), ARCHIVED_DATA.end(), matches_key);
-        ASSERT(it != ARCHIVED_DATA.end());
+        if (it == ARCHIVED_DATA.end()) {
+            std::ostringstream oss;
+            oss << key;
+            throw dasi::util::ObjectNotFound(oss.str(), Here());
+        }
         return new BufferReadHandle(it->second);
     }
 
@@ -169,46 +178,6 @@ CASE("Dasi simple archive") {
     EXPECT(::memcmp(ARCHIVED_DATA[0].second.data(), test_data, sizeof(test_data)-1) == 0);
 }
 
-CASE("Dasi simple retrieve") {
-    ARCHIVED_DATA.clear();
-
-    dasi::api::Dasi dasi(TEST_CONFIG);
-
-    dasi::api::Key key {
-        {"key1", "value1"},
-        {"key2", "value2"},
-        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
-        {"key1a", "value1a"},
-        {"key2a", "value2a"},
-        {"key1b", "value1b"},
-        {"key2b", "value2b"},
-        {"key3b", "value3b"},
-    };
-
-    dasi::api::Query query {
-        {"key1", {"value1"}},
-        {"key2", {"value2"}},
-        {"key3", {"value3"}},
-        {"key1a", {"value1a"}},
-        {"key2a", {"value2a"}},
-        {"key1b", {"value1b"}},
-        {"key2b", {"value2b"}},
-        {"key3b", {"value3b"}},
-    };
-
-    char test_data[] = "TESTING TESTING";
-    dasi.archive(key, test_data, sizeof(test_data));
-
-    api::Result result(dasi.retrieve(query));
-    std::unique_ptr<api::ReadHandle> handle(result.toHandle());
-    char res[sizeof(test_data)];
-    handle->open();
-    dasi::api::AutoCloser closer(*handle);
-    auto len = handle->read(res, sizeof(test_data));
-    EXPECT(len == sizeof(test_data));
-    EXPECT(::memcmp(res, test_data, len) == 0);
-}
-
 CASE("Dasi archive with invalid key") {
     ARCHIVED_DATA.clear();
 
@@ -250,6 +219,235 @@ CASE("Dasi archive with invalid key") {
     for (const auto& key : {key1, key2, key3}) {
         EXPECT_THROWS_AS(dasi.archive(key, test_data, sizeof(test_data)-1), util::SeriousBug);
     }
+}
+
+CASE("Dasi simple retrieve") {
+    ARCHIVED_DATA.clear();
+
+    dasi::api::Dasi dasi(TEST_CONFIG);
+
+    dasi::api::Key key {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b"}},
+        {"key2b", {"value2b"}},
+        {"key3b", {"value3b"}},
+    };
+
+    char test_data[] = "TESTING TESTING";
+    dasi.archive(key, test_data, sizeof(test_data));
+
+    char extra_data[] = "NEW DATA";
+    key.set("key3b", "new3b");
+    dasi.archive(key, extra_data, sizeof(extra_data));
+
+    api::Result result(dasi.retrieve(query));
+    std::unique_ptr<api::ReadHandle> handle(result.toHandle());
+    char res[sizeof(test_data)];
+    handle->open();
+    dasi::api::AutoCloser closer(*handle);
+    auto len = handle->read(res, sizeof(test_data));
+    EXPECT(len == sizeof(test_data));
+    EXPECT(::memcmp(res, test_data, len) == 0);
+}
+
+CASE("Dasi retrieve multiple objects") {
+    ARCHIVED_DATA.clear();
+
+    dasi::api::Dasi dasi(TEST_CONFIG);
+
+    dasi::api::Key key {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b"}},
+        {"key2b", {"value2b"}},
+        {"key3b", {"value3b", "new3b"}},
+    };
+
+    char test_data[] = "TESTING TESTING";
+    dasi.archive(key, test_data, sizeof(test_data));
+
+    char extra_data[] = "NEW DATA";
+    key.set("key3b", "new3b");
+    dasi.archive(key, extra_data, sizeof(extra_data));
+
+    api::Result result(dasi.retrieve(query));
+    std::unique_ptr<api::ReadHandle> handle(result.toHandle());
+    handle->open();
+    dasi::api::AutoCloser closer(*handle);
+
+    char res[sizeof(test_data)];
+    auto len = handle->read(res, sizeof(test_data));
+    EXPECT(len == sizeof(test_data));
+    EXPECT(::memcmp(res, test_data, len) == 0);
+
+    char res2[sizeof(extra_data)];
+    auto len2 = handle->read(res2, sizeof(extra_data));
+    EXPECT(len2 == sizeof(extra_data));
+    EXPECT(::memcmp(res2, extra_data, len2) == 0);
+}
+
+CASE("Dasi retrieve with iterator") {
+    ARCHIVED_DATA.clear();
+
+    dasi::api::Dasi dasi(TEST_CONFIG);
+
+    dasi::api::Key kbase {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    size_t num_keys = 5;
+    std::vector<std::string> vals;
+    std::map<std::string, std::pair<dasi::api::Key, std::string>> expected;
+    vals.reserve(num_keys);
+    const char templ[] = "TEST ";
+    size_t data_len = sizeof(templ) - 1 + 2;
+    for (size_t i = 0; i < num_keys; ++i) {
+        dasi::api::Key key(kbase);
+        std::string kv = std::to_string(i);
+        key.set("key2b", kv);
+        std::ostringstream oss;
+        oss << templ << std::setw(2) << std::setfill('0') << i;
+        dasi.archive(key, oss.str().c_str(), data_len);
+        if (i % 2 == 0) {
+            vals.push_back(kv);
+            expected.emplace(kv, std::make_pair(key, oss.str()));
+        }
+    }
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b"}},
+        {"key2b", vals},
+        {"key3b", {"value3b"}},
+    };
+
+    api::Result result(dasi.retrieve(query));
+
+    for (auto [key, handle] : result) {
+        auto kv = key.get("key2b");
+        auto it = expected.find(kv);
+        EXPECT(it != expected.end());
+        auto [ekey, edata] = it->second;
+
+        EXPECT(ekey == key);
+
+        handle->open();
+        dasi::api::AutoCloser closer(*handle);
+        char res[data_len];
+        auto len = handle->read(res, data_len);
+        EXPECT(len == data_len);
+        EXPECT(::memcmp(res, edata.c_str(), len) == 0);
+
+        expected.erase(it);
+    }
+
+    EXPECT(expected.empty());
+}
+
+CASE("Dasi retrieve with no data matched") {
+    ARCHIVED_DATA.clear();
+
+    dasi::api::Dasi dasi(TEST_CONFIG);
+
+    dasi::api::Key key {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b"}},
+        {"key2b", {"value2b"}},
+        {"key3b", {"absent"}},
+    };
+
+    char test_data[] = "TESTING TESTING";
+    dasi.archive(key, test_data, sizeof(test_data));
+
+    EXPECT_THROWS_AS(dasi.retrieve(query), dasi::util::ObjectNotFound);
+}
+
+CASE("Dasi retrieve with partial data") {
+    ARCHIVED_DATA.clear();
+
+    dasi::api::Dasi dasi(TEST_CONFIG);
+
+    dasi::api::Key key {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b", "absent"}},
+        {"key2b", {"value2b"}},
+        {"key3b", {"value3b"}},
+    };
+
+    char test_data[] = "TESTING TESTING";
+    dasi.archive(key, test_data, sizeof(test_data));
+
+    EXPECT_THROWS_AS(dasi.retrieve(query), dasi::util::ObjectNotFound);
 }
 
 

@@ -109,6 +109,10 @@ struct InvalidConfiguration : public UserError {
     InvalidConfiguration(const std::string_view& msg, const CodeLocation& loc);
 };
 
+struct ObjectNotFound : public UserError {
+    ObjectNotFound(const std::string_view& msg, const CodeLocation& loc);
+};
+
 //----------------------------------------------------------------------------------------------------------------------
 
 inline void Assert(int code, const std::string& msg, const char* file, int line, const char* func) {
