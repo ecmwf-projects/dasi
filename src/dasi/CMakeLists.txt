@@ -45,6 +45,7 @@ ecbuild_add_library(
         core/SplitKeyT.h
         core/SplitReferenceKey.h
 
+        util/AutoCloser.h
         util/Buffer.cc
         util/Buffer.h
         util/CartesianProduct.h

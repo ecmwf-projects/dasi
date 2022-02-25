@@ -9,6 +9,7 @@
 #include "dasi/core/Catalogue.h"
 #include "dasi/core/SplitReferenceKey.h"
 
+#include "dasi/util/AutoCloser.h"
 #include "dasi/util/Buffer.h"
 
 #include <cstring>
@@ -259,7 +260,7 @@ CASE("Dasi simple retrieve") {
     std::unique_ptr<api::ReadHandle> handle(result.toHandle());
     char res[sizeof(test_data)];
     handle->open();
-    dasi::api::AutoCloser closer(*handle);
+    dasi::util::AutoCloser closer(*handle);
     auto len = handle->read(res, sizeof(test_data));
     EXPECT(len == sizeof(test_data));
     EXPECT(::memcmp(res, test_data, len) == 0);
@@ -302,7 +303,7 @@ CASE("Dasi retrieve multiple objects") {
     api::RetrieveResult result(dasi.retrieve(query));
     std::unique_ptr<api::ReadHandle> handle(result.toHandle());
     handle->open();
-    dasi::api::AutoCloser closer(*handle);
+    dasi::util::AutoCloser closer(*handle);
 
     char res[sizeof(test_data)];
     auto len = handle->read(res, sizeof(test_data));
@@ -372,7 +373,7 @@ CASE("Dasi retrieve with iterator") {
         EXPECT(ekey == key);
 
         handle->open();
-        dasi::api::AutoCloser closer(*handle);
+        dasi::util::AutoCloser closer(*handle);
         char res[data_len];
         auto len = handle->read(res, data_len);
         EXPECT(len == data_len);
