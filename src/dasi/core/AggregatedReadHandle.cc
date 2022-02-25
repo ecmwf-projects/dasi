@@ -33,22 +33,15 @@ size_t AggregatedReadHandle::read(void* buf, size_t len) {
         nread += chunk;
 
         if (nread < len) {
-            if (!next()) {
+            ++current_;
+            if (current_ == handles_.end()) {
                 return nread;
             }
+            open();
         }
     } while (nread < len);
 
     return nread;
-}
-
-bool AggregatedReadHandle::next() {
-    ++current_;
-    bool moreData = current_ != handles_.end();
-    if (moreData) {
-        open();
-    }
-    return moreData;
 }
 
 void AggregatedReadHandle::open() {

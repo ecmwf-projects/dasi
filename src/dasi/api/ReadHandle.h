@@ -18,7 +18,6 @@ public: // methods
     virtual ~ReadHandle() {}
 
     virtual size_t read(void* buf, size_t len) = 0;
-    virtual bool next() { return false; }
 
     virtual void open() = 0;
     virtual void close() = 0;

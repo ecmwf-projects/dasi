@@ -24,7 +24,6 @@ public: // methods
     ~AggregatedReadHandle();
 
     size_t read(void* buf, size_t len) override;
-    bool next() override;
 
     void open() override;
     void close() override;
