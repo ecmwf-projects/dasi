@@ -11,7 +11,7 @@
 namespace dasi::api {
 class Config;
 class Query;
-class Result;
+class RetrieveResult;
 }
 
 namespace dasi::core {
@@ -28,7 +28,7 @@ public: // methods
     Retriever(const api::Config& config, const Schema& schema, int lruSize=20);
     ~Retriever() = default;
 
-    api::Result retrieve(const api::Query& query);
+    api::RetrieveResult retrieve(const api::Query& query);
 
     DB& database(const OrderedReferenceKey& dbkey);
 

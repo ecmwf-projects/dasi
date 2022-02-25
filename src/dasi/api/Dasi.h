@@ -4,7 +4,7 @@
 #include "dasi/api/Key.h"
 #include "dasi/api/Config.h"
 #include "dasi/api/Query.h"
-#include "dasi/api/Result.h"
+#include "dasi/api/RetrieveResult.h"
 
 #include <iosfwd>
 #include <memory>
@@ -32,7 +32,7 @@ public: // methods
     ~Dasi();
 
     void archive(const Key& key, const void* data, size_t length);
-    Result retrieve(const Query& query);
+    RetrieveResult retrieve(const Query& query);
 
 private: // methods
 

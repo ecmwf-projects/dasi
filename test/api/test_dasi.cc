@@ -255,7 +255,7 @@ CASE("Dasi simple retrieve") {
     key.set("key3b", "new3b");
     dasi.archive(key, extra_data, sizeof(extra_data));
 
-    api::Result result(dasi.retrieve(query));
+    api::RetrieveResult result(dasi.retrieve(query));
     std::unique_ptr<api::ReadHandle> handle(result.toHandle());
     char res[sizeof(test_data)];
     handle->open();
@@ -299,7 +299,7 @@ CASE("Dasi retrieve multiple objects") {
     key.set("key3b", "new3b");
     dasi.archive(key, extra_data, sizeof(extra_data));
 
-    api::Result result(dasi.retrieve(query));
+    api::RetrieveResult result(dasi.retrieve(query));
     std::unique_ptr<api::ReadHandle> handle(result.toHandle());
     handle->open();
     dasi::api::AutoCloser closer(*handle);
@@ -361,7 +361,7 @@ CASE("Dasi retrieve with iterator") {
         {"key3b", {"value3b"}},
     };
 
-    api::Result result(dasi.retrieve(query));
+    api::RetrieveResult result(dasi.retrieve(query));
 
     for (auto [key, handle] : result) {
         auto kv = key.get("key2b");

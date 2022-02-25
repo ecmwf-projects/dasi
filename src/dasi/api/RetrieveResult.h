@@ -12,7 +12,7 @@ class ReadHandle;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class Result {
+class RetrieveResult {
 
 public: // types
 
@@ -21,8 +21,8 @@ public: // types
 
 public: // methods
 
-    Result(std::vector<Key>&& keys, std::vector<item_type>&& values);
-    ~Result();
+    RetrieveResult(std::vector<Key>&& keys, std::vector<item_type>&& values);
+    ~RetrieveResult();
 
     const_iterator begin() const { return const_iterator{keys_.begin(), values_.begin()}; }
     const_iterator end() const { return const_iterator{keys_.end(), values_.end()}; }
@@ -39,12 +39,12 @@ public: // classes
 
     class const_iterator : public std::iterator<
         std::input_iterator_tag,
-        std::pair<Key, Result::item_type>> {
+        std::pair<Key, RetrieveResult::item_type>> {
 
     private: // types
 
         using key_iterator = std::vector<Key>::const_iterator;
-        using value_iterator = std::vector<Result::item_type>::const_iterator;
+        using value_iterator = std::vector<RetrieveResult::item_type>::const_iterator;
 
     public: // methods
 

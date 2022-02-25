@@ -1,7 +1,7 @@
 
 #include "dasi/api/ReadHandle.h"
 #include "dasi/api/Query.h"
-#include "dasi/api/Result.h"
+#include "dasi/api/RetrieveResult.h"
 
 #include "dasi/core/Retriever.h"
 
@@ -26,8 +26,8 @@ public: // methods
         handles_.push_back(handle);
     }
 
-    api::Result toResult() {
-        return api::Result{std::move(keys_), std::move(handles_)};
+    api::RetrieveResult toResult() {
+        return api::RetrieveResult{std::move(keys_), std::move(handles_)};
     }
 
 private: // members
@@ -72,7 +72,7 @@ Retriever::Retriever(const Config& config, const Schema& schema, int lruSize) :
     schema_(schema),
     databases_(lruSize) {}
 
-api::Result Retriever::retrieve(const api::Query& query) {
+api::RetrieveResult Retriever::retrieve(const api::Query& query) {
     ResultAggregator agg;
     RetrieveVisitor visitor(*this, agg);
     schema_.walk(query, visitor);

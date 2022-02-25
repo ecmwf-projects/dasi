@@ -48,7 +48,7 @@ void Dasi::archive(const Key& key, const void* data, size_t length) {
     archiver().archive(key, data, length);
 }
 
-Result Dasi::retrieve(const Query& query) {
+RetrieveResult Dasi::retrieve(const Query& query) {
     return retriever().retrieve(query);
 }
 
