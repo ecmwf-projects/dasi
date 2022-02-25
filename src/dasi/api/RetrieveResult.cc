@@ -7,13 +7,15 @@ namespace dasi::api {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-RetrieveResult::RetrieveResult(std::vector<Key>&& keys, std::vector<item_type>&& values) :
-    keys_(std::move(keys)), values_(std::move(values)) {}
-
 RetrieveResult::~RetrieveResult() {
     for (auto val : values_) {
         delete val;
     }
+}
+
+void RetrieveResult::append(const Key& key, item_type value) {
+    keys_.push_back(key);
+    values_.push_back(value);
 }
 
 ReadHandle* RetrieveResult::toHandle() {

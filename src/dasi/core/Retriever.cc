@@ -11,40 +11,13 @@ namespace dasi::core {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class ResultAggregator {
-
-public: // methods
-
-    ~ResultAggregator() {
-        for(auto handle : handles_) {
-            delete handle;
-        }
-    }
-
-    void append(const api::Key& key, api::ReadHandle* handle) {
-        keys_.push_back(key);
-        handles_.push_back(handle);
-    }
-
-    api::RetrieveResult toResult() {
-        return api::RetrieveResult{std::move(keys_), std::move(handles_)};
-    }
-
-private: // members
-
-    std::vector<api::Key> keys_;
-    std::vector<api::ReadHandle*> handles_;
-};
-
-//----------------------------------------------------------------------------------------------------------------------
-
 class RetrieveVisitor {
 
 public: // methods
 
-    RetrieveVisitor(Retriever& parent, ResultAggregator& agg) :
+    RetrieveVisitor(Retriever& parent, api::RetrieveResult& res) :
         parent_(parent),
-        agg_(agg) {}
+        res_(res) {}
 
     void thirdLevel(SplitReferenceKey& key) {
         std::cout << "Third level in retrieve!!!" << std::endl;
@@ -56,13 +29,13 @@ public: // methods
                 key2.set(elem.first, std::string{elem.second});
             }
         }
-        agg_.append(key2, result);
+        res_.append(key2, result);
     }
 
 private: // members
 
     Retriever& parent_;
-    ResultAggregator& agg_;
+    api::RetrieveResult& res_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -73,10 +46,10 @@ Retriever::Retriever(const Config& config, const Schema& schema, int lruSize) :
     databases_(lruSize) {}
 
 api::RetrieveResult Retriever::retrieve(const api::Query& query) {
-    ResultAggregator agg;
-    RetrieveVisitor visitor(*this, agg);
+    api::RetrieveResult res;
+    RetrieveVisitor visitor(*this, res);
     schema_.walk(query, visitor);
-    return agg.toResult();
+    return res;
 }
 
 DB& Retriever::database(const OrderedReferenceKey& dbkey) {

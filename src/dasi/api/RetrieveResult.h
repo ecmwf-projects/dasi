@@ -21,8 +21,10 @@ public: // types
 
 public: // methods
 
-    RetrieveResult(std::vector<Key>&& keys, std::vector<item_type>&& values);
+    RetrieveResult() = default;
     ~RetrieveResult();
+
+    void append(const Key& key, item_type value);
 
     const_iterator begin() const { return const_iterator{keys_.begin(), values_.begin()}; }
     const_iterator end() const { return const_iterator{keys_.end(), values_.end()}; }
