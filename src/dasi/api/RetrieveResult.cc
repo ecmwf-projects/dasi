@@ -1,6 +1,8 @@
 
 #include "dasi/api/RetrieveResult.h"
 
+#include "dasi/api/ReadHandle.h"
+
 #include "dasi/core/AggregatedReadHandle.h"
 
 namespace dasi::api {
@@ -8,20 +10,25 @@ namespace dasi::api {
 //----------------------------------------------------------------------------------------------------------------------
 
 RetrieveResult::~RetrieveResult() {
-    for (auto val : values_) {
-        delete val;
+    for (auto&& [key, val] : values_) {
+        if (val != nullptr) {
+            delete val;
+        }
     }
 }
 
-void RetrieveResult::append(const Key& key, item_type value) {
-    keys_.push_back(key);
-    values_.push_back(value);
+void RetrieveResult::append(const Key& key, ReadHandle* value) {
+    values_.emplace_back(key, value);
 }
 
 ReadHandle* RetrieveResult::toHandle() {
-    auto handle = new dasi::core::AggregatedReadHandle(values_);
-    values_.clear();
-    return handle;
+    std::vector<ReadHandle*> handles;
+    handles.reserve(values_.size());
+    for (auto& kv : values_) {
+        handles.push_back(kv.second);
+        kv.second = nullptr;
+    }
+    return new dasi::core::AggregatedReadHandle(handles);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
