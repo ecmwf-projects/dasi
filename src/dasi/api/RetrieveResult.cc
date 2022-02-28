@@ -9,24 +9,15 @@ namespace dasi::api {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-RetrieveResult::~RetrieveResult() {
-    for (auto&& [key, val] : values_) {
-        if (val != nullptr) {
-            delete val;
-        }
-    }
-}
-
-void RetrieveResult::append(const Key& key, ReadHandle* value) {
-    values_.emplace_back(key, value);
+void RetrieveResult::append(Key&& key, ObjectLocation&& loc) {
+    values_.emplace_back(std::move(key), std::move(loc));
 }
 
 ReadHandle* RetrieveResult::toHandle() {
     std::vector<ReadHandle*> handles;
     handles.reserve(values_.size());
-    for (auto& kv : values_) {
-        handles.push_back(kv.second);
-        kv.second = nullptr;
+    for (auto& [key, loc] : values_) {
+        handles.push_back(loc.toHandle());
     }
     return new dasi::core::AggregatedReadHandle(handles);
 }

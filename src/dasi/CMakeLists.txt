@@ -26,6 +26,8 @@ ecbuild_add_library(
         api/ReadHandle.h
         api/RetrieveResult.cc
         api/RetrieveResult.h
+        api/ObjectLocation.cc
+        api/ObjectLocation.h
 
         core/Archiver.cc
         core/Archiver.h
@@ -35,6 +37,8 @@ ecbuild_add_library(
         core/Catalogue.h
         core/DB.cc
         core/DB.h
+        core/HandleFactory.cc
+        core/HandleFactory.h
         core/KeyT.h
         core/OrderedReferenceKey.h
         core/Retriever.cc

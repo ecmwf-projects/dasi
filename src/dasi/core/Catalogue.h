@@ -1,9 +1,10 @@
 
 #pragma once
 
-#include "dasi/core/OrderedReferenceKey.h"
+#include "dasi/api/ObjectLocation.h"
 
 #include "dasi/core/OrderedKey.h"
+#include "dasi/core/OrderedReferenceKey.h"
 
 #include <mutex>
 #include <map>
@@ -13,7 +14,6 @@
 
 namespace dasi::api {
 class Config;
-class ReadHandle;
 }
 
 namespace dasi::core {
@@ -36,7 +36,7 @@ public: // methods
     const api::Config& config() const { return config_; }
 
     virtual void archive(const SplitReferenceKey& key, const void* data, size_t length) { NOTIMP; }
-    virtual api::ReadHandle* retrieve(const SplitReferenceKey& key) { NOTIMP; }
+    virtual api::ObjectLocation retrieve(const SplitReferenceKey& key) { NOTIMP; }
 
 private: // members
 

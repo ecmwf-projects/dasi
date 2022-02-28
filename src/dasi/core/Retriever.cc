@@ -29,7 +29,7 @@ public: // methods
                 key2.set(elem.first, std::string{elem.second});
             }
         }
-        res_.append(key2, result);
+        res_.append(std::move(key2), std::move(result));
     }
 
 private: // members

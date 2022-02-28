@@ -7,10 +7,12 @@
 #include "dasi/api/SplitKey.h"
 
 #include "dasi/core/Catalogue.h"
+#include "dasi/core/HandleFactory.h"
 #include "dasi/core/SplitReferenceKey.h"
 
 #include "dasi/util/AutoCloser.h"
 #include "dasi/util/Buffer.h"
+#include "dasi/util/StringBuilder.h"
 
 #include <cstring>
 #include <iomanip>
@@ -65,6 +67,33 @@ private: // members
 
 };
 
+class BufferHandleBuilder : public dasi::core::HandleBuilderBase {
+
+public: // members
+
+    constexpr static const char* type = "buffer";
+
+public: // methods
+
+    BufferHandleBuilder() : core::HandleBuilderBase(type) {}
+
+    api::ReadHandle* makeReadHandle(const std::string& location, offset_type offset, length_type length) override {
+        std::istringstream iss(location);
+        void* buf;
+        iss >> buf;
+        ASSERT(buf != nullptr);
+        return new BufferReadHandle(*reinterpret_cast<const util::Buffer*>(buf));
+    }
+
+    static api::ObjectLocation toLocation(const util::Buffer& buffer) {
+        std::string loc = util::StringBuilder() << reinterpret_cast<const void*>(&buffer);
+        return api::ObjectLocation{type, loc, 0, buffer.size()};
+    }
+
+};
+
+BufferHandleBuilder bufferBuilder;
+
 std::vector<std::pair<api::SplitKey, util::Buffer>> ARCHIVED_DATA;
 
 class PlayCatalogue : public dasi::core::Catalogue {
@@ -86,7 +115,7 @@ private: // methods
         ARCHIVED_DATA.emplace_back(std::make_pair(api::SplitKey{key}, util::Buffer{data, length}));
     }
 
-    api::ReadHandle* retrieve(const core::SplitReferenceKey& key) override {
+    api::ObjectLocation retrieve(const core::SplitReferenceKey& key) override {
         EXPECT(key[0] == dbkey());
         std::cout << "DBKEY: " << dbkey() << std::endl;
         std::cout << "RETRIEVE: " << key << std::endl;
@@ -99,7 +128,7 @@ private: // methods
             oss << key;
             throw dasi::util::ObjectNotFound(oss.str(), Here());
         }
-        return new BufferReadHandle(it->second);
+        return BufferHandleBuilder::toLocation(it->second);
     }
 
     void print(std::ostream& s) const override {
@@ -364,7 +393,7 @@ CASE("Dasi retrieve with iterator") {
 
     api::RetrieveResult result(dasi.retrieve(query));
 
-    for (auto [key, handle] : result) {
+    for (auto& [key, loc] : result) {
         auto kv = key.get("key2b");
         auto it = expected.find(kv);
         EXPECT(it != expected.end());
@@ -372,6 +401,7 @@ CASE("Dasi retrieve with iterator") {
 
         EXPECT(ekey == key);
 
+        std::unique_ptr<api::ReadHandle> handle(loc.toHandle());
         handle->open();
         dasi::util::AutoCloser closer(*handle);
         char res[data_len];

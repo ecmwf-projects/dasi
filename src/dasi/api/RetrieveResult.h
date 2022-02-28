@@ -2,8 +2,8 @@
 #pragma once
 
 #include "dasi/api/Key.h"
+#include "dasi/api/ObjectLocation.h"
 
-#include <memory>
 #include <vector>
 
 namespace dasi::api {
@@ -16,15 +16,12 @@ class RetrieveResult {
 
 public: // types
 
-    using item_type = ReadHandle*;
-    using value_type = std::pair<Key, item_type>;
+    using value_type = std::pair<Key, ObjectLocation>;
     using const_iterator = std::vector<value_type>::const_iterator;
 
 public: // methods
 
-    ~RetrieveResult();
-
-    void append(const Key& key, ReadHandle* value);
+    void append(Key&& key, ObjectLocation&& loc);
 
     const_iterator begin() const { return values_.begin(); }
     const_iterator end() const { return values_.end(); }

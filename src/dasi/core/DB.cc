@@ -31,7 +31,7 @@ void DB::archive(const SplitReferenceKey& key, const void* data, size_t length) 
     catalogue_->archive(key, data, length);
 }
 
-api::ReadHandle* DB::retrieve(const SplitReferenceKey& key) {
+api::ObjectLocation DB::retrieve(const SplitReferenceKey& key) {
     return catalogue_->retrieve(key);
 }
 
