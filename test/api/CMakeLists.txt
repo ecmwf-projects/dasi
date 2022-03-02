@@ -4,6 +4,7 @@ list( APPEND _api_tests
     key
     query
     SplitKey
+    dasi_c
 )
 
 foreach( _test ${_api_tests} )
