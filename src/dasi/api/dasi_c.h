@@ -18,6 +18,7 @@ enum dasi_error {
     DASI_NOT_FOUND = 3,
     DASI_ITERATOR_END = 4
 };
+typedef enum dasi_error dasi_error;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -30,7 +31,7 @@ struct dasi_key_t;
 typedef struct dasi_key_t dasi_key_t;
 
 struct dasi_query_t;
-typedef struct dasi_key_t dasi_key_t;
+typedef struct dasi_query_t dasi_query_t;
 
 struct dasi_retrieve_result_t;
 typedef struct dasi_retrieve_result_t dasi_retrieve_result_t;
