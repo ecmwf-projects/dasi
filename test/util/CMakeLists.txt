@@ -6,6 +6,7 @@ list( APPEND _util_tests
     StringBuilder
     LRUMap
     ReverseAdapter
+    AsyncGenerator
 )
 
 foreach( _test ${_util_tests} )
@@ -15,3 +16,5 @@ foreach( _test ${_util_tests} )
             LIBS dasi
     )
 endforeach()
+
+set_tests_properties(dasi_test_util_AsyncGenerator PROPERTIES TIMEOUT 10)

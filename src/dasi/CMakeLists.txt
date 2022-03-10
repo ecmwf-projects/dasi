@@ -57,6 +57,7 @@ ecbuild_add_library(
         shelf/ShelfCatalogue.h
 
         util/AutoCloser.h
+        util/AsyncGenerator.h
         util/Buffer.cc
         util/Buffer.h
         util/CartesianProduct.h
@@ -65,6 +66,7 @@ ecbuild_add_library(
         util/ContainerIostream.h
         util/Exceptions.cc
         util/Exceptions.h
+        util/Generator.h
         util/IndentStream.h
         util/LRUMap.h
         util/OrderedMap.h
