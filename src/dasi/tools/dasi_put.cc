@@ -1,43 +1,18 @@
 
-#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <utility>
 #include <vector>
 
 #include "dasi/api/Dasi.h"
 #include "dasi/util/Buffer.h"
 #include "dasi/util/Exceptions.h"
+#include "dasi/tools/Parser.h"
 
 using dasi::util::UserError;
 
-
-dasi::api::Key parseKey(const std::string& s) {
-    dasi::api::Key key;
-
-    for (auto it = s.begin(); it != s.end();) {
-        auto kend = std::find(it, s.end(), '=');
-        if (kend == s.end()) {
-            std::ostringstream oss;
-            oss << "Invalid key '" << s << "'";
-            throw UserError(oss.str(), Here());
-        }
-        std::string k(it, kend);
-        it = kend;
-        auto vend = std::find(++it, s.end(), ',');
-        std::string v(it, vend);
-        it = vend;
-        if (it != s.end()) {
-            ++it;
-        }
-        key.set(k, v);
-    }
-
-    return key;
-}
 
 dasi::util::Buffer readData(const char* filename) {
     std::ifstream stream(filename, std::ios::binary);
@@ -95,7 +70,7 @@ int main(int argc, char** argv) {
         std::ifstream config(config_path);
         dasi::api::Dasi dasi(config);
         for (const auto& arg : args) {
-            auto key = parseKey(arg.first);
+            auto key = dasi::tools::parseKey(arg.first);
             std::cout << "Archiving " << key << std::endl;
             auto buf = readData(arg.second);
             dasi.archive(key, buf.data(), buf.size());

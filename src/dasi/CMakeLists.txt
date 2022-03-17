@@ -81,14 +81,23 @@ ecbuild_add_executable(
     LIBS dasi
 )
 
+ecbuild_add_library(
+    TARGET dasi-tools
+    TYPE OBJECT
+    SOURCES
+        tools/Parser.cc
+        tools/Parser.h
+    PRIVATE_LIBS dasi
+)
+
 ecbuild_add_executable(
     TARGET dasi-put
     SOURCES tools/dasi_put.cc
-    LIBS dasi
+    LIBS dasi dasi-tools
 )
 
 ecbuild_add_executable(
     TARGET dasi-get
     SOURCES tools/dasi_get.cc
-    LIBS dasi
+    LIBS dasi dasi-tools
 )
