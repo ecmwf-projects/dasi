@@ -155,6 +155,22 @@ class RetrieveResult:
         return ReadHandle(_dasi.retrieve_result_get_handle(self._result))
 
 
+class ListIterator:
+    def __init__(self, cdata):
+        self._iterator = cdata
+        self._first = True
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if not self._first:
+            _dasi.list_iterator_next(self._iterator)
+        self._first = False
+        key = Key(_dasi.list_iterator_get(self._iterator))
+        return key
+
+
 class DASI:
     def __init__(self, config):
         if isinstance(config, InlineConfig):
@@ -171,3 +187,8 @@ class DASI:
         if not isinstance(query, Query):
             query = Query(query)
         return RetrieveResult(_dasi.get(self._session, query._cdata))
+
+    def list(self, query):
+        if not isinstance(query, Query):
+            query = Query(query)
+        return ListIterator(_dasi.list(self._session, query._cdata))

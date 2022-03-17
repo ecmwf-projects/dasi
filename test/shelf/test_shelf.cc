@@ -189,6 +189,76 @@ CASE("Dasi retrieve with no data matched") {
     std::filesystem::remove_all(root);
 }
 
+CASE("Dasi list with full query") {
+    std::filesystem::path root = test_dir("dasi_test_shelf");
+    std::cout << "data root: " << root << std::endl;
+
+    std::stringstream cfg;
+    cfg << "engine: shelf" << "\n";
+    cfg << "root: " << root << "\n";
+    cfg << TEST_SCHEMA;
+
+    dasi::api::Dasi dasi(cfg);
+
+    dasi::api::Key kbase {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    size_t num_keys = 5;
+    std::vector<std::string> vals;
+    std::map<std::string, std::pair<dasi::api::Key, std::string>> expected;
+    vals.reserve(num_keys);
+    const char templ[] = "TEST ";
+    size_t data_len = sizeof(templ) - 1 + 2;
+    for (size_t i = 0; i < num_keys; ++i) {
+        dasi::api::Key key(kbase);
+        std::string kv = std::to_string(i);
+        key.set("key2b", kv);
+        std::ostringstream oss;
+        oss << templ << std::setw(2) << std::setfill('0') << i;
+        dasi.archive(key, oss.str().c_str(), data_len);
+        if (i % 2 == 0) {
+            vals.push_back(kv);
+            expected.emplace(kv, std::make_pair(key, oss.str()));
+        }
+    }
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b"}},
+        {"key2b", vals},
+        {"key3b", {"value3b"}},
+    };
+
+    dasi::api::ListResult result(dasi.list(query));
+
+    for (auto& key : result) {
+        auto kv = key.get("key2b");
+        auto it = expected.find(kv);
+        EXPECT(it != expected.end());
+        auto [ekey, edata] = it->second;
+
+        EXPECT(ekey == key);
+
+        expected.erase(it);
+    }
+
+    EXPECT(expected.empty());
+
+    std::filesystem::remove_all(root);
+}
+
 int main(int argc, char** argv) {
     return ::dasi::util::run_tests();
 }

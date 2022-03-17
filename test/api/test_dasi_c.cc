@@ -125,6 +125,15 @@ private: // methods
         return BufferReadHandle::toLocation(it->second);
     }
 
+    bool exists(const core::SplitReferenceKey& key) override {
+        EXPECT(key[0] == dbkey());
+        auto matches_key = [&key](const auto& el){
+            return el.first == key;
+        };
+        auto it = std::find_if(ARCHIVED_DATA.begin(), ARCHIVED_DATA.end(), matches_key);
+        return (it != ARCHIVED_DATA.end());
+    }
+
     void print(std::ostream& s) const override {
         s << "PlayCatalogue[]";
     }
@@ -183,6 +192,9 @@ namespace detail {
 
     template<>
     void cleanup(dasi_retrieve_iterator_t* ptr) { dasi_retrieve_iterator_destroy(ptr); }
+
+    template<>
+    void cleanup(dasi_list_iterator_t* ptr) { dasi_list_iterator_destroy(ptr); }
 }
 
 template<typename T>
@@ -480,6 +492,7 @@ CASE("Dasi retrieve with iterator") {
     do {
         dasi_key_t* key;
         DASI_CHECK(dasi_retrieve_iterator_get_key(iter, &key));
+        Destructor keyD(key);
         const char* kv;
         DASI_CHECK(dasi_key_get(key, "key2b", &kv));
         auto it = expected.find(std::string{kv});
@@ -501,6 +514,7 @@ CASE("Dasi retrieve with iterator") {
         EXPECT(len == data_len);
         EXPECT(::memcmp(res, edata.c_str(), len) == 0);
 
+        DASI_CHECK(dasi_key_destroy(ekey));
         expected.erase(it);
     } while((err = dasi_retrieve_iterator_next(iter)) == DASI_SUCCESS);
     EXPECT(err == DASI_ITERATOR_END);
@@ -582,6 +596,93 @@ CASE("Dasi retrieve with partial data") {
 
     dasi_retrieve_result_t* result;
     EXPECT(dasi_get(session, query, &result) == DASI_NOT_FOUND);
+}
+
+CASE("Dasi list with full query") {
+    ARCHIVED_DATA.clear();
+
+    dasi_session_t* session;
+    DASI_CHECK(dasi_open_str(TEST_CONFIG, &session));
+    Destructor sessionD(session);
+
+    dasi_key_t* kbase;
+    DASI_CHECK(dasi_key_new(&kbase));
+    Destructor kbaseD(kbase);
+    DASI_CHECK(dasi_key_set(kbase, "key1", "value1"));
+    DASI_CHECK(dasi_key_set(kbase, "key2", "value2"));
+    DASI_CHECK(dasi_key_set(kbase, "key3", "value3"));
+    DASI_CHECK(dasi_key_set(kbase, "key1a", "value1a"));
+    DASI_CHECK(dasi_key_set(kbase, "key2a", "value2a"));
+    DASI_CHECK(dasi_key_set(kbase, "key1b", "value1b"));
+    DASI_CHECK(dasi_key_set(kbase, "key2b", "value2b"));
+    DASI_CHECK(dasi_key_set(kbase, "key3b", "value3b"));
+
+    size_t num_keys = 5;
+    std::vector<std::string> vals;
+    std::map<std::string, dasi_key_t*> expected;
+    vals.reserve(num_keys);
+    char data[] = "TEST   ";
+    size_t data_len = sizeof(data) - 1;
+    for (size_t i = 0; i < num_keys; ++i) {
+        dasi_key_t* key;
+        DASI_CHECK(dasi_key_copy(kbase, &key));
+        std::string kv = std::to_string(i);
+        DASI_CHECK(dasi_key_set(key, "key2b", kv.c_str()));
+        std::snprintf(data, data_len + 1, "TEST %02ld", i);
+        DASI_CHECK(dasi_put(session, key, data, data_len));
+        if (i % 2 == 0) {
+            vals.push_back(kv);
+            expected.emplace(kv, key);
+        }
+    }
+
+    dasi_query_t* query;
+    DASI_CHECK(dasi_query_new(&query));
+    Destructor queryD(query);
+    const char* value[1];
+    value[0] = "value1";
+    DASI_CHECK(dasi_query_set(query, "key1", value, 1));
+    value[0] = "value2";
+    DASI_CHECK(dasi_query_set(query, "key2", value, 1));
+    value[0] = "value3";
+    DASI_CHECK(dasi_query_set(query, "key3", value, 1));
+    value[0] = "value1a";
+    DASI_CHECK(dasi_query_set(query, "key1a", value, 1));
+    value[0] = "value2a";
+    DASI_CHECK(dasi_query_set(query, "key2a", value, 1));
+    value[0] = "value1b";
+    DASI_CHECK(dasi_query_set(query, "key1b", value, 1));
+    const char* cvals[vals.size()];
+    for (size_t i = 0; i < vals.size(); ++i) {
+        cvals[i] = vals[i].c_str();
+    }
+    DASI_CHECK(dasi_query_set(query, "key2b", cvals, vals.size()));
+    value[0] = "value3b";
+    DASI_CHECK(dasi_query_set(query, "key3b", value, 1));
+
+    dasi_list_iterator_t* result;
+    DASI_CHECK(dasi_list(session, query, &result));
+    Destructor resultD(result);
+    dasi_error err;
+    do {
+        dasi_key_t* key;
+        DASI_CHECK(dasi_list_iterator_get(result, &key));
+        Destructor keyD(key);
+        const char* kv;
+        DASI_CHECK(dasi_key_get(key, "key2b", &kv));
+        auto it = expected.find(std::string{kv});
+        EXPECT(it != expected.end());
+        auto ekey = it->second;
+
+        int cmp;
+        DASI_CHECK(dasi_key_cmp(ekey, key, &cmp));
+        EXPECT(cmp == 0);
+
+        DASI_CHECK(dasi_key_destroy(ekey));
+        expected.erase(it);
+    } while((err = dasi_list_iterator_next(result)) == DASI_SUCCESS);
+    EXPECT(err == DASI_ITERATOR_END);
+    EXPECT(expected.empty());
 }
 
 

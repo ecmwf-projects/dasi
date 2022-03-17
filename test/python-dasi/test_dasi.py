@@ -309,3 +309,53 @@ def test_get_partial(dasi_config):
 
     with pytest.raises(DASIObjectNotFound):
         dasi.get(query)
+
+
+def test_list_full(dasi_config):
+    dasi = DASI(dasi_config)
+
+    kbase = {
+        "key1": "value1",
+        "key2": "value2",
+        "key3": "value3",
+        "key1a": "value1a",
+        "key2a": "value2a",
+        "key1b": "value1b",
+        "key2b": "value2b",
+        "key3b": "value3b",
+    }
+
+    num_keys = 5
+    vals = []
+    expected = {}
+    templ = b"TEST "
+    for i in range(num_keys):
+        key = kbase.copy()
+        kv = str(i)
+        key["key2b"] = kv
+        data = b"%b%02d" % (templ, i)
+        dasi.put(key, data)
+        if i % 2 == 0:
+            vals.append(kv)
+            expected[kv] = Key(key)
+
+    query = {
+        "key1": ["value1"],
+        "key2": ["value2"],
+        "key3": ["value3"],
+        "key1a": ["value1a"],
+        "key2a": ["value2a"],
+        "key1b": ["value1b"],
+        "key2b": vals,
+        "key3b": ["value3b"],
+    }
+
+    result = dasi.list(query)
+
+    for key in result:
+        kv = key["key2b"]
+        assert kv in expected
+        ekey = expected.pop(kv)
+        assert ekey == key
+
+    assert expected == {}

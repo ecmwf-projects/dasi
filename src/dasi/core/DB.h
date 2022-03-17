@@ -27,6 +27,7 @@ public: // methods
 
     void archive(const SplitReferenceKey& key, const void* data, size_t length);
     api::ObjectLocation retrieve(const SplitReferenceKey& key);
+    bool exists(const SplitReferenceKey& key);
 
 private: // members
 

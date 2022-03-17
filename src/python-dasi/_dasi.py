@@ -54,6 +54,7 @@ open_str = wrap(lib.dasi_open_str, out="dasi_session_t **", gc=lib.dasi_close)
 close = wrap(lib.dasi_close)
 put = wrap(lib.dasi_put)
 get = wrap(lib.dasi_get, out="dasi_retrieve_result_t **", gc=lib.dasi_retrieve_result_destroy)
+list = wrap(lib.dasi_list, out="dasi_list_iterator_t **", gc=lib.dasi_list_iterator_destroy)
 
 key_new = wrap(lib.dasi_key_new, out="dasi_key_t **", gc=lib.dasi_key_destroy)
 key_set = wrap(lib.dasi_key_set)
@@ -78,3 +79,7 @@ retrieve_iterator_get_handle = wrap(lib.dasi_retrieve_iterator_get_handle,
 read_handle_open = wrap(lib.dasi_read_handle_open)
 read_handle_close = wrap(lib.dasi_read_handle_close)
 read_handle_read = wrap(lib.dasi_read_handle_read, out="size_t *")
+
+list_iterator_next = wrap(lib.dasi_list_iterator_next)
+list_iterator_get = wrap(lib.dasi_list_iterator_get,
+   out="dasi_key_t **", gc=lib.dasi_key_destroy)

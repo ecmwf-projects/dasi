@@ -53,6 +53,12 @@ api::ObjectLocation ShelfCatalogue::retrieve(const core::SplitReferenceKey& key)
     return core::FileReadHandle::toLocation(path);
 }
 
+bool ShelfCatalogue::exists(const core::SplitReferenceKey& key) {
+    ASSERT(key[0] == dbkey());
+    auto path = buildPath(key);
+    return std::filesystem::exists(path);
+}
+
 
 std::filesystem::path ShelfCatalogue::buildPath(const core::SplitReferenceKey& key) {
     std::filesystem::path p(root_);

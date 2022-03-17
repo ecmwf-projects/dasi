@@ -30,6 +30,7 @@ ecbuild_add_library(
         api/RetrieveResult.h
         api/ObjectLocation.cc
         api/ObjectLocation.h
+        api/ListResult.h
 
         core/Archiver.cc
         core/Archiver.h
@@ -43,6 +44,8 @@ ecbuild_add_library(
         core/FileReadHandle.h
         core/HandleFactory.cc
         core/HandleFactory.h
+        core/Lister.cc
+        core/Lister.h
         core/KeyT.h
         core/OrderedReferenceKey.h
         core/Retriever.cc
@@ -99,5 +102,12 @@ ecbuild_add_executable(
 ecbuild_add_executable(
     TARGET dasi-get
     SOURCES tools/dasi_get.cc
+    LIBS dasi dasi-tools
+)
+
+ecbuild_add_executable(
+    TARGET dasi-list
+    SOURCES
+        tools/dasi_list.cc
     LIBS dasi dasi-tools
 )

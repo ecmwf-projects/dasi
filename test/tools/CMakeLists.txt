@@ -2,6 +2,7 @@
 list( APPEND _tools_tests
     put
     get
+    list
 )
 
 foreach( _test ${_tools_tests} )

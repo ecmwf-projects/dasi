@@ -127,6 +127,14 @@ private: // methods
         return BufferReadHandle::toLocation(it->second);
     }
 
+    bool exists(const core::SplitReferenceKey& key) override {
+        auto matches_key = [&key](const auto& el){
+            return el.first == key;
+        };
+        auto it = std::find_if(ARCHIVED_DATA.begin(), ARCHIVED_DATA.end(), matches_key);
+        return (it != ARCHIVED_DATA.end());
+    }
+
     void print(std::ostream& s) const override {
         s << "PlayCatalogue[]";
     }
@@ -497,6 +505,67 @@ CASE("Dasi retrieve with partial data") {
     EXPECT_THROWS_AS(dasi.retrieve(query), dasi::util::ObjectNotFound);
 }
 
+CASE("Dasi list with full query") {
+    ARCHIVED_DATA.clear();
+
+    dasi::api::Dasi dasi(TEST_CONFIG);
+
+    dasi::api::Key kbase {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},   // n.b. in the sample schema, this key is used twice.
+        {"key1a", "value1a"},
+        {"key2a", "value2a"},
+        {"key1b", "value1b"},
+        {"key2b", "value2b"},
+        {"key3b", "value3b"},
+    };
+
+    size_t num_keys = 5;
+    std::vector<std::string> vals;
+    std::map<std::string, dasi::api::Key> expected;
+    vals.reserve(num_keys);
+    const char templ[] = "TEST ";
+    size_t data_len = sizeof(templ) - 1 + 2;
+    for (size_t i = 0; i < num_keys; ++i) {
+        dasi::api::Key key(kbase);
+        std::string kv = std::to_string(i);
+        key.set("key2b", kv);
+        std::ostringstream oss;
+        oss << templ << std::setw(2) << std::setfill('0') << i;
+        dasi.archive(key, oss.str().c_str(), data_len);
+        if (i % 2 == 0) {
+            vals.push_back(kv);
+            expected.emplace(kv, key);
+        }
+    }
+
+    dasi::api::Query query {
+        {"key1", {"value1"}},
+        {"key2", {"value2"}},
+        {"key3", {"value3"}},
+        {"key1a", {"value1a"}},
+        {"key2a", {"value2a"}},
+        {"key1b", {"value1b"}},
+        {"key2b", vals},
+        {"key3b", {"value3b"}},
+    };
+
+    api::ListResult result(dasi.list(query));
+
+    for (auto& key : result) {
+        auto kv = key.get("key2b");
+        auto it = expected.find(kv);
+        EXPECT(it != expected.end());
+        auto ekey = it->second;
+
+        EXPECT(ekey == key);
+
+        expected.erase(it);
+    }
+
+    EXPECT(expected.empty());
+}
 
 int main(int argc, char** argv) {
     return ::dasi::util::run_tests();

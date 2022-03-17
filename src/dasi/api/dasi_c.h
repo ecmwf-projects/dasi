@@ -55,6 +55,9 @@ typedef struct dasi_retrieve_iterator_t dasi_retrieve_iterator_t;
 struct dasi_read_handle_t;
 typedef struct dasi_read_handle_t dasi_read_handle_t;
 
+struct dasi_list_iterator_t;
+typedef struct dasi_list_iterator_t dasi_list_iterator_t;
+
 //----------------------------------------------------------------------------------------------------------------------
 
 /// Session
@@ -71,6 +74,8 @@ dasi_error dasi_put(dasi_session_t *session, dasi_key_t *key, const void *data, 
 
 /// Make a query to retrieve objects. Returns a new result object.
 dasi_error dasi_get(dasi_session_t *session, dasi_query_t *query, dasi_retrieve_result_t **result);
+
+dasi_error dasi_list(dasi_session_t *session, dasi_query_t *query, dasi_list_iterator_t **result);
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -149,6 +154,15 @@ dasi_error dasi_read_handle_close(dasi_read_handle_t *handle);
 /// Reads `size` bytes into the given buffer. Returns the number of bytes
 /// actually read. End of stream has been reached if `*len < size`.
 dasi_error dasi_read_handle_read(dasi_read_handle_t *handle, void *buffer, size_t size, size_t *len);
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/// List iterator
+
+dasi_error dasi_list_iterator_destroy(dasi_list_iterator_t *iterator);
+
+dasi_error dasi_list_iterator_next(dasi_list_iterator_t *iterator);
+dasi_error dasi_list_iterator_get(dasi_list_iterator_t *iterator, dasi_key_t **key);
 
 #ifdef __cplusplus
 }

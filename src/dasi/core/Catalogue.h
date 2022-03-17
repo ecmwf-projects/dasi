@@ -37,6 +37,7 @@ public: // methods
 
     virtual void archive(const SplitReferenceKey& key, const void* data, size_t length) { NOTIMP; }
     virtual api::ObjectLocation retrieve(const SplitReferenceKey& key) { NOTIMP; }
+    virtual bool exists(const SplitReferenceKey& key) { NOTIMP; }
 
 private: // members
 

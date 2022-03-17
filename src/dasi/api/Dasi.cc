@@ -2,6 +2,7 @@
 #include "dasi/api/Dasi.h"
 
 #include "dasi/core/Archiver.h"
+#include "dasi/core/Lister.h"
 #include "dasi/core/Retriever.h"
 #include "dasi/util/Exceptions.h"
 
@@ -44,12 +45,26 @@ core::Retriever& Dasi::retriever() {
     return *retriever_;
 }
 
+core::Lister& Dasi::lister() {
+
+    if (!lister_) {
+
+        long listLRUSize = config_.getLong("listLRUSize", 20);
+        lister_ = std::make_unique<core::Lister>(config_, schema(), listLRUSize);
+    }
+    return *lister_;
+}
+
 void Dasi::archive(const Key& key, const void* data, size_t length) {
     archiver().archive(key, data, length);
 }
 
 RetrieveResult Dasi::retrieve(const Query& query) {
     return retriever().retrieve(query);
+}
+
+ListResult Dasi::list(const Query& query) {
+    return lister().list(query);
 }
 
 

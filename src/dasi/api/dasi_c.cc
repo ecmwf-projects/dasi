@@ -89,6 +89,30 @@ private:
     wrapped end_;
 };
 
+struct dasi_list_iterator_t : public ListResult {
+public:
+    using wrapped = ListResult::Iter;
+
+    dasi_list_iterator_t(ListResult&& result) :
+        ListResult(std::move(result)),
+        begin_(begin()),
+        end_(end()) {}
+
+    bool next() {
+        ++begin_;
+        return begin_ != end_;
+    }
+
+    dasi_key_t *get() const {
+        ASSERT(begin_ != end_);
+        return new dasi_key_t(*begin_);
+    }
+
+private:
+    wrapped begin_;
+    wrapped end_;
+};
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -191,6 +215,15 @@ dasi_error dasi_get(dasi_session_t *session, dasi_query_t *query, dasi_retrieve_
         ASSERT(query != nullptr);
         ASSERT(result != nullptr);
         *result = new dasi_retrieve_result_t(std::move(session->retrieve(*query)));
+    });
+}
+
+dasi_error dasi_list(dasi_session_t *session, dasi_query_t *query, dasi_list_iterator_t **result) {
+    return wrapFunc([session, query, result] {
+        ASSERT(session != nullptr);
+        ASSERT(query != nullptr);
+        ASSERT(result != nullptr);
+        *result = new dasi_list_iterator_t(std::move(session->list(*query)));
     });
 }
 
@@ -382,6 +415,30 @@ dasi_error dasi_read_handle_read(dasi_read_handle_t *handle, void *buffer, size_
         ASSERT(buffer != nullptr);
         ASSERT(len != nullptr);
         *len = handle->read(buffer, size);
+    });
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+dasi_error dasi_list_iterator_destroy(dasi_list_iterator_t *iterator) {
+    return wrapFunc([iterator] {
+        ASSERT(iterator != nullptr);
+        delete iterator;
+    });
+}
+
+dasi_error dasi_list_iterator_next(dasi_list_iterator_t *iterator) {
+    return wrapFunc([iterator] (int) {
+        ASSERT(iterator != nullptr);
+        return iterator->next()? DASI_SUCCESS : DASI_ITERATOR_END;
+    });
+}
+
+dasi_error dasi_list_iterator_get(dasi_list_iterator_t *iterator, dasi_key_t **key) {
+    return wrapFunc([iterator, key] {
+        ASSERT(iterator != nullptr);
+        ASSERT(key != nullptr);
+        *key = iterator->get();
     });
 }
 

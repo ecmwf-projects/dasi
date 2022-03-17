@@ -35,6 +35,10 @@ api::ObjectLocation DB::retrieve(const SplitReferenceKey& key) {
     return catalogue_->retrieve(key);
 }
 
+bool DB::exists(const SplitReferenceKey& key) {
+    return catalogue_->exists(key);
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 }
