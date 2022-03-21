@@ -3,6 +3,8 @@
 
 #include "dasi/api/ReadHandle.h"
 
+#include "dasi/util/AutoCloser.h"
+
 #include <memory>
 #include <vector>
 
@@ -30,12 +32,15 @@ public: // methods
 
 private: // methods
 
+    void openInternal();
+
     void print(std::ostream& s) const override;
 
 private: // members
 
     HandleList handles_;
     HandleList::iterator current_;
+    std::unique_ptr<util::AutoCloser<ReadHandle>> closer_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

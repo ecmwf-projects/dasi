@@ -24,36 +24,38 @@ size_t AggregatedReadHandle::read(void* buf, size_t len) {
         return 0;
     }
 
-    size_t nread = 0;
+    size_t bytes_read = 0;
     auto cur = static_cast<char*>(buf);
     
     do {
-        size_t chunk = (*current_)->read(static_cast<void*>(cur), len - nread);
+        size_t chunk = (*current_)->read(static_cast<void*>(cur), len - bytes_read);
         cur += chunk;
-        nread += chunk;
+        bytes_read += chunk;
 
-        if (nread < len) {
+        if (bytes_read < len) {
             ++current_;
             if (current_ == handles_.end()) {
-                return nread;
+                return bytes_read;
             }
-            open();
+            openInternal();
         }
-    } while (nread < len);
+    } while (bytes_read < len);
 
-    return nread;
+    return bytes_read;
 }
 
 void AggregatedReadHandle::open() {
-    (*current_)->open();
+    ASSERT(!closer_);
+    openInternal();
 }
 
 void AggregatedReadHandle::close() {
-    for (auto& h : handles_) {
-        h->close();
-    }
+    closer_.reset();
+}
 
-    handles_.clear();
+void AggregatedReadHandle::openInternal() {
+    (*current_)->open();
+    closer_.reset(new util::AutoCloser(**current_));
 }
 
 void AggregatedReadHandle::print(std::ostream& s) const {
