@@ -13,7 +13,7 @@ AggregatedReadHandle::AggregatedReadHandle(const std::vector<ReadHandle*>& handl
     current_(handles_.begin()) {}
 
 AggregatedReadHandle::~AggregatedReadHandle() {
-    if (!handles_.empty()) {
+    if (closer_) {
         std::cerr << "ERROR: " << *this << " has not been closed" << std::endl;
     }
 }
