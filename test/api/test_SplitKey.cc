@@ -1,6 +1,7 @@
 
 #include "dasi/util/Test.h"
 
+#include "dasi/api/Key.h"
 #include "dasi/api/SplitKey.h"
 
 #include <sstream>
@@ -62,6 +63,15 @@ CASE("Construct from empty key") {
         ss << k;
         EXPECT(ss.str() == "[{key1:value1}, {key2:value2}, {key3:value3}]");
     }
+
+    {
+        dasi::api::Key joined {
+            {"key1", "value1"},
+            {"key2", "value2"},
+            {"key3", "value3"},
+        };
+        EXPECT(k.toKey() == joined);
+    }
 }
 
 CASE("Construct from initialiser list") {
@@ -92,6 +102,15 @@ CASE("Construct from initialiser list") {
         std::ostringstream ss;
         ss << k;
         EXPECT(ss.str() == "[{key1:value1}, {key2:value2}, {key3:value3}]");
+    }
+
+    {
+        dasi::api::Key joined {
+            {"key1", "value1"},
+            {"key2", "value2"},
+            {"key3", "value3"},
+        };
+        EXPECT(k.toKey() == joined);
     }
 }
 

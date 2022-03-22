@@ -34,6 +34,17 @@ public: // method
     template<typename KEY2>
     bool operator==(const SplitKeyT<KEY2>& rhs) const { return std::equal(keys_.begin(), keys_.end(), rhs.keys_.begin()); }
 
+    template<typename KEY2 = KEY>
+    KEY2 join() const {
+        KEY2 joined;
+        for (const auto& key : keys_) {
+            for (const auto &kv : key) {
+                joined.set(kv.first, kv.second);
+            }
+        }
+        return joined;
+    }
+
 private: // methods
 
     void print(std::ostream& s) const { s << keys_; }
