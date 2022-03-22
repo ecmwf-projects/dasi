@@ -119,6 +119,55 @@ CASE("Modify existing key") {
     }
 }
 
+CASE("Modify copied key") {
+
+    dasi::core::OrderedKey base {
+        {"key1", "value1"},
+        {"key2", "value2"},
+        {"key3", "value3"},
+    };
+
+    dasi::core::OrderedKey k(base);
+
+    {
+        std::ostringstream ss;
+        ss << k;
+        EXPECT(ss.str() == "{key1:value1, key2:value2, key3:value3}");
+    }
+
+    k.set("key1", "VALUE1a");
+    k.set("key3", "VALUE3b");
+
+    {
+        std::ostringstream ss;
+        ss << k;
+        EXPECT(ss.str() == "{key1:VALUE1a, key2:value2, key3:VALUE3b}");
+    }
+
+    // Test expected order
+
+    std::vector<std::pair<std::string, std::string>> expected {
+        {"key1", "VALUE1a"},
+        {"key2", "value2"},
+        {"key3", "VALUE3b"},
+    };
+
+    EXPECT(k.size() == expected.size());
+    int i = 0;
+    for (const auto& kv : k) {
+        EXPECT(kv.first == expected[i].first);
+        EXPECT(kv.second == expected[i++].second);
+    }
+
+    // Check that base is intact
+
+    {
+        std::ostringstream ss;
+        ss << base;
+        EXPECT(ss.str() == "{key1:value1, key2:value2, key3:value3}");
+    }
+}
+
 CASE("Test that clear() works") {
 
     dasi::core::OrderedKey k {

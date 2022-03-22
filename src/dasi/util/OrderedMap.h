@@ -71,6 +71,7 @@ public: // types
 public: // methods
 
     OrderedMap() = default;
+    OrderedMap(const OrderedMap& om);
     OrderedMap(std::initializer_list<value_type>);
 
 //    const T& operator[](const Key& key) const;
@@ -127,6 +128,16 @@ private: // members
 };
 
 //----------------------------------------------------------------------------------------------------------------------
+
+template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
+OrderedMap<Key, T, Compare, Allocator, VecAllocator>::OrderedMap(const OrderedMap& om) {
+    keys_.reserve(om.size());
+    for (const auto& kv : om) {
+        auto r = values_.emplace(kv);
+        ASSERT(r.second);
+        keys_.emplace_back(std::move(r.first));
+    }
+}
 
 template <typename Key, typename T, typename Compare, typename Allocator, typename VecAllocator>
 OrderedMap<Key, T, Compare, Allocator, VecAllocator>::OrderedMap(std::initializer_list<value_type> values) {

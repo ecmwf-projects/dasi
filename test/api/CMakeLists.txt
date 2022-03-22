@@ -3,6 +3,7 @@ list( APPEND _api_tests
     dasi
     key
     query
+    SplitKey
 )
 
 foreach( _test ${_api_tests} )
