@@ -9,7 +9,7 @@ namespace dasi::api {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-void RetrieveResult::append(Key&& key, ObjectLocation&& loc) {
+void RetrieveResult::append(SplitKey&& key, ObjectLocation&& loc) {
     values_.emplace_back(std::move(key), std::move(loc));
 }
 

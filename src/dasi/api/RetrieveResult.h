@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "dasi/api/Key.h"
+#include "dasi/api/SplitKey.h"
 #include "dasi/api/ObjectLocation.h"
 
 #include <vector>
@@ -16,12 +16,12 @@ class RetrieveResult {
 
 public: // types
 
-    using value_type = std::pair<Key, ObjectLocation>;
+    using value_type = std::pair<SplitKey, ObjectLocation>;
     using const_iterator = std::vector<value_type>::const_iterator;
 
 public: // methods
 
-    void append(Key&& key, ObjectLocation&& loc);
+    void append(SplitKey&& key, ObjectLocation&& loc);
 
     const_iterator begin() const { return values_.begin(); }
     const_iterator end() const { return values_.end(); }

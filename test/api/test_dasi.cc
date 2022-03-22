@@ -361,9 +361,27 @@ CASE("Dasi retrieve with iterator") {
         {"key3b", "value3b"},
     };
 
+    dasi::api::SplitKey exp_base {
+        {
+            {"key1", "value1"},
+            {"key2", "value2"},
+            {"key3", "value3"},
+        },
+        {
+            {"key1a", "value1a"},
+            {"key2a", "value2a"},
+            {"key3", "value3"},
+        },
+        {
+            {"key1b", "value1b"},
+            {"key2b", "value2b"},
+            {"key3b", "value3b"},
+        }
+    };
+
     size_t num_keys = 5;
     std::vector<std::string> vals;
-    std::map<std::string, std::pair<dasi::api::Key, std::string>> expected;
+    std::map<std::string, std::pair<dasi::api::SplitKey, std::string>> expected;
     vals.reserve(num_keys);
     const char templ[] = "TEST ";
     size_t data_len = sizeof(templ) - 1 + 2;
@@ -375,8 +393,10 @@ CASE("Dasi retrieve with iterator") {
         oss << templ << std::setw(2) << std::setfill('0') << i;
         dasi.archive(key, oss.str().c_str(), data_len);
         if (i % 2 == 0) {
+            dasi::api::SplitKey ekey(exp_base);
+            ekey[2].set("key2b", kv);
             vals.push_back(kv);
-            expected.emplace(kv, std::make_pair(key, oss.str()));
+            expected.emplace(kv, std::make_pair(ekey, oss.str()));
         }
     }
 
@@ -394,7 +414,7 @@ CASE("Dasi retrieve with iterator") {
     api::RetrieveResult result(dasi.retrieve(query));
 
     for (auto& [key, loc] : result) {
-        auto kv = key.get("key2b");
+        auto kv = key[2].get("key2b");
         auto it = expected.find(kv);
         EXPECT(it != expected.end());
         auto [ekey, edata] = it->second;

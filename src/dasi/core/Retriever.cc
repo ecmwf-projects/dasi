@@ -23,13 +23,7 @@ public: // methods
         std::cout << "Third level in retrieve!!!" << std::endl;
         DB& db = parent_.database(key[0]);
         auto result = db.retrieve(key);
-        api::Key key2;
-        for (int level = 0; level < 3; ++level) {
-            for (const auto& elem : key[level]) {
-                key2.set(elem.first, std::string{elem.second});
-            }
-        }
-        res_.append(std::move(key2), std::move(result));
+        res_.append(api::SplitKey(key), std::move(result));
     }
 
 private: // members
