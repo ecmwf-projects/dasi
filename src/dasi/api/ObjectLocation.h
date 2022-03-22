@@ -18,6 +18,7 @@ public: // types
 
 public: // methods
 
+    /// @note - If this becomes too constraining, we may want to add extra functionality (factory with ObjectLocation subclasses?)
     ObjectLocation(const std::string& type, const std::string& location, offset_type offset, length_type length);
     virtual ~ObjectLocation();
 
