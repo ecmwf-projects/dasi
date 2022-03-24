@@ -26,6 +26,7 @@ public: // methods
     bool has(const std::string_view& name) const;
 
     void set(const std::string& k, std::initializer_list<std::string> v);
+    void set(const std::string& k, const value_type& v);
 
     const value_type& get(const std::string_view& name) const;
 

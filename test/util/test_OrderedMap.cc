@@ -59,6 +59,40 @@ CASE("Construct an ordered map with an initialiser list") {
     }
 }
 
+CASE("Copy an ordered map and modify values") {
+
+    dasi::util::OrderedMap<std::string, std::string> base {
+        {"zzzz", "zvalue"},
+        {"yyyy", "yvalue"},
+        {"xxxx", "xvalue"}
+    };
+
+    std::vector<std::pair<std::string, std::string>> expected {
+        {"zzzz", "zvalue"},
+        {"yyyy", "yvalue"},
+        {"xxxx", "xvalue"}
+    };
+
+    dasi::util::OrderedMap<std::string, std::string> om(base);
+
+    EXPECT(om.size() == expected.size());
+    int i = 0;
+    for (const auto& kv : om) {
+        EXPECT(kv.first == expected[i].first);
+        EXPECT(kv.second == expected[i++].second);
+    }
+
+    om["yyyy"] = "ynew";
+
+    expected[1] = std::make_pair("yyyy", "ynew");
+    EXPECT(om.size() == expected.size());
+    i = 0;
+    for (const auto& kv : om) {
+        EXPECT(kv.first == expected[i].first);
+        EXPECT(kv.second == expected[i++].second);
+    }
+}
+
 CASE("We can iterate with mutable values") {
 
     dasi::util::OrderedMap<std::string, std::string> om {

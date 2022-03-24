@@ -23,21 +23,33 @@ ecbuild_add_library(
         api/Config.h
         api/Config.cc
         api/SplitKey.h
+        api/ReadHandle.h
+        api/RetrieveResult.cc
+        api/RetrieveResult.h
+        api/ObjectLocation.cc
+        api/ObjectLocation.h
 
         core/Archiver.cc
         core/Archiver.h
+        core/AggregatedReadHandle.cc
+        core/AggregatedReadHandle.h
         core/Catalogue.cc
         core/Catalogue.h
         core/DB.cc
         core/DB.h
+        core/HandleFactory.cc
+        core/HandleFactory.h
         core/KeyT.h
         core/OrderedReferenceKey.h
+        core/Retriever.cc
+        core/Retriever.h
         core/Schema.cc
         core/Schema.h
         core/SchemaKeyIterator.h
         core/SplitKeyT.h
         core/SplitReferenceKey.h
 
+        util/AutoCloser.h
         util/Buffer.cc
         util/Buffer.h
         util/CartesianProduct.h

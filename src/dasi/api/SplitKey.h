@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "dasi/api/Key.h"
 #include "dasi/core/SplitKeyT.h"
 #include "dasi/core/OrderedKey.h"
 #include "dasi/core/SplitReferenceKey.h"
@@ -28,6 +29,10 @@ public: // methods
         keys_[1] = rhs[1];
         keys_[2] = rhs[2];
         return *this;
+    }
+
+    Key toKey() const {
+        return join<Key>();
     }
 };
 

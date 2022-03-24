@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "dasi/api/ObjectLocation.h"
+
 #include <memory>
 
 namespace dasi::api {
@@ -24,6 +26,7 @@ public: // methods
     virtual ~DB();
 
     void archive(const SplitReferenceKey& key, const void* data, size_t length);
+    api::ObjectLocation retrieve(const SplitReferenceKey& key);
 
 private: // members
 

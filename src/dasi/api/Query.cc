@@ -25,6 +25,10 @@ void Query::set(const std::string& k, std::initializer_list<std::string> v) {
     values_.insert_or_assign(k, v);
 }
 
+void Query::set(const std::string& k, const value_type& v) {
+    values_.insert_or_assign(k, v);
+}
+
 auto Query::get(const std::string_view& name) const -> const value_type& {
     using util::StringBuilder;
     using util::KeyError;

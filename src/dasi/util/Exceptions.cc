@@ -64,6 +64,9 @@ UserError::UserError(const std::string_view& msg, const CodeLocation& loc) :
 InvalidConfiguration::InvalidConfiguration(const std::string_view& msg, const CodeLocation& loc) :
     UserError("Invalid configuration: "s += msg, loc) {}
 
+ObjectNotFound::ObjectNotFound(const std::string_view& msg, const CodeLocation& loc) :
+    UserError("Object not found: "s += msg, loc) {}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 } // namespace dasi

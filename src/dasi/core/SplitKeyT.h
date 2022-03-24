@@ -5,6 +5,7 @@
 #include <initializer_list>
 #include <iosfwd>
 #include <array>
+#include <algorithm>
 
 #include "dasi/core/OrderedReferenceKey.h"
 #include "dasi/util/ContainerIostream.h"
@@ -30,6 +31,20 @@ public: // method
 
     bool operator==(const SplitKeyT& rhs) { return keys_ == rhs.keys_; }
 
+    template<typename KEY2>
+    bool operator==(const SplitKeyT<KEY2>& rhs) const { return std::equal(keys_.begin(), keys_.end(), rhs.keys_.begin()); }
+
+    template<typename KEY2 = KEY>
+    KEY2 join() const {
+        KEY2 joined;
+        for (const auto& key : keys_) {
+            for (const auto &kv : key) {
+                joined.set(kv.first, kv.second);
+            }
+        }
+        return joined;
+    }
+
 private: // methods
 
     void print(std::ostream& s) const { s << keys_; }
@@ -40,6 +55,9 @@ private: // friends
         k.print(s);
         return s;
     }
+
+    template<typename KEY2>
+    friend class SplitKeyT;
 
 protected: // members
 
