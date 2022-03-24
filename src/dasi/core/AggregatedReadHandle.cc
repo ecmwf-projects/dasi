@@ -55,7 +55,7 @@ void AggregatedReadHandle::close() {
 
 void AggregatedReadHandle::openInternal() {
     (*current_)->open();
-    closer_.reset(new util::AutoCloser(**current_));
+    closer_.emplace(**current_);
 }
 
 void AggregatedReadHandle::print(std::ostream& s) const {

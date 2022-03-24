@@ -6,6 +6,7 @@
 #include "dasi/util/AutoCloser.h"
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 
@@ -40,7 +41,7 @@ private: // members
 
     HandleList handles_;
     HandleList::iterator current_;
-    std::unique_ptr<util::AutoCloser<ReadHandle>> closer_;
+    std::optional<util::AutoCloser<ReadHandle>> closer_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------
