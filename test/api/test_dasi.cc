@@ -87,7 +87,7 @@ public: // methods
 
     static api::ObjectLocation toLocation(const util::Buffer& buffer) {
         std::string loc = util::StringBuilder() << reinterpret_cast<const void*>(&buffer);
-        return api::ObjectLocation{type, loc, 0, buffer.size()};
+        return api::ObjectLocation{type, loc, 0, length_type(buffer.size())};
     }
 
 };

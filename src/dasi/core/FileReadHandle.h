@@ -19,7 +19,7 @@ class FileReadHandle : public api::ReadHandle {
 
 public: // methods
 
-    FileReadHandle(const std::filesystem::path& path, long long offset = 0);
+    FileReadHandle(const std::filesystem::path& path, long long offset = 0, long long length = -1);
     ~FileReadHandle();
 
     size_t read(void* buf, size_t len) override;
@@ -35,6 +35,8 @@ private: // members
 
     std::filesystem::path path_;
     long long offset_;
+    long long length_;
+    long long pos_;
     std::ifstream stream_;
 };
 
@@ -52,7 +54,7 @@ public: // methods
 
     api::ReadHandle* makeReadHandle(const std::string& location, offset_type offset, length_type length) override;
 
-    static api::ObjectLocation toLocation(const std::filesystem::path& path, long long offset = 0);
+    static api::ObjectLocation toLocation(const std::filesystem::path& path, long long offset = 0, long long length = -1);
 
 };
 
