@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "dasi/api/Dasi.h"
+#include "dasi/util/Buffer.h"
 #include "dasi/util/Exceptions.h"
 
 using dasi::util::UserError;
@@ -38,14 +39,14 @@ dasi::api::Key parseKey(const std::string& s) {
     return key;
 }
 
-void* readData(const char* filename, size_t* plen) {
+dasi::util::Buffer readData(const char* filename) {
     std::ifstream stream(filename, std::ios::binary);
     stream.seekg(0, std::ios_base::end);
-    *plen = stream.tellg();
+    size_t len = stream.tellg();
     stream.seekg(0);
-    auto buf = new char[*plen];
-    stream.read(buf, *plen);
-    return static_cast<void*>(buf);
+    dasi::util::Buffer buf(len);
+    stream.read(static_cast<char*>(buf.data()), len);
+    return buf;
 }
 
 
@@ -96,9 +97,8 @@ int main(int argc, char** argv) {
         for (const auto& arg : args) {
             auto key = parseKey(arg.first);
             std::cout << "Archiving " << key << std::endl;
-            size_t len;
-            void* data = readData(arg.second, &len);
-            dasi.archive(key, data, len);
+            auto buf = readData(arg.second);
+            dasi.archive(key, buf.data(), buf.size());
         }
     }
     catch (const UserError& e) {
