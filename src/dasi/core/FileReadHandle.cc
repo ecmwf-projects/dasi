@@ -1,6 +1,8 @@
 
 #include "dasi/core/FileReadHandle.h"
 
+#include "dasi/core/HandleFactory.h"
+
 #include <iostream>
 
 namespace dasi::core {
@@ -34,22 +36,16 @@ void FileReadHandle::close() {
     stream_.close();
 }
 
+api::ObjectLocation FileReadHandle::toLocation(const std::filesystem::path& path, long long offset, long long length) {
+    return api::ObjectLocation{type, path, offset, length};
+}
+
 void FileReadHandle::print(std::ostream& s) const {
     s << "FileReadHandle[" << path_ << "]";
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-FileHandleBuilder::FileHandleBuilder() : core::HandleBuilderBase(type) {}
-
-api::ReadHandle* FileHandleBuilder::makeReadHandle(const std::string& location, offset_type offset, length_type length) {
-    return new FileReadHandle(location, offset, length);
-}
-
-api::ObjectLocation FileHandleBuilder::toLocation(const std::filesystem::path& path, long long offset, long long length) {
-    return api::ObjectLocation{type, path, offset, length};
-}
-
-FileHandleBuilder fileBuilder;
+HandleBuilder<FileReadHandle> fileBuilder;
 
 }

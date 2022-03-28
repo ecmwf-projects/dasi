@@ -50,7 +50,7 @@ api::ObjectLocation ShelfCatalogue::retrieve(const core::SplitReferenceKey& key)
         oss << key;
         throw util::ObjectNotFound(oss.str(), Here());
     }
-    return core::FileHandleBuilder::toLocation(path);
+    return core::FileReadHandle::toLocation(path);
 }
 
 

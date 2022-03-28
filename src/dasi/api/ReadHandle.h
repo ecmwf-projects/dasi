@@ -13,6 +13,11 @@ namespace dasi::api {
 
 class ReadHandle {
 
+public: // types
+
+    using offset_type = long long;
+    using length_type = long long;  // -1 means unlimited length, if applicable
+
 public: // methods
 
     virtual ~ReadHandle() {}

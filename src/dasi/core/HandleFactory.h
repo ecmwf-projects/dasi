@@ -34,7 +34,27 @@ private: // members
 
 //----------------------------------------------------------------------------------------------------------------------
 
+template<typename HandleT>
+class HandleBuilder : public HandleBuilderBase {
+
+public: // methods
+
+    HandleBuilder() : HandleBuilderBase(HandleT::type) {}
+
+    api::ReadHandle* makeReadHandle(const std::string& location, offset_type offset, length_type length) override {
+        return new HandleT(location, offset, length);
+    }
+
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
 class HandleFactory {
+
+public: // types
+
+    using offset_type = HandleBuilderBase::offset_type;
+    using length_type = HandleBuilderBase::length_type;
 
 public: // methods
 
@@ -44,7 +64,7 @@ public: // methods
     void remove(const std::string& name);
 
     api::ReadHandle* buildReadHandle(const std::string& name, const std::string& location,
-        HandleBuilderBase::offset_type offset, HandleBuilderBase::length_type length);
+        offset_type offset, length_type length);
 
 private: // methods
 
