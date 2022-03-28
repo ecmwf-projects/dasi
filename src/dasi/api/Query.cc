@@ -29,6 +29,16 @@ void Query::set(const std::string& k, const value_type& v) {
     values_.insert_or_assign(k, v);
 }
 
+void Query::append(const std::string& k, const std::string& v) {
+    auto it = values_.find(k);
+    if (it == values_.end()) {
+        set(k, {v});
+        return;
+    }
+    values_[k].push_back(v);
+}
+
+
 auto Query::get(const std::string_view& name) const -> const value_type& {
     using util::StringBuilder;
     using util::KeyError;

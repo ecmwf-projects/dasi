@@ -23,21 +23,36 @@ CASE("Construct from empty request") {
     EXPECT(r.has("key1"));
     EXPECT(!r.has("key2"));
     EXPECT(!r.has("key3"));
+    EXPECT(!r.has("key4"));
 
     r.set("key2", {"value2"});
     EXPECT(r.has("key1"));
     EXPECT(r.has("key2"));
     EXPECT(!r.has("key3"));
+    EXPECT(!r.has("key4"));
 
     r.set("key3", {});
     EXPECT(r.has("key1"));
     EXPECT(r.has("key2"));
     EXPECT(r.has("key3"));
+    EXPECT(!r.has("key4"));
+
+    r.append("key4", "value4");
+    EXPECT(r.has("key1"));
+    EXPECT(r.has("key2"));
+    EXPECT(r.has("key3"));
+    EXPECT(r.has("key4"));
+
+    r.append("key4", "value4b");
+    EXPECT(r.has("key1"));
+    EXPECT(r.has("key2"));
+    EXPECT(r.has("key3"));
+    EXPECT(r.has("key4"));
 
     {
         std::ostringstream ss;
         ss << r;
-        EXPECT(ss.str() == "{key1:[value1a, value1b], key2:[value2], key3:[]}");
+        EXPECT(ss.str() == "{key1:[value1a, value1b], key2:[value2], key3:[], key4:[value4, value4b]}");
     }
 }
 

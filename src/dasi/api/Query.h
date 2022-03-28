@@ -28,6 +28,8 @@ public: // methods
     void set(const std::string& k, std::initializer_list<std::string> v);
     void set(const std::string& k, const value_type& v);
 
+    void append(const std::string& k, const std::string& v);
+
     const value_type& get(const std::string_view& name) const;
 
 private: // methods

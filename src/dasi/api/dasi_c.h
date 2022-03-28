@@ -76,6 +76,7 @@ dasi_error dasi_query_new(dasi_query_t **query);
 dasi_error dasi_query_destroy(dasi_query_t *query);
 
 dasi_error dasi_query_set(dasi_query_t *query, const char *keyword, const char *values[], size_t num);
+dasi_error dasi_query_append(dasi_query_t *query, const char *keyword, const char *value);
 
 //----------------------------------------------------------------------------------------------------------------------
 

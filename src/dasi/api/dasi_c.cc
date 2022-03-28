@@ -263,6 +263,15 @@ dasi_error dasi_query_set(dasi_query_t *query, const char *keyword, const char *
     });
 }
 
+dasi_error dasi_query_append(dasi_query_t *query, const char *keyword, const char *value) {
+    return wrapFunc([query, keyword, value] {
+        ASSERT(query != nullptr);
+        ASSERT(keyword != nullptr);
+        ASSERT(value != nullptr);
+        query->append(keyword, value);
+    });
+}
+
 //----------------------------------------------------------------------------------------------------------------------
 
 dasi_error dasi_retrieve_result_destroy(dasi_retrieve_result_t *result) {
