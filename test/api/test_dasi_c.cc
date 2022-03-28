@@ -27,11 +27,19 @@ using namespace dasi;
 
 class BufferReadHandle : public dasi::api::ReadHandle {
 
+public: // members
+
+    constexpr static const char* type = "buffer";
+
 public: // methods
 
     BufferReadHandle(const util::Buffer& buffer) :
         buffer_(buffer),
         pos_(0) {}
+
+    BufferReadHandle(const std::string& location, offset_type offset, length_type length) :
+        buffer_(deserialise(location)),
+        pos_(offset) {}
 
     size_t read(void* buf, size_t len) override {
         if (pos_ >= buffer_.size()) {
@@ -52,10 +60,23 @@ public: // methods
     void open() override {}
     void close() override {}
 
+    static api::ObjectLocation toLocation(const util::Buffer& buffer) {
+        std::string loc = util::StringBuilder() << reinterpret_cast<const void*>(&buffer);
+        return api::ObjectLocation{type, loc, 0, length_type(buffer.size())};
+    }
+
 private: // methods
 
     void print(std::ostream& s) const override {
         s << "BufferReadHandle";
+    }
+
+    static const util::Buffer& deserialise(const std::string& location) {
+        std::istringstream iss(location);
+        void* buf;
+        iss >> buf;
+        ASSERT(buf != nullptr);
+        return *reinterpret_cast<const util::Buffer*>(buf);
     }
 
 private: // members
@@ -65,32 +86,7 @@ private: // members
 
 };
 
-class BufferHandleBuilder : public dasi::core::HandleBuilderBase {
-
-public: // members
-
-    constexpr static const char* type = "buffer";
-
-public: // methods
-
-    BufferHandleBuilder() : core::HandleBuilderBase(type) {}
-
-    api::ReadHandle* makeReadHandle(const std::string& location, offset_type offset, length_type length) override {
-        std::istringstream iss(location);
-        void* buf;
-        iss >> buf;
-        ASSERT(buf != nullptr);
-        return new BufferReadHandle(*reinterpret_cast<const util::Buffer*>(buf));
-    }
-
-    static api::ObjectLocation toLocation(const util::Buffer& buffer) {
-        std::string loc = util::StringBuilder() << reinterpret_cast<const void*>(&buffer);
-        return api::ObjectLocation{type, loc, 0, buffer.size()};
-    }
-
-};
-
-BufferHandleBuilder bufferBuilder;
+core::HandleBuilder<BufferReadHandle> bufferBuilder;
 
 std::vector<std::pair<api::SplitKey, util::Buffer>> ARCHIVED_DATA;
 
@@ -126,7 +122,7 @@ private: // methods
             oss << key;
             throw dasi::util::ObjectNotFound(oss.str(), Here());
         }
-        return BufferHandleBuilder::toLocation(it->second);
+        return BufferReadHandle::toLocation(it->second);
     }
 
     void print(std::ostream& s) const override {
