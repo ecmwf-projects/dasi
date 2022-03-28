@@ -18,6 +18,8 @@ class Buffer  {
 
 public:  // methods
 
+    /// Allocate given length in bytes
+    Buffer(size_t len);
     /// Allocate and copy memory of given length in bytes
     Buffer(const void*, size_t len);
 

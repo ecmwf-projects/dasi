@@ -22,6 +22,11 @@ static void deallocate(char* buffer) {
 
 //----------------------------------------------------------------------------------------------------------------------
 
+Buffer::Buffer(size_t len) :
+    size_(len) {
+    create();
+}
+
 Buffer::Buffer(const void* p, size_t len) :
     size_(len) {
     create();
