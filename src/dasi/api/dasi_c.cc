@@ -9,6 +9,7 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <string>
 #include <sstream>
 
 using namespace dasi::api;
@@ -92,6 +93,8 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------
 
+static std::string g_current_error;
+
 static dasi_error _wrapInner(std::function<void()> f) {
     f();
     return DASI_SUCCESS;
@@ -108,23 +111,43 @@ static dasi_error wrapFunc(F f) {
     }
     catch (dasi::util::ObjectNotFound& e) {
         std::cerr << e.what() << std::endl;
+        g_current_error = e.what();
         return DASI_NOT_FOUND;
     }
     catch (dasi::util::Exception& e) {
         std::cerr << "Caught DASI error: " << e.what() << std::endl;
+        g_current_error = e.what();
         return DASI_ERROR;
     }
     catch (std::exception& e) {
         std::cerr << "Caught unexpected error: " << e.what() << std::endl;
+        g_current_error = e.what();
         return DASI_UNEXPECTED;
     }
     catch (...) {
         std::cerr << "Caught unknown error" << std::endl;
+        g_current_error = "Unknown";
         return DASI_UNEXPECTED;
     }
 }
 
 extern "C" {
+
+const char *dasi_error_str(dasi_error err) {
+    switch(err) {
+    case DASI_SUCCESS:
+        return "Success";
+    case DASI_ERROR:
+    case DASI_UNEXPECTED:
+    case DASI_NOT_FOUND:
+        return g_current_error.c_str();
+    case DASI_ITERATOR_END:
+        return "No more items";
+    default:
+        return "<unknown>";
+    }
+    ASSERT(false);
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
