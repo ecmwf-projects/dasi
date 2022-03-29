@@ -1,6 +1,8 @@
 
 * Shelf store: use POSIX API rather than std::fstream?
 * Clarify flush semantics (add a flush call to the API)
+* Add WriteHandle infrastructure, for readHandle->saveInto(writeHandle)?
+* Move parseKey / parseQuery out of the source files of the CLI tools
 
 * Should we nuke the ReferenceKey types - are they too much complexity
 * A SharedString type
