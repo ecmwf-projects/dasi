@@ -27,6 +27,8 @@ else()
     set( YAML_CPP_LIBRARIES "${CMAKE_CURRENT_BINARY_DIR}/contrib/yaml-cpp/lib/libyaml-cpp.a" )
 endif()
 
+ecbuild_add_option(FEATURE PYTHON REQUIRED_PACKAGES "Python3 COMPONENTS Interpreter")
+
 add_subdirectory( src )
 add_subdirectory( test )
 

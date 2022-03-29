@@ -1,3 +1,6 @@
 contrib/*
 .idea/*
 build
+*.egg-info
+__pycache__
+*.pyc
