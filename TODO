@@ -3,6 +3,11 @@
 * Clarify flush semantics (add a flush call to the API)
 * Add WriteHandle infrastructure, for readHandle->saveInto(writeHandle)?
 * Move parseKey / parseQuery out of the source files of the CLI tools
+* C API: test error handling
+* C API: refactor?
+  - Rename dasi_session_t to dasi_t
+  - dasi_<type>_<action> vs dasi_<new/free>_<type>
+  - dasi_retrieve_result_iterate vs dasi_retrieve_iterator_new
 
 * Should we nuke the ReferenceKey types - are they too much complexity
 * A SharedString type
