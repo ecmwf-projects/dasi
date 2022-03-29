@@ -1,4 +1,7 @@
 
+* Shelf store: use POSIX API rather than std::fstream?
+* Clarify flush semantics (add a flush call to the API)
+
 * Should we nuke the ReferenceKey types - are they too much complexity
 * A SharedString type
     - Can be used for the Keys in various Maps

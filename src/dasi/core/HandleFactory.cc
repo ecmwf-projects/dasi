@@ -36,7 +36,7 @@ void HandleFactory::remove(const std::string& name) {
 }
 
 api::ReadHandle* HandleFactory::buildReadHandle(const std::string& name, const std::string& location,
-    HandleBuilderBase::offset_type offset, HandleBuilderBase::length_type length) {
+    offset_type offset, length_type length) {
 
     auto it = builders_.find(name);
 

@@ -37,6 +37,8 @@ ecbuild_add_library(
         core/Catalogue.h
         core/DB.cc
         core/DB.h
+        core/FileReadHandle.cc
+        core/FileReadHandle.h
         core/HandleFactory.cc
         core/HandleFactory.h
         core/KeyT.h
@@ -48,6 +50,9 @@ ecbuild_add_library(
         core/SchemaKeyIterator.h
         core/SplitKeyT.h
         core/SplitReferenceKey.h
+
+        shelf/ShelfCatalogue.cc
+        shelf/ShelfCatalogue.h
 
         util/AutoCloser.h
         util/Buffer.cc
