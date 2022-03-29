@@ -7,9 +7,9 @@ project( dasi LANGUAGES CXX C )
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(yaml-cpp 0.6.0)
+find_package(yaml-cpp 0.6.0 QUIET)
 
-if(DEFINED "yaml-cpp_FOUND")
+if(yaml-cpp_FOUND)
     message(STATUS "Found yaml-cpp (${yaml-cpp_CONFIG})")
 else()
     include(ExternalProject)
