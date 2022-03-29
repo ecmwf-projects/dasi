@@ -8,6 +8,8 @@
   - Rename dasi_session_t to dasi_t
   - dasi_<type>_<action> vs dasi_<new/free>_<type>
   - dasi_retrieve_result_iterate vs dasi_retrieve_iterator_new
+* Python API: test error handling
+* Python API: script the generation of the stripped down header for cffi
 
 * Should we nuke the ReferenceKey types - are they too much complexity
 * A SharedString type
