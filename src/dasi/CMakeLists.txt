@@ -15,6 +15,8 @@ ecbuild_add_library(
     SOURCES
         api/Dasi.cc
         api/Dasi.h
+        api/dasi_c.cc
+        api/dasi_c.h
         api/Key.h
         api/Query.cc
         api/Query.h
