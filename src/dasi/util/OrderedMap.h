@@ -16,7 +16,7 @@ template <typename Key,
           typename T,
           typename Compare = std::less<Key>,
           typename Allocator = std::allocator<std::pair<const Key, T>>,
-          typename VecAllocator = std::allocator<typename std::map<Key, T, Compare, Allocator>::const_iterator>>
+          typename VecAllocator = std::allocator<typename std::map<Key, T, Compare, Allocator>::iterator>>
 class OrderedMap {
 
 private: // types

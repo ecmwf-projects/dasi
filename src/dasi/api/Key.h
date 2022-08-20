@@ -10,7 +10,10 @@ namespace dasi::api {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-using Key = core::KeyT<::std::map, std::string>;
+// Avoid compiler unhappiness on variable number of template arguments to std::map<>. Enforce 3.
+template <typename K, typename T, typename C> using KeyMap = std::map<K, T, C>;
+
+using Key = core::KeyT<KeyMap, std::string>;
 
 //----------------------------------------------------------------------------------------------------------------------
 

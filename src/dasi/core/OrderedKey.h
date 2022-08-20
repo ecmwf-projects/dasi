@@ -15,7 +15,9 @@ namespace dasi::core {
 // This class implements Key, but:
 // i) Maintains order (as constructed by Schema)
 
-class OrderedKey : public KeyT<util::OrderedMap, std::string> {
+template <typename K, typename T, typename C> using OrderedKeyMap = util::OrderedMap<K, T, C>;
+
+class OrderedKey : public KeyT<OrderedKeyMap, std::string> {
 
 public: // methods
     using KeyT::KeyT;

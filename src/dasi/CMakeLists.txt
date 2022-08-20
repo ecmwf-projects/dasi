@@ -5,9 +5,7 @@ ecbuild_add_library(
     INSTALL_HEADERS LISTED
     DEPENDS yaml-cpp
     PRIVATE_LIBS
-        "${YAML_CPP_LIBRARIES}"
-    PRIVATE_INCLUDES
-        "${YAML_CPP_INCLUDE_DIR}"
+        yaml-cpp
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>

@@ -14,7 +14,9 @@ namespace dasi::core {
 // i) Maintains order (as constructed by Schema)
 // ii) Stores string_views, to avoid unecessary string copies
 
-class OrderedReferenceKey : public KeyT<util::OrderedMap, std::string_view> {
+template <typename K, typename T, typename C> using OrderedReferenceKeyMap = util::OrderedMap<K, T, C>;
+
+class OrderedReferenceKey : public KeyT<OrderedReferenceKeyMap, std::string_view> {
 public:
     using KeyT::KeyT;
 };

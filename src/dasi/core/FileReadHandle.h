@@ -29,7 +29,7 @@ public: // methods
     void open() override;
     void close() override;
 
-    static api::ObjectLocation toLocation(const std::filesystem::path& path, long long offset = 0, long long length = -1);
+    api::ObjectLocation toLocation() const;
 
 private: // methods
 

@@ -7,10 +7,11 @@
 #include "dasi/util/Colour.h"
 
 #include <functional>
-#include <string>
-#include <sstream>
 #include <iostream>
 #include <set>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace dasi::util {
 

@@ -1,4 +1,6 @@
 
+
+
 * Shelf store: use POSIX API rather than std::fstream?
 * Clarify flush semantics (add a flush call to the API)
 * Add WriteHandle infrastructure, for readHandle->saveInto(writeHandle)?

@@ -36,8 +36,8 @@ void FileReadHandle::close() {
     stream_.close();
 }
 
-api::ObjectLocation FileReadHandle::toLocation(const std::filesystem::path& path, long long offset, long long length) {
-    return api::ObjectLocation{type, path, offset, length};
+api::ObjectLocation FileReadHandle::toLocation() const {
+    return api::ObjectLocation{type, path_, offset_, length_};
 }
 
 void FileReadHandle::print(std::ostream& s) const {

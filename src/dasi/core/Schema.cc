@@ -76,6 +76,8 @@ void SchemaRuleParent<TSelf, ChildRule, LEVEL>::print(std::ostream& s) const {
 // Explicitly instantiate only these instances in this unit
 
 template class SchemaRule<SchemaRule3, 2>;
+template class SchemaRule<SchemaRule2, 1>;   // Only needed for clang/mac happiness
+template class SchemaRule<SchemaRule1, 0>;   // Only needed for clang/mac happiness
 template class SchemaRuleParent<SchemaRule2, SchemaRule3, 1>;
 template class SchemaRuleParent<SchemaRule1, SchemaRule2, 0>;
 
