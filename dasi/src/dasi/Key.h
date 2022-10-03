@@ -57,6 +57,7 @@ public: // methods
 
 private: // methods
 
+    /// TODO: It would be nice to have an elegant custom formatting
     void print(std::ostream& s) const;
 
 private: // friends

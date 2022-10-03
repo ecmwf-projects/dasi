@@ -2,6 +2,7 @@
 list( APPEND _dasi_tests
     simple_archive
     key
+    query
 )
 
 foreach( _test ${_dasi_tests} )
