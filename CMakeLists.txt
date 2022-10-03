@@ -12,7 +12,7 @@ cmake_minimum_required( VERSION 3.12 FATAL_ERROR )
 
 find_package( ecbuild 3.6 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild ${CMAKE_CURRENT_SOURCE_DIR}/../../ecsdk/ecbuild)
 
-project( FDBBundle LANGUAGES C CXX )
+project( DASIBundle LANGUAGES C CXX )
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,9 +21,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ecbuild_bundle_initialize()
 
-ecbuild_bundle( PROJECT eccodes      GIT "ssh://git@git.ecmwf.int/eccodes/eccodes"   BRANCH master UPDATE)
-ecbuild_bundle( PROJECT eckit        GIT "ssh://git@git.ecmwf.int/ecsdk/eckit"       BRANCH master UPDATE)
-ecbuild_bundle( PROJECT metkit       GIT "ssh://git@git.ecmwf.int/ecsdk/metkit"      BRANCH master UPDATE)
-ecbuild_bundle( PROJECT fdb5         GIT "ssh://git@git.ecmwf.int/mars/fdb5"         BRANCH master UPDATE)
+ecbuild_bundle( PROJECT eckit        GIT "ssh://git@git.ecmwf.int/ecsdk/eckit"       BRANCH develop UPDATE)
+ecbuild_bundle( PROJECT metkit       GIT "ssh://git@git.ecmwf.int/ecsdk/metkit"      BRANCH develop UPDATE)
+ecbuild_bundle( PROJECT fdb5         GIT "ssh://git@git.ecmwf.int/mars/fdb5"         BRANCH feature/FDB-296 UPDATE)
+ecbuild_bundle( PROJECT dasi         GIT "ssh://git@git.ecmwf.int/mars/dasi"         BRANCH develop UPDATE)
 
 ecbuild_bundle_finalize()
