@@ -37,8 +37,8 @@ typedef enum dasi_error dasi_error;
 
 /// Types
 
-struct dasi_session_t;
-typedef struct dasi_session_t dasi_session_t;
+struct dasi_t;
+typedef struct dasi_t dasi_t;
 
 struct dasi_key_t;
 typedef struct dasi_key_t dasi_key_t;
@@ -60,17 +60,17 @@ typedef struct dasi_read_handle_t dasi_read_handle_t;
 /// Session
 
 /// Open a session using the given configuration file. Returns a new session object.
-dasi_error dasi_open(const char *filename, dasi_session_t **session);
+dasi_error dasi_open(const char *filename, dasi_t **session);
 /// Open a session using the given configuration string. Returns a new session object.
-dasi_error dasi_open_str(const char *config, dasi_session_t **session);
+dasi_error dasi_open_str(const char *config, dasi_t **session);
 /// Close the session and release the object.
-dasi_error dasi_close(dasi_session_t *session);
+dasi_error dasi_close(dasi_t *session);
 
 /// Store an object.
-dasi_error dasi_put(dasi_session_t *session, dasi_key_t *key, const void *data, size_t len);
+dasi_error dasi_put(dasi_t *session, dasi_key_t *key, const void *data, size_t len);
 
 /// Make a query to retrieve objects. Returns a new result object.
-dasi_error dasi_get(dasi_session_t *session, dasi_query_t *query, dasi_retrieve_result_t **result);
+dasi_error dasi_get(dasi_t *session, dasi_query_t *query, dasi_retrieve_result_t **result);
 
 //----------------------------------------------------------------------------------------------------------------------
 

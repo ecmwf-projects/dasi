@@ -49,8 +49,8 @@ def wrap(fun, out=None, gc=None):
     return wrapped
 
 
-open = wrap(lib.dasi_open, out="dasi_session_t **", gc=lib.dasi_close)
-open_str = wrap(lib.dasi_open_str, out="dasi_session_t **", gc=lib.dasi_close)
+open = wrap(lib.dasi_open, out="dasi_t **", gc=lib.dasi_close)
+open_str = wrap(lib.dasi_open_str, out="dasi_t **", gc=lib.dasi_close)
 close = wrap(lib.dasi_close)
 put = wrap(lib.dasi_put)
 get = wrap(lib.dasi_get, out="dasi_retrieve_result_t **", gc=lib.dasi_retrieve_result_destroy)

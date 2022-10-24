@@ -7,8 +7,8 @@ enum dasi_error {
 };
 typedef enum dasi_error dasi_error;
 
-struct dasi_session_t;
-typedef struct dasi_session_t dasi_session_t;
+struct dasi_t;
+typedef struct dasi_t dasi_t;
 
 struct dasi_key_t;
 typedef struct dasi_key_t dasi_key_t;
@@ -25,11 +25,11 @@ typedef struct dasi_retrieve_iterator_t dasi_retrieve_iterator_t;
 struct dasi_read_handle_t;
 typedef struct dasi_read_handle_t dasi_read_handle_t;
 
-dasi_error dasi_open(const char *filename, dasi_session_t **session);
-dasi_error dasi_open_str(const char *config, dasi_session_t **session);
-dasi_error dasi_close(dasi_session_t *session);
-dasi_error dasi_put(dasi_session_t *session, dasi_key_t *key, const void *data, size_t len);
-dasi_error dasi_get(dasi_session_t *session, dasi_query_t *query, dasi_retrieve_result_t **result);
+dasi_error dasi_open(const char *filename, dasi_t **session);
+dasi_error dasi_open_str(const char *config, dasi_t **session);
+dasi_error dasi_close(dasi_t *session);
+dasi_error dasi_put(dasi_t *session, dasi_key_t *key, const void *data, size_t len);
+dasi_error dasi_get(dasi_t *session, dasi_query_t *query, dasi_retrieve_result_t **result);
 
 dasi_error dasi_key_new(dasi_key_t **key);
 dasi_error dasi_key_copy(const dasi_key_t *from, dasi_key_t **to);

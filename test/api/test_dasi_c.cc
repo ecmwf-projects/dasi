@@ -167,7 +167,7 @@ namespace detail {
     void cleanup(T*);
 
     template<>
-    void cleanup(dasi_session_t* ptr) { dasi_close(ptr); }
+    void cleanup(dasi_t* ptr) { dasi_close(ptr); }
 
     template<>
     void cleanup(dasi_key_t* ptr) { dasi_key_destroy(ptr); }
@@ -202,7 +202,7 @@ struct HandleCloser {
 CASE("Dasi simple archive") {
     ARCHIVED_DATA.clear();
 
-    dasi_session_t* session;
+    dasi_t* session;
     DASI_CHECK(dasi_open_str(TEST_CONFIG, &session));
     Destructor sessionD(session);
 
@@ -248,7 +248,7 @@ CASE("Dasi simple archive") {
 CASE("Dasi archive with invalid key") {
     ARCHIVED_DATA.clear();
 
-    dasi_session_t* session;
+    dasi_t* session;
     DASI_CHECK(dasi_open_str(TEST_CONFIG, &session));
     Destructor sessionD(session);
 
@@ -304,7 +304,7 @@ CASE("Dasi archive with invalid key") {
 CASE("Dasi simple retrieve") {
     ARCHIVED_DATA.clear();
 
-    dasi_session_t* session;
+    dasi_t* session;
     DASI_CHECK(dasi_open_str(TEST_CONFIG, &session));
     Destructor sessionD(session);
 
@@ -357,7 +357,7 @@ CASE("Dasi simple retrieve") {
 CASE("Dasi retrieve multiple objects") {
     ARCHIVED_DATA.clear();
 
-    dasi_session_t* session;
+    dasi_t* session;
     DASI_CHECK(dasi_open_str(TEST_CONFIG, &session));
     Destructor sessionD(session);
 
@@ -418,7 +418,7 @@ CASE("Dasi retrieve multiple objects") {
 CASE("Dasi retrieve with iterator") {
     ARCHIVED_DATA.clear();
 
-    dasi_session_t* session;
+    dasi_t* session;
     DASI_CHECK(dasi_open_str(TEST_CONFIG, &session));
     Destructor sessionD(session);
 
@@ -510,7 +510,7 @@ CASE("Dasi retrieve with iterator") {
 CASE("Dasi retrieve with no data matched") {
     ARCHIVED_DATA.clear();
 
-    dasi_session_t* session;
+    dasi_t* session;
     DASI_CHECK(dasi_open_str(TEST_CONFIG, &session));
     Destructor sessionD(session);
 
@@ -548,7 +548,7 @@ CASE("Dasi retrieve with no data matched") {
 CASE("Dasi retrieve with partial data") {
     ARCHIVED_DATA.clear();
 
-    dasi_session_t* session;
+    dasi_t* session;
     DASI_CHECK(dasi_open_str(TEST_CONFIG, &session));
     Destructor sessionD(session);
 

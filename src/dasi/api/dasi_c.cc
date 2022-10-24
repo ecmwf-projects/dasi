@@ -16,7 +16,7 @@ using namespace dasi::api;
 
 extern "C" {
 
-struct dasi_session_t : public Dasi {
+struct dasi_t : public Dasi {
     using Dasi::Dasi;
 };
 
@@ -151,32 +151,32 @@ const char *dasi_error_str(dasi_error err) {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-dasi_error dasi_open(const char *filename, dasi_session_t **session) {
+dasi_error dasi_open(const char *filename, dasi_t **session) {
     return wrapFunc([filename, session] {
         ASSERT(filename != nullptr);
         ASSERT(session != nullptr);
         std::ifstream in(filename);
-        *session = new dasi_session_t(in);
+        *session = new dasi_t(in);
     });
 }
 
-dasi_error dasi_open_str(const char *config, dasi_session_t **session) {
+dasi_error dasi_open_str(const char *config, dasi_t **session) {
     return wrapFunc([config, session] {
         ASSERT(config != nullptr);
         ASSERT(session != nullptr);
         std::istringstream in(config);
-        *session = new dasi_session_t(in);
+        *session = new dasi_t(in);
     });
 }
 
-dasi_error dasi_close(dasi_session_t *session) {
+dasi_error dasi_close(dasi_t *session) {
     return wrapFunc([session] {
         ASSERT(session != nullptr);
         delete session;
     });
 }
 
-dasi_error dasi_put(dasi_session_t *session, dasi_key_t *key, const void *data, size_t len) {
+dasi_error dasi_put(dasi_t *session, dasi_key_t *key, const void *data, size_t len) {
     return wrapFunc([session, key, data, len] {
         ASSERT(session != nullptr);
         ASSERT(key != nullptr);
@@ -185,7 +185,7 @@ dasi_error dasi_put(dasi_session_t *session, dasi_key_t *key, const void *data, 
     });
 }
 
-dasi_error dasi_get(dasi_session_t *session, dasi_query_t *query, dasi_retrieve_result_t **result) {
+dasi_error dasi_get(dasi_t *session, dasi_query_t *query, dasi_retrieve_result_t **result) {
     return wrapFunc([session, query, result] {
         ASSERT(session != nullptr);
         ASSERT(query != nullptr);
