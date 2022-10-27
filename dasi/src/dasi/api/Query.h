@@ -47,6 +47,11 @@ public: // methods
 
     const value_type& get(const std::string_view& name) const;
 
+    map_type::const_iterator begin() const;
+    map_type::const_iterator end() const;
+    map_type::const_iterator cbegin() const;
+    map_type::const_iterator cend() const;
+
 private: // methods
 
     /// TODO: It would be nice to have a query-specific nice formatting

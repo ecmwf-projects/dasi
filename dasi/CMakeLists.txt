@@ -12,9 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ecbuild_find_package( NAME eckit  VERSION 1.12 REQUIRED )
 
-ecbuild_find_package( NAME metkit VERSION 1.5 REQUIRED )
+ecbuild_find_package( NAME metkit VERSION 1.9 REQUIRED )
 
-ecbuild_find_package( NAME metkit VERSION 5.10 REQUIRED )
+ecbuild_find_package( NAME fdb5 VERSION 5.11 REQUIRED )
 
 add_subdirectory( src )
 add_subdirectory( tests )

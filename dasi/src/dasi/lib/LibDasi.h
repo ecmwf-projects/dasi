@@ -8,46 +8,32 @@
  * does it submit to any jurisdiction.
  */
 
-
 /// @author Simon Smart
-/// @date   Sep 2022
+/// @date   Oct 2022
 
 #pragma once
 
-#include "dasi/Key.h"
-//#include "dasi/Query.h"
+#include "eckit/system/Library.h"
 
-#include <memory>
 
 namespace dasi {
 
 //-------------------------------------------------------------------------------------------------
 
-class DasiImpl;
-
-class Dasi {
+class LibDasi : public eckit::system::Library {
 
 public: // methods
 
-    /** Dasi Constructor.
-     *  \param dasi_config A YAML configuration for Dasi. Specifies where data is stored
-     *  \param application_config A configuration for runtime-specific overrides within Dasi. Controls how data is written/read
-     */
-    explicit Dasi(const char* dasi_config, const char* application_config=nullptr);
+    static LibDasi& instance();
 
-    ~Dasi();
+private: // methods
 
-    void archive(const Key& key, const void* data, size_t length);
+    LibDasi();
 
-    //ListGenerator list(const Query& request);
-
-private: // members
-
-    std::unique_ptr<DasiImpl> impl_;
+    std::string version() const override;
+    std::string gitsha1(unsigned int count) const override;
 };
 
 //-------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-
-

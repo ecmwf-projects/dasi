@@ -1,6 +1,6 @@
 #include "eckit/testing/Test.h"
 
-#include "dasi/Query.h"
+#include "dasi/api/Query.h"
 
 #include <sstream>
 #include <string>
@@ -70,6 +70,29 @@ CASE("Construct from initialiser list") {
     EXPECT(r.has("key2"));
     EXPECT(r.has("key3"));
     EXPECT(!r.has("other"));
+
+    bool k1 = false;
+    bool k2 = false;
+    bool k3 = false;
+    int count = 0;
+    for (const auto& kv : r) {
+        ++count;
+        if (kv.first == "key1") {
+            EXPECT(kv.second.size() == 0);
+            k1 = true;
+        } else if (kv.first == "key2") {
+            EXPECT(kv.second.size() == 1);
+            EXPECT(kv.second[0] == "value2");
+            k2 = true;
+        } else if (kv.first == "key3") {
+            EXPECT(kv.second.size() == 2);
+            EXPECT(kv.second[0] == "value3a");
+            EXPECT(kv.second[1] == "value3b");
+            k3 = true;
+        }
+    }
+    EXPECT(count == 3);
+    EXPECT(k1 && k2 && k3);
 
     std::ostringstream ss;
     ss << r;

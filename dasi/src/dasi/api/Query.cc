@@ -1,5 +1,5 @@
 
-#include "dasi/Query.h"
+#include "Query.h"
 
 #include "eckit/types/Types.h"
 #include "eckit/exception/Exceptions.h"
@@ -47,6 +47,23 @@ auto Query::get(const std::string_view& name) const -> const value_type& {
     }
     return it->second;
 }
+
+Query::map_type::const_iterator Query::begin() const {
+    return cbegin();
+}
+
+Query::map_type::const_iterator Query::end() const {
+    return cend();
+}
+
+Query::map_type::const_iterator Query::cbegin() const {
+    return values_.cbegin();
+}
+
+Query::map_type::const_iterator Query::cend() const {
+    return values_.cend();
+}
+
 //-------------------------------------------------------------------------------------------------
 
 }

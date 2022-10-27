@@ -1,4 +1,6 @@
 
+configure_file(lib/dasi_version.h.in dasi_version.h )
+
 ecbuild_add_library(
     TARGET dasi
     TYPE SHARED
@@ -10,13 +12,24 @@ ecbuild_add_library(
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
 
     SOURCES
-        Dasi.cc
-        Dasi.h
-        Key.cc
-        Key.h
-        Query.cc
-        Query.h
+        api/Dasi.cc
+        api/Dasi.h
+        api/Key.cc
+        api/Key.h
+        api/Query.cc
+        api/Query.h
+
+        api/detail/ListGenerator.cc
+        api/detail/ListGenerator.h
+        api/detail/ListGeneratorImpl.cc
+        api/detail/ListGeneratorImpl.h
+
+        lib/LibDasi.cc
+        lib/LibDasi.h
 
     PUBLIC_LIBS
         eckit
+
+    PRIVATE_LIBS
+        fdb5
 )

@@ -11,7 +11,7 @@
 
 #include "eckit/testing/Test.h"
 
-#include "dasi/Key.h"
+#include "dasi/api/Key.h"
 
 #include <sstream>
 #include <string>
