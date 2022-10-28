@@ -1,7 +1,7 @@
 
 #include "LibDasi.h"
 
-#include "dasi/dasi_version.h"
+#include "dasi/lib/dasi_version.h"
 
 
 namespace dasi {

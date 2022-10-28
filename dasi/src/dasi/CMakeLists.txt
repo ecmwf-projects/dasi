@@ -1,5 +1,5 @@
 
-configure_file(lib/dasi_version.h.in dasi_version.h )
+configure_file( lib/dasi_version.h.in lib/dasi_version.h )
 
 ecbuild_add_library(
     TARGET dasi
@@ -27,9 +27,14 @@ ecbuild_add_library(
         lib/LibDasi.cc
         lib/LibDasi.h
 
+        tools/DASITool.cc
+        tools/DASITool.h
+
     PUBLIC_LIBS
         eckit
 
     PRIVATE_LIBS
         fdb5
 )
+
+add_subdirectory( tools )
