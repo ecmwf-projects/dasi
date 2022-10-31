@@ -83,7 +83,33 @@ public:
         ASSERT(begin_ != end_);
         return new dasi_read_handle_t((*begin_).second.toHandle());
     }
-    
+
+private:
+    wrapped begin_;
+    wrapped end_;
+};
+
+struct dasi_key_iterator_t {
+public:
+    using wrapped = Key::map_type::const_iterator;
+
+    dasi_key_iterator_t(wrapped&& begin, wrapped&& end) : begin_(std::move(begin)), end_(std::move(end)) {}
+
+    bool next() {
+        ++begin_;
+        return begin_ != end_;
+    }
+
+    const char *keyword() const {
+        ASSERT(begin_ != end_);
+        return (*begin_).first.c_str();
+    }
+
+    const char *value() const {
+        ASSERT(begin_ != end_);
+        return (*begin_).second.c_str();
+    }
+
 private:
     wrapped begin_;
     wrapped end_;
@@ -244,6 +270,14 @@ dasi_error dasi_key_get(dasi_key_t *key, const char *keyword, const char **value
     });
 }
 
+dasi_error dasi_key_iterate(dasi_key_t *key, dasi_key_iterator_t **iterator) {
+    return wrapFunc([key, iterator] {
+        ASSERT(key != nullptr);
+        ASSERT(iterator != nullptr);
+        *iterator = new dasi_key_iterator_t(key->begin(), key->end());
+    });
+}
+
 dasi_error dasi_key_cmp(dasi_key_t *lhs, dasi_key_t *rhs, int *result) {
     return wrapFunc([lhs, rhs, result] {
         ASSERT(lhs != nullptr);
@@ -258,6 +292,38 @@ dasi_error dasi_key_cmp(dasi_key_t *lhs, dasi_key_t *rhs, int *result) {
         else {
             *result = 1;
         }
+    });
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+dasi_error dasi_key_iterator_destroy(dasi_key_iterator_t *iterator) {
+    return wrapFunc([iterator] {
+        ASSERT(iterator != nullptr);
+        delete iterator;
+    });
+}
+
+dasi_error dasi_key_iterator_next(dasi_key_iterator_t *iterator) {
+    return wrapFunc([iterator] (int) {
+        ASSERT(iterator != nullptr);
+        return iterator->next()? DASI_SUCCESS : DASI_ITERATOR_END;
+    });
+}
+
+dasi_error dasi_key_iterator_get_keyword(dasi_key_iterator_t *iterator, const char **keyword) {
+    return wrapFunc([iterator, keyword] {
+        ASSERT(iterator != nullptr);
+        ASSERT(keyword != nullptr);
+        *keyword = iterator->keyword();
+    });
+}
+
+dasi_error dasi_key_iterator_get_value(dasi_key_iterator_t *iterator, const char **value) {
+    return wrapFunc([iterator, value] {
+        ASSERT(iterator != nullptr);
+        ASSERT(value != nullptr);
+        *value = iterator->value();
     });
 }
 

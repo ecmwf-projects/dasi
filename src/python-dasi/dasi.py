@@ -54,6 +54,9 @@ class Key:
     def __setitem__(self, kw, val):
         _dasi.key_set(self._key, _encode(kw), _encode(val))
 
+    def __iter__(self):
+        return KeyIterator(_dasi.key_iterate(self._key))
+
     def update(self, data):
         for kw, val in data.items():
             self[kw] = val
@@ -70,6 +73,23 @@ class Key:
     @property
     def _cdata(self):
         return self._key
+
+
+class KeyIterator:
+    def __init__(self, cdata):
+        self._iterator = cdata
+        self._first = True
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if not self._first:
+            _dasi.key_iterator_next(self._iterator)
+        self._first = False
+        keyword = _decode(_dasi.key_iterator_get_keyword(self._iterator))
+        value = _decode(_dasi.key_iterator_get_value(self._iterator))
+        return keyword, value
 
 
 class Query:

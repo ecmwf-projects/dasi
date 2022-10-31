@@ -46,6 +46,9 @@ typedef struct dasi_t dasi_t;
 struct dasi_key_t;
 typedef struct dasi_key_t dasi_key_t;
 
+struct dasi_key_iterator_t;
+typedef struct dasi_key_iterator_t dasi_key_iterator_t;
+
 struct dasi_query_t;
 typedef struct dasi_query_t dasi_query_t;
 
@@ -95,8 +98,25 @@ dasi_error dasi_key_del(dasi_key_t *key, const char *keyword);
 /// `dasi_key_destroy` on the key.
 dasi_error dasi_key_get(dasi_key_t *key, const char *keyword, const char **value);
 
+/// Iterate over the keyword-value pairs. Returns a new iterator object.
+dasi_error dasi_key_iterate(dasi_key_t *key, dasi_key_iterator_t **iterator);
+
 /// Compare the given keys according to lexicographical order (like `strcmp`).
 dasi_error dasi_key_cmp(dasi_key_t *lhs, dasi_key_t *rhs, int *result);
+
+//----------------------------------------------------------------------------------------------------------------------
+
+/// Key iterator
+
+/// Release an iterator object
+dasi_error dasi_key_iterator_destroy(dasi_key_iterator_t *iterator);
+
+/// Advance to the next item. Error code is `DASI_ITERATOR_END` if there is none.
+dasi_error dasi_key_iterator_next(dasi_key_iterator_t *iterator);
+/// Get the current keyword. Returns a pointer to an internal buffer.
+dasi_error dasi_key_iterator_get_keyword(dasi_key_iterator_t *iterator, const char **keyword);
+/// Get the current value. Returns a pointer to an internal buffer.
+dasi_error dasi_key_iterator_get_value(dasi_key_iterator_t *iterator, const char **value);
 
 //----------------------------------------------------------------------------------------------------------------------
 

@@ -15,6 +15,9 @@ typedef struct dasi_t dasi_t;
 struct dasi_key_t;
 typedef struct dasi_key_t dasi_key_t;
 
+struct dasi_key_iterator_t;
+typedef struct dasi_key_iterator_t dasi_key_iterator_t;
+
 struct dasi_query_t;
 typedef struct dasi_query_t dasi_query_t;
 
@@ -39,7 +42,13 @@ dasi_error dasi_key_destroy(dasi_key_t *key);
 dasi_error dasi_key_set(dasi_key_t *key, const char *keyword, const char *value);
 dasi_error dasi_key_del(dasi_key_t *key, const char *keyword);
 dasi_error dasi_key_get(dasi_key_t *key, const char *keyword, const char **value);
+dasi_error dasi_key_iterate(dasi_key_t *key, dasi_key_iterator_t **iterator);
 dasi_error dasi_key_cmp(dasi_key_t *lhs, dasi_key_t *rhs, int *result);
+
+dasi_error dasi_key_iterator_destroy(dasi_key_iterator_t *iterator);
+dasi_error dasi_key_iterator_next(dasi_key_iterator_t *iterator);
+dasi_error dasi_key_iterator_get_keyword(dasi_key_iterator_t *iterator, const char **keyword);
+dasi_error dasi_key_iterator_get_value(dasi_key_iterator_t *iterator, const char **value);
 
 dasi_error dasi_query_new(dasi_query_t **query);
 dasi_error dasi_query_copy(const dasi_query_t *from, dasi_query_t **to);
