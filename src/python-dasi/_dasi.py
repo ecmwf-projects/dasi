@@ -56,12 +56,14 @@ put = wrap(lib.dasi_put)
 get = wrap(lib.dasi_get, out="dasi_retrieve_result_t **", gc=lib.dasi_retrieve_result_destroy)
 
 key_new = wrap(lib.dasi_key_new, out="dasi_key_t **", gc=lib.dasi_key_destroy)
+key_copy = wrap(lib.dasi_key_copy, out="dasi_key_t **", gc=lib.dasi_key_destroy)
 key_set = wrap(lib.dasi_key_set)
 key_del = wrap(lib.dasi_key_del)
 key_get = wrap(lib.dasi_key_get, out="const char **")
 key_cmp = wrap(lib.dasi_key_cmp, out="int *")
 
 query_new = wrap(lib.dasi_query_new, out="dasi_query_t **", gc=lib.dasi_query_destroy)
+query_copy = wrap(lib.dasi_query_copy, out="dasi_query_t **", gc=lib.dasi_query_destroy)
 query_set = wrap(lib.dasi_query_set)
 
 retrieve_result_iterate = wrap(lib.dasi_retrieve_result_iterate,

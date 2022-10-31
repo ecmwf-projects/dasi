@@ -270,6 +270,14 @@ dasi_error dasi_query_new(dasi_query_t **query) {
     });
 }
 
+dasi_error dasi_query_copy(const dasi_query_t *from, dasi_query_t **to) {
+    return wrapFunc([from, to] {
+        ASSERT(from != nullptr);
+        ASSERT(to != nullptr);
+        *to = new dasi_query_t(*from);
+    });
+}
+
 dasi_error dasi_query_destroy(dasi_query_t *query) {
     return wrapFunc([query] {
         ASSERT(query != nullptr);

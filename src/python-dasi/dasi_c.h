@@ -40,6 +40,7 @@ dasi_error dasi_key_get(dasi_key_t *key, const char *keyword, const char **value
 dasi_error dasi_key_cmp(dasi_key_t *lhs, dasi_key_t *rhs, int *result);
 
 dasi_error dasi_query_new(dasi_query_t **query);
+dasi_error dasi_query_copy(const dasi_query_t *from, dasi_query_t **to);
 dasi_error dasi_query_destroy(dasi_query_t *query);
 dasi_error dasi_query_set(dasi_query_t *query, const char *keyword, const char *values[], size_t num);
 

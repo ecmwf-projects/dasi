@@ -73,7 +73,12 @@ class Key:
 
 class Query:
     def __init__(self, data=None):
-        self._query = _dasi.query_new()
+        if isinstance(data, Query):
+            self._query = _dasi.query_copy(data._query)
+            data = None
+        else:
+            self._query = _dasi.query_new()
+
         if data is not None:
             self.update(data)
 
