@@ -1,6 +1,7 @@
 
-from . import _dasi
+import os
 
+from . import _dasi
 from ._dasi import DASIError, DASIUnexpectedError, DASIObjectNotFound
 
 _ffi = _dasi.ffi
@@ -18,7 +19,7 @@ def _encode(data, buffer=False):
 
 
 def _decode(cdata):
-    buf = _ffi.buffer(cdata)
+    buf = _ffi.string(cdata)
     return str(buf, encoding='utf-8', errors='surrogateescape')
 
 
@@ -165,7 +166,7 @@ class DASI:
         if isinstance(config, InlineConfig):
             self._session = _dasi.open_str(config.value)
         else:
-            self._session = _dasi.open(config)
+            self._session = _dasi.open(os.fsencode(config))
 
     def put(self, key, data):
         if not isinstance(key, Key):
