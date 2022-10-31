@@ -1,0 +1,10 @@
+---
+engine: shelf
+root: /tmp/dasi/lqcd
+schema:
+  - [fermion_action, gauge_action, flavors, beta, qmass1, qmass2,
+      [nx, nt, version,
+        [trajectory, type]]]
+  - [fermion_action, gauge_action, flavors, beta, qmass1, qmass2, qmass3,
+      [nx, nt, version,
+        [trajectory, type]]]
