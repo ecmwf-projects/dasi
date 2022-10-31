@@ -1,0 +1,9 @@
+---
+engine: shelf
+root: /tmp/dasi/weather
+schema:
+  - [type, version, date, time,
+      [number, step,
+        [level, param]],
+      [step,
+        [level, param]]]
