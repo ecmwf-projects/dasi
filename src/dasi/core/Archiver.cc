@@ -17,7 +17,7 @@ public: // methods
         length_(length) {}
 
     void thirdLevel(SplitReferenceKey& key) {
-        std::cout << "Third level in archive!!!" << std::endl;
+        std::cout << "Archiving " << key << std::endl;
         DB& db = parent_.database(key[0]);
         db.archive(key, data_, length_);
     }

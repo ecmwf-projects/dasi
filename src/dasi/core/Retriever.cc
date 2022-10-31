@@ -20,7 +20,7 @@ public: // methods
         res_(res) {}
 
     void thirdLevel(SplitReferenceKey& key) {
-        std::cout << "Third level in retrieve!!!" << std::endl;
+        std::cout << "Retrieving " << key << std::endl;
         DB& db = parent_.database(key[0]);
         auto result = db.retrieve(key);
         res_.append(api::SplitKey(key), std::move(result));
