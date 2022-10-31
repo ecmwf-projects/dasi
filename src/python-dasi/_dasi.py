@@ -23,6 +23,11 @@ class DASIObjectNotFound(DASIError):
     pass
 
 
+def error_str(err):
+    errmsg = ffi.string(lib.dasi_error_str(err))
+    return str(errmsg, encoding='utf-8', errors='surrogateescape')
+
+
 def wrap(fun, out=None, gc=None):
     @functools.wraps(fun)
     def wrapped(*args):
@@ -37,14 +42,15 @@ def wrap(fun, out=None, gc=None):
                     return ffi.gc(outval[0], wrap(gc))
                 return outval[0]
             return
+        errmsg = error_str(err)
         if err == lib.DASI_ITERATOR_END:
             raise StopIteration
         if err == lib.DASI_NOT_FOUND:
-            raise DASIObjectNotFound(fun.__name__)
+            raise DASIObjectNotFound(errmsg)
         if err == lib.DASI_ERROR:
-            raise DASIError(fun.__name__)
+            raise DASIError(errmsg)
         if err == lib.DASI_UNEXPECTED:
-            raise DASIUnexpectedError(fun.__name__)
+            raise DASIUnexpectedError(errmsg)
         assert False, f"Unknown error code {err}"
     return wrapped
 

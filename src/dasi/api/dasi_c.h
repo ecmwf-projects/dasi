@@ -33,6 +33,9 @@ enum dasi_error {
 };
 typedef enum dasi_error dasi_error;
 
+/// Get the error message associated with the error code. Returns a pointer to an internal string.
+const char *dasi_error_str(dasi_error err);
+
 //----------------------------------------------------------------------------------------------------------------------
 
 /// Types

@@ -7,6 +7,8 @@ enum dasi_error {
 };
 typedef enum dasi_error dasi_error;
 
+const char *dasi_error_str(dasi_error err);
+
 struct dasi_t;
 typedef struct dasi_t dasi_t;
 
