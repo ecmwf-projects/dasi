@@ -57,6 +57,12 @@ class Key:
     def __iter__(self):
         return KeyIterator(_dasi.key_iterate(self._key))
 
+    def __repr__(self):
+        return "Key(" + repr(dict(self)) + ")"
+
+    def __str__(self):
+        return repr(dict(self))
+
     def update(self, data):
         for kw, val in data.items():
             self[kw] = val
