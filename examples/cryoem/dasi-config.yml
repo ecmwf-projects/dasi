@@ -1,0 +1,7 @@
+---
+engine: shelf
+root: /tmp/dasi/cryoem
+schema:
+  - [User, Project,
+      [DateTime, DataProcessing,
+        [Type, Object]]]
