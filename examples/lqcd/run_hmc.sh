@@ -24,9 +24,15 @@ case $FLAVORS in
     qmass="$qmass,qmass3=$QMASS3" ;;
 esac
 
-basekey="fermion_action=$FERMION_ACTION,gauge_action=$GAUGE_ACTION"
-basekey="$basekey,flavors=$FLAVORS,beta=$BETA,$qmass"
-basekey="$basekey,nx=$NX,nt=$NT,version=$VERSION"
+basekey=""
+basekey+="fermion_action=$FERMION_ACTION,"
+basekey+="gauge_action=$GAUGE_ACTION,"
+basekey+="flavors=$FLAVORS,"
+basekey+="beta=$BETA,"
+basekey+="$qmass,"
+basekey+="nx=$NX,"
+basekey+="nt=$NT,"
+basekey+="version=$VERSION"
 
 BEGIN=0
 if [[ -n "$RESTART" ]] ; then
