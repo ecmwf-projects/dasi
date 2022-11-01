@@ -32,7 +32,7 @@ BEGIN=0
 if [[ -n "$RESTART" ]] ; then
     restartkey="$basekey,trajectory=$RESTART,type=restart"
 
-    dasi-get -c dasi.yml $restartkey init.xml
+    dasi-get -c dasi-config.yml $restartkey init.xml
 
     BEGIN=$RESTART
     RESTART=init.xml
@@ -45,7 +45,7 @@ rm -f init.xml
 
 END=$((BEGIN + N_TRAJ))
 for ((traj=BEGIN+1; traj <= END; ++traj)) ; do
-    dasi-put -c dasi.yml "$basekey,trajectory=$traj,type=gauge_config" config_$traj.lime
-    dasi-put -c dasi.yml "$basekey,trajectory=$traj,type=restart" restart_$traj.xml
+    dasi-put -c dasi-config.yml "$basekey,trajectory=$traj,type=gauge_config" config_$traj.lime
+    dasi-put -c dasi-config.yml "$basekey,trajectory=$traj,type=restart" restart_$traj.xml
     rm -f config_$traj.lime restart_$traj.xml
 done

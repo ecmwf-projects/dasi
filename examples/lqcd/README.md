@@ -6,7 +6,7 @@ trajectory.
 
 ## Running the example
 
-Set a valid path for the DASI store root in `dasi.yml`.
+Set a valid path for the DASI store root in `dasi-config.yml`.
 
 ```
 ./run_hmc.sh
