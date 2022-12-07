@@ -3,6 +3,8 @@ ecbuild_add_library(
     TARGET dasi
     TYPE SHARED
     INSTALL_HEADERS LISTED
+    HEADER_DESTINATION
+        ${INSTALL_INCLUDE_DIR}/dasi
     DEPENDS yaml-cpp
     PRIVATE_LIBS
         "${YAML_CPP_LIBRARIES}"
