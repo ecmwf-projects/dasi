@@ -52,7 +52,7 @@ public: // methods
     ListGenerator list(const Query& query);
 
     /// Retrieve data objects from the archive
-    /// @todo - a retrive function that gets data sizes as well.
+    /// @todo - a retrieve function that gets data sizes as well.
     ///         Support explicit data locations for lazy retrievals (e.g. nice xarray or dask support)
     ///         Build on the Query functionality?
     /// @todo - Explicitly and cleanly distinguish _all_ from _unspecified_ (currently all cases treated as _unspecified_)

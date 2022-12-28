@@ -31,12 +31,24 @@ public: // methods
     /** Is there a value corresponding to the specified key?
      * @param name The key to look up the corresponding value
      */
-    [[nodiscard]]
+    [[ nodiscard ]]
     bool has(const char* name) const;
-    [[nodiscard]]
+    [[ nodiscard ]]
     bool has(const std::string_view& name) const;
-    [[nodiscard]]
+    [[ nodiscard ]]
     bool has(const std::string& name) const;
+
+    /*
+     ** Comparison operators (for use in containers, etc.)
+     */
+    [[ nodiscard ]]
+    bool operator<(const Key& rhs) const;
+    [[ nodiscard ]]
+    bool operator==(const Key& rhs) const;
+    [[ nodiscard ]]
+    bool operator!=(const Key& rhs) const;
+    [[ nodiscard ]]
+    bool operator>(const Key& rhs) const;
 
     /** Set the value corresponding to a specified key
      * @param k The key to set the value of

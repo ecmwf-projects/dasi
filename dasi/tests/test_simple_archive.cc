@@ -49,6 +49,42 @@ std::string simple_config(const eckit::PathName& basedir) {
 
 //----------------------------------------------------------------------------------------------------------------------
 
+class ListResultChecker {
+
+public:
+    ListResultChecker(std::initializer_list<dasi::Key> init) : expectedValues_(init), validated_(false) {}
+
+    ~ListResultChecker() noexcept(false) {
+        validate();
+    }
+
+    void found(const dasi::Key& k) {
+        ASSERT(!validated_);
+        EXPECT(expectedValues_.erase(k) == 1);
+    }
+
+    void validate() {
+        if (!validated_) {
+            validated_ = true;
+            EXPECT(expectedValues_.empty());
+        }
+    }
+
+    template <typename GENERATOR>
+    void iterate(GENERATOR&& generator) {
+        for (const auto& elem : generator) {
+            found(elem.key);
+        }
+        validate();
+    }
+
+private:
+    std::set<dasi::Key> expectedValues_;
+    bool validated_;
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
 CASE("simple archive") {
 
     eckit::TmpDir test_wd(eckit::LocalPathName::cwd().c_str());
@@ -157,16 +193,67 @@ CASE("Accessing data that has been archived") {
             {"key3",  {"value1"}},
         };
 
-        int cnt = 0;
-        for (const auto& elem : dasi.list(query)) {
-            ++cnt;
-            eckit::Log::info() << " elem: " << elem << std::endl;
-        }
-        EXPECT(cnt == 3);
+        ListResultChecker checker{
+            {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
+             {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value1"}},
+            {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
+             {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value2"}},
+            {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
+             {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value3"}},
+        };
+
+        checker.iterate(dasi.list(query));
     }
 
     SECTION("We can list a subset of the data") {
-        EXPECT(false);
+
+        dasi::Query query {
+                {"key1",  {"value1"}},
+                {"key2",  {"123"}},
+                {"key3",  {"value1"}},
+                {"key3b",  {"value1", "value3"}},
+        };
+
+        ListResultChecker checker{
+                {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
+                 {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value1"}},
+                {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
+                 {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value3"}},
+        };
+
+        checker.iterate(dasi.list(query));
+    }
+
+    SECTION("We can match no data") {
+
+        dasi::Query query {
+                {"key1",  {"value1"}},
+                {"key2",  {"123"}},
+                {"key3",  {"value1"}},
+                {"key3b",  {"value4", "value5"}},
+        };
+
+        ListResultChecker checker{};
+        checker.iterate(dasi.list(query));
+    }
+
+    SECTION("We can have only some of the query matched") {
+
+        dasi::Query query {
+                {"key1",  {"value1"}},
+                {"key2",  {"123", "321"}},
+                {"key3",  {"value1"}},
+                {"key3b",  {"value1", "value3", "value4", "value5"}},
+        };
+
+        ListResultChecker checker{
+                {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
+                 {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value1"}},
+                {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
+                 {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value3"}},
+        };
+
+        checker.iterate(dasi.list(query));
     }
 
     SECTION("We get no results from a query with no hits") {
@@ -202,18 +289,17 @@ CASE("Accessing data that has been archived") {
         eckit::MemoryHandle mh;
         auto len = dh->saveInto(mh);
 
-        eckit::Log::info() << "Length: " << len << std::endl;
         EXPECT(len == eckit::Length(55));
         EXPECT(::memcmp(mh.data(), "TESTING SIMPLE ARCHIVE 3333333333TESTING SIMPLE ARCHIVE", 55) == 0);
     }
 
-    SECTION("Retrieval fails if not fully qualified") {
-        EXPECT(false);
-    }
+    //SECTION("Retrieval fails if not fully qualified") {
+    //    EXPECT(false);
+    //}
 
-    SECTION("Retrieval fails if not all keys in query satisfied") {
-        EXPECT(false);
-    }
+    //SECTION("Retrieval fails if not all keys in query satisfied") {
+    //    EXPECT(false);
+    //}
 }
 
 //CASE("Arhive data that should be masked...") {

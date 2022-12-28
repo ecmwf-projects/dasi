@@ -48,6 +48,22 @@ void Key::clear() {
     values_.clear();
 }
 
+bool Key::operator<(const Key& rhs) const {
+    return values_ < rhs.values_;
+}
+
+bool Key::operator==(const Key& rhs) const {
+    return values_ == rhs.values_;
+}
+
+bool Key::operator>(const Key& rhs) const {
+    return values_ > rhs.values_;
+}
+
+bool Key::operator!=(const Key& rhs) const {
+    return values_ != rhs.values_;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } // namespace dasi
