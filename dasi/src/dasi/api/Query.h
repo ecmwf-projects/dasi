@@ -36,6 +36,7 @@ public: // methods
 
     Query() = default;
     Query(std::initializer_list<std::pair<const std::string, value_type>>);
+    Query(const std::string& strKey);
 
     [[nodiscard]]
     bool has(const std::string_view& name) const;

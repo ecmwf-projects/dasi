@@ -19,10 +19,12 @@ ecbuild_add_library(
         api/Query.cc
         api/Query.h
 
-        api/detail/ListGenerator.cc
-        api/detail/ListGenerator.h
-        api/detail/ListGeneratorImpl.cc
-        api/detail/ListGeneratorImpl.h
+        api/detail/ListDetail.cc
+        api/detail/ListDetail.h
+        api/detail/Generators.h
+
+        impl/ListGeneratorImpl.cc
+        impl/ListGeneratorImpl.h
 
         lib/LibDasi.cc
         lib/LibDasi.h

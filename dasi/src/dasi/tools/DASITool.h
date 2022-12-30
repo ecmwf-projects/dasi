@@ -4,7 +4,11 @@
 
 #pragma once
 
+#include "dasi/api/Dasi.h"
+
 #include "eckit/runtime/Tool.h"
+#include "eckit/filesystem/PathName.h"
+#include "eckit/utils/Optional.h"
 
 #include <vector>
 
@@ -24,6 +28,8 @@ protected: // methods
     DASITool(int argc, char** argv);
     ~DASITool() override = default;
 
+    Dasi& dasi();
+
 public: // methods
 
     virtual void usage(const std::string& tool) const {}
@@ -41,9 +47,14 @@ private: // methods
     [[ nodiscard ]]
     virtual int minimumPositionalArguments() const { return -1; }
 
+    void initInternal(const eckit::option::CmdArgs& args);
+
 protected: // members
 
     std::vector<eckit::option::Option*> options_;
+    eckit::PathName configPath_;
+
+    eckit::Optional<Dasi> dasi_;
 };
 
 //-------------------------------------------------------------------------------------------------

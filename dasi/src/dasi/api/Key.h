@@ -27,6 +27,7 @@ public: // methods
 
     Key() = default;
     Key(std::initializer_list<std::pair<const std::string, std::string>>);
+    Key(const std::string& strKey);
 
     /** Is there a value corresponding to the specified key?
      * @param name The key to look up the corresponding value

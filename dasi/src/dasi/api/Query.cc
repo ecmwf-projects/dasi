@@ -2,7 +2,10 @@
 #include "Query.h"
 
 #include "eckit/types/Types.h"
+#include "eckit/utils/StringTools.h"
 #include "eckit/exception/Exceptions.h"
+
+using namespace eckit;
 
 
 namespace dasi {
@@ -12,6 +15,15 @@ namespace dasi {
 Query::Query(std::initializer_list<std::pair<const std::string, std::vector<std::string>>> l) :
         values_(l) {}
 
+Query::Query(const std::string& strKey) {
+    // TODO: Introduce a more robust parser
+    for (const std::string& bit : StringTools::split(",", strKey)) {
+        auto kvs = StringTools::split("=", bit);
+        if (kvs.size() != 2) throw UserError("Invalid key supplied", Here());
+        auto vals = StringTools::split("/", kvs[1]);
+        values_.emplace(std::move(kvs[0]), std::move(vals));
+    }
+}
 
 void Query::print(std::ostream& s) const {
     s << values_;

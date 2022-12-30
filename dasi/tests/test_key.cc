@@ -69,6 +69,27 @@ CASE("Construct from initialiser list") {
     EXPECT(ss.str() == "{key1=value1,key2=value2,key3=value3}");
 }
 
+CASE("Construct from string") {
+
+    dasi::Key k("key3=value3,key1=value1,key2=value2");
+
+    EXPECT(k.has("key1"));
+    EXPECT(k.has("key2"));
+    EXPECT(k.has("key3"));
+    EXPECT(!k.has("other"));
+
+    EXPECT(k.size() == 3);
+
+    std::ostringstream ss;
+    ss << k;
+    EXPECT(ss.str() == "{key1=value1,key2=value2,key3=value3}");
+}
+
+CASE("Rejects invalid keys") {
+    EXPECT_THROWS_AS(dasi::Key("key3=value3=value3b,key1=value1,key2=value2"), eckit::UserError);
+    EXPECT_THROWS_AS(dasi::Key("key3=value3/value3b,key1=value1,key2=value2"), eckit::UserError);
+}
+
 CASE("Modify existing key") {
 
     dasi::Key k {

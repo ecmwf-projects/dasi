@@ -14,9 +14,9 @@
 
 #pragma once
 
-#include "Key.h"
-#include "Query.h"
-#include "dasi/api/detail/ListGenerator.h"
+#include "dasi/api/Key.h"
+#include "dasi/api/Query.h"
+#include "dasi/api/detail/ListDetail.h"
 
 #include <memory>
 
@@ -31,7 +31,7 @@ class Dasi {
 public: // methods
 
     /// Dasi Constructor.
-    /// @param dasi_config A YAML configuration for Dasi. Specifies where data is stored
+    /// @param dasi_config A YAML configuration, or configuration path for Dasi. Specifies where data is stored
     /// @param application_config A configuration for runtime-specific overrides within Dasi. Controls how data is written/read
     explicit Dasi(const char* dasi_config, const char* application_config=nullptr);
 

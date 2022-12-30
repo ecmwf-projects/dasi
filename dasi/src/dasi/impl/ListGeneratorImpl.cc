@@ -6,6 +6,7 @@ namespace dasi {
 //-------------------------------------------------------------------------------------------------
 
 ListGeneratorImpl::ListGeneratorImpl(fdb5::ListIterator&& iter) :
+    APIGeneratorImpl<ListElement>(),
     iter_(std::move(iter)),
     done_(false) {
     next();

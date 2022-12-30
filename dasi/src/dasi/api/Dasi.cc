@@ -11,7 +11,7 @@
 #include "Dasi.h"
 
 #include "dasi/lib/LibDasi.h"
-#include "dasi/api/detail/ListGeneratorImpl.h"
+#include "dasi/impl/ListGeneratorImpl.h"
 
 #include "fdb5/api/FDB.h"
 #include "fdb5/api/helpers/FDBToolRequest.h"
@@ -69,9 +69,25 @@ eckit::LocalConfiguration parse_application_config(const char* application_confi
 
 fdb5::Config construct_config(const char* dasi_config, const char* application_config) {
 
+    // Is the dasi_configation a raw yaml, or is it a path?
+    // FIXME: TODO: This behaves badly if there is a _path_ that doesn't exist (fails on parsing)
+
+    eckit::PathName config_path(dasi_config);
+    std::string yaml_config;
+    if (config_path.exists()) {
+        std::unique_ptr<eckit::DataHandle> dh(config_path.fileHandle());
+        size_t sz = dh->size();
+        dh->openForRead();
+        eckit::AutoClose closer(*dh);
+        yaml_config.resize(sz);
+        ASSERT(dh->read(&yaml_config[0], sz) == sz);
+    } else {
+        yaml_config = dasi_config;
+    }
+
     ASSERT(dasi_config);
     LOG_DEBUG_LIB(LibDasi) << "Dasi Configuration: " << eckit::newl;
-    LOG_DEBUG_LIB(LibDasi) << dasi_config << eckit::newl << std::endl;
+    LOG_DEBUG_LIB(LibDasi) << yaml_config << eckit::newl << std::endl;
 
     LOG_DEBUG_LIB(LibDasi) << "Application Configuration:";
     if (application_config) {
@@ -81,7 +97,7 @@ fdb5::Config construct_config(const char* dasi_config, const char* application_c
         LOG_DEBUG_LIB(LibDasi) << " <default>" << std::endl;
     }
 
-    std::istringstream dasi_ss(dasi_config);
+    std::istringstream dasi_ss(yaml_config);
     eckit::YAMLConfiguration cfg(dasi_ss);
 
     if (cfg.has("schema")) {

@@ -5,25 +5,26 @@
 #pragma once
 
 #include "fdb5/api/helpers/ListIterator.h"
-#include "ListGenerator.h"
+#include "dasi/api/detail/Generators.h"
+#include "dasi/api/detail/ListDetail.h"
 
 namespace dasi {
 
 //-------------------------------------------------------------------------------------------------
 
-class ListGeneratorImpl {
+class ListGeneratorImpl : public APIGeneratorImpl<ListElement> {
 
 public: // methods
 
     explicit ListGeneratorImpl(fdb5::ListIterator&& iter);
 
-    void next();
+    void next() override;
 
     [[ nodiscard ]]
-    const dasi::ListElement& value() const;
+    const ListElement& value() const override;
 
     [[ nodiscard ]]
-    bool done() const;
+    bool done() const override;
 
 private: // members
 

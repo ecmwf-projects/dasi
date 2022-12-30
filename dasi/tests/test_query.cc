@@ -99,7 +99,45 @@ CASE("Construct from initialiser list") {
     EXPECT(ss.str() == "{key1=[],key2=[value2],key3=[value3a,value3b]}");
 }
 
-CASE("Modify existing key") {
+CASE("Construct from string") {
+
+    dasi::Query r("key1=value1,key3=value3a/value3b,key2=value2");
+
+    EXPECT(r.has("key1"));
+    EXPECT(r.has("key2"));
+    EXPECT(r.has("key3"));
+    EXPECT(!r.has("other"));
+
+    bool k1 = false;
+    bool k2 = false;
+    bool k3 = false;
+    int count = 0;
+    for (const auto& kv : r) {
+        ++count;
+        if (kv.first == "key1") {
+            EXPECT(kv.second.size() == 1);
+            EXPECT(kv.second[0] == "value1");
+            k1 = true;
+        } else if (kv.first == "key2") {
+            EXPECT(kv.second.size() == 1);
+            EXPECT(kv.second[0] == "value2");
+            k2 = true;
+        } else if (kv.first == "key3") {
+            EXPECT(kv.second.size() == 2);
+            EXPECT(kv.second[0] == "value3a");
+            EXPECT(kv.second[1] == "value3b");
+            k3 = true;
+        }
+    }
+    EXPECT(count == 3);
+    EXPECT(k1 && k2 && k3);
+
+    std::ostringstream ss;
+    ss << r;
+    EXPECT(ss.str() == "{key1=[value1],key2=[value2],key3=[value3a,value3b]}");
+}
+
+CASE("Modify existing query") {
 
     dasi::Query r {
         {"key1", {"value1"}},

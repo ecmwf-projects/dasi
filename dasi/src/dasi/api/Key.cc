@@ -2,7 +2,10 @@
 #include "Key.h"
 
 #include "eckit/types/Types.h"
+#include "eckit/utils/StringTools.h"
+#include "eckit/exception/Exceptions.h"
 
+using namespace eckit;
 
 namespace dasi {
 
@@ -10,6 +13,16 @@ namespace dasi {
 
 Key::Key(std::initializer_list<std::pair<const std::string, std::string>> l) :
     values_(l) {
+}
+
+Key::Key(const std::string& strKey) {
+    // TODO: Introduce a more robust parser
+    for (const std::string& bit : StringTools::split(",", strKey)) {
+        auto kvs = StringTools::split("=", bit);
+        if (kvs.size() != 2) throw UserError("Invalid key supplied", Here());
+        if (kvs[1].find('/') != std::string::npos) throw UserError("Query supplied when key required", Here());
+        values_.emplace(std::move(kvs[0]), std::move(kvs[1]));
+    }
 }
 
 void Key::print(std::ostream& s) const {

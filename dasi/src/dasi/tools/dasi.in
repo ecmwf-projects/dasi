@@ -13,7 +13,7 @@ function usage {
 
     (
     declare -F | grep dasi_builtin_ | sed 's/.*dasi_builtin_/   /'
-    for n in list info
+    for n in list info put
     do
         echo "   $n"
     done
@@ -22,10 +22,6 @@ function usage {
 
 function dasi_builtin_version {
     echo @dasi_VERSION_STR@
-}
-
-function dasi_builtin_home {
-    echo $($BINDIR/dasi-info --home)
 }
 
 function dasi_builtin_help {
