@@ -293,13 +293,13 @@ CASE("Accessing data that has been archived") {
         EXPECT(::memcmp(mh.data(), "TESTING SIMPLE ARCHIVE 3333333333TESTING SIMPLE ARCHIVE", 55) == 0);
     }
 
-    //SECTION("Retrieval fails if not fully qualified") {
-    //    EXPECT(false);
-    //}
+    SECTION("Retrieval fails if not fully qualified") {
+        EXPECT(false);
+    }
 
-    //SECTION("Retrieval fails if not all keys in query satisfied") {
-    //    EXPECT(false);
-    //}
+    SECTION("Retrieval fails if not all keys in query satisfied") {
+        EXPECT(false);
+    }
 }
 
 //CASE("Arhive data that should be masked...") {

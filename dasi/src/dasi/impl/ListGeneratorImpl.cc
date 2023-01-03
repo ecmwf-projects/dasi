@@ -9,7 +9,7 @@ ListGeneratorImpl::ListGeneratorImpl(fdb5::ListIterator&& iter) :
     APIGeneratorImpl<ListElement>(),
     iter_(std::move(iter)),
     done_(false) {
-    next();
+    ListGeneratorImpl::next();
 }
 
 void ListGeneratorImpl::next() {
@@ -21,7 +21,7 @@ void ListGeneratorImpl::next() {
                     key.set(kv.first, kv.second);
                 }
             }
-            dasiElement_.key = key;
+            dasiElement_.key = std::move(key);
             dasiElement_.timestamp = fdb5Element_.timestamp();
             dasiElement_.location.uri = fdb5Element_.location().uri();
             dasiElement_.location.offset = fdb5Element_.location().offset();

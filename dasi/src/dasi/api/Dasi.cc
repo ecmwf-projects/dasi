@@ -12,6 +12,7 @@
 
 #include "dasi/lib/LibDasi.h"
 #include "dasi/impl/ListGeneratorImpl.h"
+#include "dasi/impl/PolicyStatusGeneratorImpl.h"
 
 #include "fdb5/api/FDB.h"
 #include "fdb5/api/helpers/FDBToolRequest.h"
@@ -22,6 +23,7 @@
 #include "eckit/exception/Exceptions.h"
 #include "eckit/log/Log.h"
 #include "eckit/runtime/Main.h"
+#include "eckit/utils/Tokenizer.h"
 
 #include "metkit/mars/MarsRequest.h"
 
@@ -155,6 +157,57 @@ public: // methods
         fdb_.flush();
     }
 
+    PolicyGenerator setPolicy(const Query& query, const PolicyDict& policyDict) {
+        /// @todo Put this properly through the entire FDB infrastructure. This implementation is a bit of a hack...
+        /* Currently not wired into the FDB. */
+
+        if (policyDict.has("access")) {
+
+            const auto& access = policyDict.getSubConfiguration("access");
+
+            bool foundAny = false;
+            fdb5::ControlIdentifiers identifiers;
+            fdb5::ControlAction action;
+            for (const auto& key : access.keys()) {
+
+                if (key == "list") identifiers |= fdb5::ControlIdentifier::List;
+                if (key == "retrieve") identifiers |= fdb5::ControlIdentifier::Retrieve;
+                if (key == "archive") identifiers |= fdb5::ControlIdentifier::Archive;
+                if (key == "wipe") identifiers |= fdb5::ControlIdentifier::Wipe;
+
+                bool val = access.getBool(key);
+
+                fdb5::ControlAction newAction = access.getBool(key) ?
+                        fdb5::ControlAction::Enable : fdb5::ControlAction::Disable;
+                if (foundAny) {
+                    if (newAction != action) throw eckit::UserError("Can only enable or disable locks in one action", Here());
+                }
+
+                action = newAction;
+                foundAny = true;
+            }
+
+            auto&& iter = fdb_.control(fdb5::FDBToolRequest(queryToMarsRequest(query)),
+                                       action,
+                                       identifiers);
+            return PolicyGenerator(std::make_unique<PolicyStatusGeneratorImpl>(std::move(iter)));
+
+        } else {
+            /// @todo implementation for anything other than locking
+            NOTIMP;
+        }
+    }
+
+    PolicyGenerator queryPolicy(const Query& query, const std::string& name="") {
+        /// @todo Put this properly through the entire FDB infrastructure for _policies_,
+        //        not just reusing/abusing locking...
+        std::vector<std::string> policySpecifiers;
+        eckit::Tokenizer(".")(name, policySpecifiers);
+
+        auto&& iter = fdb_.status(fdb5::FDBToolRequest(queryToMarsRequest(query)));
+        return PolicyGenerator(std::make_unique<PolicyStatusGeneratorImpl>(std::move(iter), std::move(policySpecifiers)));
+    }
+
 private: // methods
 
     metkit::mars::MarsRequest queryToMarsRequest(const Query& query) {
@@ -203,6 +256,16 @@ std::unique_ptr<eckit::DataHandle> Dasi::retrieve(const Query& query) {
 void Dasi::flush() {
     ASSERT(impl_);
     impl_->flush();
+}
+
+PolicyGenerator Dasi::setPolicy(const Query& query, const PolicyDict& policyDict) {
+    ASSERT(impl_);
+    return impl_->setPolicy(query, policyDict);
+}
+
+PolicyGenerator Dasi::queryPolicy(const Query& query, const std::string& name) {
+    ASSERT(impl_);
+    return impl_->queryPolicy(query, name);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

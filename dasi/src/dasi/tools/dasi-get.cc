@@ -28,7 +28,7 @@ private: // methods
     void execute(const eckit::option::CmdArgs& args) override;
 
     [[ nodiscard ]]
-    int numberOfPositionalArguments() const override { return -1; }
+    int numberOfPositionalArguments() const override { return 2; }
 };
 
 void DASIGet::usage(const std::string &tool) const {

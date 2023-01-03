@@ -17,6 +17,7 @@
 #include "dasi/api/Key.h"
 #include "dasi/api/Query.h"
 #include "dasi/api/detail/ListDetail.h"
+#include "dasi/api/detail/PolicyDetail.h"
 
 #include <memory>
 
@@ -64,12 +65,20 @@ public: // methods
     /// @note always safe to call
     void flush();
 
-    /// @note - lock/unlock should be a subset of policy semantics
-    /// @note - move should follow same api and/or an ioctl-type api
-    /// @todo - setPolicy();
-    /// @todo - queryPolicy();
+    /// Set a named policy, or set of policies, for the data collections identified by the query
+    /// @param query The data collections to modify
+    /// @param policyDict A (nested) dictionary of policy keys/values to set
+    /// @returns Identified policy objects for each identified data collection, relative to the specified name.
+    ///          Corresponds to the output from queryPolicy
+    PolicyGenerator setPolicy(const Query& query, const PolicyDict& policyDict);
 
-    //ListGenerator list(const Query& request);
+    /// Retrieve a named policy, or set of policies, for the data collections identified by the query
+    /// @param query The data collections to modify
+    /// @param name The name of the policy to set, or an identifier of the subset of policies to set
+    /// @returns Identified policy objects for each identified data collection, relative to the specified name
+    PolicyGenerator queryPolicy(const Query& query, const std::string& name="");
+
+    /// @note - move should follow same api and/or an ----- ioctl-type ----- api
 
 private: // members
 
