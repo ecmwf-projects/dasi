@@ -20,6 +20,7 @@ class Key {
 
     using value_type = std::string;
 
+public:
     /// @note use of transparent comparator --> allow lookup with std::string_view as key
     using map_type = std::map<std::string, value_type, std::less<>>;
 
@@ -65,6 +66,17 @@ public: // methods
     /** Return the number of key:value pairs stored */
     typename map_type::size_type size() const;
 
+    const value_type& get(const std::string& k) const;
+    const value_type& get(const std::string_view& k) const;
+    const value_type& get(const char* k) const;
+
+    void erase(const std::string& k);
+    void erase(const std::string_view& k);
+    /** Erase the key:value pair specified by its name
+     * @param k The key to be erased.
+     */
+    void erase(const char* k);
+
     /** Erase all key:value pairs stored */
     void clear();
 
@@ -88,5 +100,3 @@ private: // members
 //-------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-
-

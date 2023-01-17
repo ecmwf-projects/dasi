@@ -1,26 +1,24 @@
 
 #include "Key.h"
 
+#include "eckit/exception/Exceptions.h"
 #include "eckit/types/Types.h"
 #include "eckit/utils/StringTools.h"
-#include "eckit/exception/Exceptions.h"
-
-using namespace eckit;
 
 namespace dasi {
 
 //-------------------------------------------------------------------------------------------------
 
-Key::Key(std::initializer_list<std::pair<const std::string, std::string>> l) :
-    values_(l) {
-}
+Key::Key(std::initializer_list<std::pair<const std::string, std::string>> l) : values_(l) {}
 
 Key::Key(const std::string& strKey) {
     // TODO: Introduce a more robust parser
-    for (const std::string& bit : StringTools::split(",", strKey)) {
-        auto kvs = StringTools::split("=", bit);
-        if (kvs.size() != 2) throw UserError("Invalid key supplied", Here());
-        if (kvs[1].find('/') != std::string::npos) throw UserError("Query supplied when key required", Here());
+    for (const std::string& bit : eckit::StringTools::split(",", strKey)) {
+        auto kvs = eckit::StringTools::split("=", bit);
+        if (kvs.size() != 2)
+            throw eckit::UserError("Invalid key supplied", Here());
+        if (kvs[1].find('/') != std::string::npos)
+            throw eckit::UserError("Query supplied when key required", Here());
         values_.emplace(std::move(kvs[0]), std::move(kvs[1]));
     }
 }
@@ -57,6 +55,44 @@ Key::map_type::size_type Key::size() const {
     return values_.size();
 }
 
+const Key::value_type& Key::get(const std::string& k) const {
+    auto it = values_.find(k);
+    if (it == values_.end()) {
+        // throw util::KeyError((util::StringBuilder() << name << " not found in KeyT").str(), Here());
+    }
+    return it->second;
+}
+
+const Key::value_type& Key::get(const std::string_view& k) const {
+    auto it = values_.find(k);
+    if (it == values_.end()) {
+        // throw util::KeyError((util::StringBuilder() << name << " not found in KeyT").str(), Here());
+    }
+    return it->second;
+}
+
+const Key::value_type& Key::get(const char* k) const {
+    return get(std::string_view(k));
+}
+
+void dasi::Key::erase(const std::string& k) {
+    auto it = values_.find(k);
+    if (it != values_.end()) {
+        values_.erase(it);
+    }
+}
+
+void Key::erase(const std::string_view& k) {
+    auto it = values_.find(k);
+    if (it != values_.end()) {
+        values_.erase(it);
+    }
+}
+
+void Key::erase(const char* k) {
+    erase(std::string_view(k));
+}
+
 void Key::clear() {
     values_.clear();
 }
@@ -79,4 +115,4 @@ bool Key::operator!=(const Key& rhs) const {
 
 //-------------------------------------------------------------------------------------------------
 
-} // namespace dasi
+}  // namespace dasi
