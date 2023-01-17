@@ -5,6 +5,7 @@
 #pragma once
 
 #include <iterator>
+#include <memory>
 
 
 namespace dasi {
@@ -89,4 +90,3 @@ private: // members
 //-------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-

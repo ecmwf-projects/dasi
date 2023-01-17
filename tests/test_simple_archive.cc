@@ -17,6 +17,7 @@
 #include "dasi/api/Dasi.h"
 
 #include <tuple>
+#include <string.h>
 
 using eckit::testing::run_tests;
 
@@ -290,7 +291,7 @@ CASE("Accessing data that has been archived") {
         auto len = dh->saveInto(mh);
 
         EXPECT(len == eckit::Length(55));
-        EXPECT(::memcmp(mh.data(), "TESTING SIMPLE ARCHIVE 3333333333TESTING SIMPLE ARCHIVE", 55) == 0);
+        EXPECT(memcmp(mh.data(), "TESTING SIMPLE ARCHIVE 3333333333TESTING SIMPLE ARCHIVE", 55) == 0);
     }
 
     SECTION("Retrieval fails if not fully qualified") {
