@@ -1,0 +1,4 @@
+---
+engine: toc
+root: /home/macm/dev/DASI/examples/weather
+schema: /ec/res4/hpcperm/macm/dev/DASI/examples/weather/schema
