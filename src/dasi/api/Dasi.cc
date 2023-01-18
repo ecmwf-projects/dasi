@@ -13,6 +13,7 @@
 #include "dasi/lib/LibDasi.h"
 #include "dasi/impl/ListGeneratorImpl.h"
 #include "dasi/impl/PolicyStatusGeneratorImpl.h"
+#include "dasi/impl/RetrieveResultImpl.h"
 
 #include "fdb5/api/FDB.h"
 #include "fdb5/api/helpers/FDBToolRequest.h"
@@ -148,9 +149,11 @@ public: // methods
         return ListGenerator(std::make_unique<ListGeneratorImpl>(std::move(iter)));
     }
 
-    std::unique_ptr<eckit::DataHandle> retrieve(const Query& query) {
-        eckit::DataHandle* dh = fdb_.retrieve(queryToMarsRequest(query));
-        return std::unique_ptr<eckit::DataHandle>(dh);
+    /// @todo - deduplicate FDB results inside the inspect() function instead
+
+    RetrieveResult retrieve(const Query& query) {
+        auto&& iter = fdb_.inspect(queryToMarsRequest(query));
+        return RetrieveResult{std::make_unique<RetrieveResultImpl>(std::move(iter))};
     }
 
     void flush() {
@@ -248,7 +251,7 @@ ListGenerator Dasi::list(const Query& query) {
     return impl_->list(query);
 }
 
-std::unique_ptr<eckit::DataHandle> Dasi::retrieve(const Query& query) {
+RetrieveResult Dasi::retrieve(const Query& query) {
     ASSERT(impl_);
     return impl_->retrieve(query);
 }

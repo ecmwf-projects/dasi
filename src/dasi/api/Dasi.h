@@ -18,6 +18,7 @@
 #include "dasi/api/Query.h"
 #include "dasi/api/detail/ListDetail.h"
 #include "dasi/api/detail/PolicyDetail.h"
+#include "dasi/api/detail/RetrieveDetail.h"
 
 #include <memory>
 
@@ -59,7 +60,7 @@ public: // methods
     /// @todo - Explicitly and cleanly distinguish _all_ from _unspecified_ (currently all cases treated as _unspecified_)
     /// @param query A description of the span of data to retrieve
     /// @returns A generic data handle, that will retrieve the data.
-    std::unique_ptr<eckit::DataHandle> retrieve(const Query& query);
+    RetrieveResult retrieve(const Query& query);
 
     /// Flushes all buffers and ensures all internal state is safe wrt. failure
     /// @note always safe to call
