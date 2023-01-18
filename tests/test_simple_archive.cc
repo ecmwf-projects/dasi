@@ -286,7 +286,10 @@ CASE("Accessing data that has been archived") {
             {"key3b",  {"value3", "value1"}},
         };
 
-        std::unique_ptr<eckit::DataHandle> dh = dasi.retrieve(query);
+        dasi::RetrieveResult ret = dasi.retrieve(query);
+        EXPECT(ret.count() == 2);
+
+        std::unique_ptr<eckit::DataHandle> dh = ret.dataHandle();
         eckit::MemoryHandle mh;
         auto len = dh->saveInto(mh);
 

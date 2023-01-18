@@ -50,7 +50,7 @@ void DASIGet::execute(const eckit::option::CmdArgs& args) {
     eckit::PathName path(args(1));
 
     std::unique_ptr<DataHandle> out_dh(path.fileHandle());
-    std::unique_ptr<DataHandle> dh = dasi().retrieve(q);
+    std::unique_ptr<DataHandle> dh = dasi().retrieve(q).dataHandle();
 
     dh->saveInto(*out_dh);
 }

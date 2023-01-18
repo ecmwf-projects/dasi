@@ -24,6 +24,8 @@ ecbuild_add_library(
         api/detail/ListDetail.h
         api/detail/PolicyDetail.cc
         api/detail/PolicyDetail.h
+        api/detail/RetrieveDetail.cc
+        api/detail/RetrieveDetail.h
 
         api/c/Dasi_c.h
         api/c/Dasi_c.cc
@@ -32,6 +34,8 @@ ecbuild_add_library(
         impl/ListGeneratorImpl.h
         impl/PolicyStatusGeneratorImpl.cc
         impl/PolicyStatusGeneratorImpl.h
+        impl/RetrieveResultImpl.cc
+        impl/RetrieveResultImpl.h
 
         lib/LibDasi.cc
         lib/LibDasi.h
