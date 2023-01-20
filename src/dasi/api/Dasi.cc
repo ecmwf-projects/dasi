@@ -139,6 +139,7 @@ public: // methods
         for (const auto& kv : key) {
             fdb_key.set(kv.first, kv.second);
         }
+        LOG_DEBUG_LIB(LibDasi) << "Schema: " << fdb_.config().schemaPath() << std::endl;
         fdb_.archive(fdb_key, data, length);
     }
 
@@ -274,4 +275,3 @@ PolicyGenerator Dasi::queryPolicy(const Query& query, const std::string& name) {
 //----------------------------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-
