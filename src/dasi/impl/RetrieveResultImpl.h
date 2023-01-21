@@ -17,10 +17,18 @@ namespace dasi {
 
 class RetrieveResultImpl {
 
+public:
+    using value_type = std::vector<fdb5::ListElement>;
+
 public: // methods
+
+    explicit RetrieveResultImpl(RetrieveResultImpl& rhs);
 
     explicit RetrieveResultImpl(fdb5::ListIterator&& iter);
     ~RetrieveResultImpl();
+
+    value_type::const_iterator begin() const;
+    value_type::const_iterator end() const;
 
     [[nodiscard]]
     std::unique_ptr<eckit::DataHandle> dataHandle() const;
@@ -31,7 +39,7 @@ public: // methods
 private: // members
 
     /// @todo - use something other than ListElement, such that it can be properly iterated by the user-facing code
-    std::vector<fdb5::ListElement> values_;
+    value_type values_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

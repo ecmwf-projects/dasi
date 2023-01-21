@@ -4,7 +4,6 @@
 
 #pragma once
 
-
 #include "eckit/io/DataHandle.h"
 
 #include <memory>
@@ -19,6 +18,7 @@ class RetrieveResult {
 
 public: // methods
 
+    explicit RetrieveResult(RetrieveResult& result);
     explicit RetrieveResult(std::unique_ptr<RetrieveResultImpl>&& impl);
     ~RetrieveResult();
 
@@ -37,7 +37,7 @@ private: // members
 
     void print(std::ostream& s) const;
 
-private: // members
+protected: // members
 
     std::unique_ptr<RetrieveResultImpl> impl_;
 };
@@ -45,4 +45,3 @@ private: // members
 //----------------------------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-

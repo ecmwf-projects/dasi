@@ -1,4 +1,7 @@
 ---
-engine: toc
-root: /home/macm/dev/DASI/examples/weather
-schema: /ec/res4/hpcperm/macm/dev/DASI/examples/weather/schema
+schema: /Users/macm/dev/DASI/examples/weather/schema
+catalogue: toc
+store: file
+spaces:
+ - roots:
+    - path: /Users/macm/dev/DASI/examples/weather

@@ -174,7 +174,7 @@ dasi_error dasi_retrieve_iterator_get_handle(dasi_retrieve_iterator_t *iterator,
 /// Read handle
 
 /// Release a handle object.
-dasi_error dasi_read_handle_destroy(dasi_read_handle_t *handle);
+dasi_error dasi_read_handle_destroy(dasi_read_handle_t **handle);
 
 /// Open the underlying data stream. MUST be called before reading.
 dasi_error dasi_read_handle_open(dasi_read_handle_t *handle);

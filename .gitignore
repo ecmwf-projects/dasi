@@ -21,4 +21,5 @@ mars-server
 metkit
 odc
 pmem
-examples
+examples/weather/ensemble*
+examples/weather/ens_mean*

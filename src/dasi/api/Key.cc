@@ -75,7 +75,7 @@ const Key::value_type& Key::get(const char* k) const {
     return get(std::string_view(k));
 }
 
-void dasi::Key::erase(const std::string& k) {
+void Key::erase(const std::string& k) {
     auto it = values_.find(k);
     if (it != values_.end()) {
         values_.erase(it);

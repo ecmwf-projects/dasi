@@ -11,6 +11,8 @@
 
 #include "dasi/api/Dasi.h"
 #include "dasi/api/ReadHandle.h"
+#include "dasi/api/detail/RetrieveDetail.h"
+#include "dasi/impl/RetrieveResultImpl.h"
 
 #include "eckit/io/DataHandle.h"
 #include "eckit/exception/Exceptions.h"
@@ -39,63 +41,73 @@ struct dasi_query_t : public Query {
     using Query::Query;
 };
 
-
-/// @todo botch?
-using RetrieveResult = std::unique_ptr<eckit::DataHandle>;
-
 struct dasi_retrieve_result_t : public RetrieveResult {
-    dasi_retrieve_result_t(RetrieveResult&& result) : RetrieveResult(std::move(result)) {}
+    dasi_retrieve_result_t(RetrieveResult& result) : RetrieveResult(result) {}
+    dasi_retrieve_result_t(std::unique_ptr<RetrieveResultImpl>&& result) : RetrieveResult(std::move(result)) {}
+    std::unique_ptr<eckit::DataHandle> toHandle() {
+        /// @todo check if correct handle used
+        return this->dataHandle();
+    }
+    RetrieveResultImpl::value_type::const_iterator begin() const {
+        return impl_->begin();
+    }
+    RetrieveResultImpl::value_type::const_iterator end() const {
+        return impl_->end();
+    }
 };
 
 struct dasi_read_handle_t {
 public:
-    dasi_read_handle_t() : handle_(nullptr) {}
-    dasi_read_handle_t(ReadHandle* handle) : dasi_read_handle_t() { set(handle); }
+    dasi_read_handle_t(eckit::DataHandle* handle) :
+        handle_(std::move(handle)) {}
 
-    void set(ReadHandle* handle) {
-        if (handle_ != nullptr) {
-            delete handle_;
-        }
-        handle_ = handle;
-    }
+    dasi_read_handle_t(std::unique_ptr<eckit::DataHandle>&& handle) :
+        handle_(std::move(handle)) {}
 
-    void open() { handle_->open(); }
+    void open() { handle_->openForRead(); }
 
     void close() { handle_->close(); }
 
     size_t read(void* buf, size_t len) { return handle_->read(buf, len); }
 
 private:
-    ReadHandle* handle_;
+    std::unique_ptr<eckit::DataHandle> handle_;
 };
 
-/// @todo missing implementation
-// struct dasi_retrieve_iterator_t {
-//  public:
-//   using wrapped = RetrieveResult::const_iterator;
-//
-//   dasi_retrieve_iterator_t(wrapped &&begin, wrapped &&end)
-//       : begin_(std::move(begin)), end_(std::move(end)) {}
-//
-//   bool next() {
-//     ++begin_;
-//     return begin_ != end_;
-//   }
-//
-//   dasi_key_t *key() const {
-//     ASSERT(begin_ != end_);
-//     return new dasi_key_t((*begin_).first.toKey());
-//   }
-//
-//   dasi_read_handle_t *handle() const {
-//     ASSERT(begin_ != end_);
-//     return new dasi_read_handle_t((*begin_).second.toHandle());
-//   }
-//
-//  private:
-//   wrapped begin_;
-//   wrapped end_;
-// };
+struct dasi_retrieve_iterator_t {
+public:
+    using wrapped = RetrieveResultImpl::value_type::const_iterator;
+
+    dasi_retrieve_iterator_t(wrapped&& begin, wrapped&& end) :
+        begin_(std::move(begin)), end_(std::move(end)) {}
+
+    bool next() {
+        ++begin_;
+        return begin_ != end_;
+    }
+
+    dasi_key_t* key() const {
+        ASSERT(begin_ != end_);
+        Key key;
+        for (const auto& subkey : (*begin_).key()) {
+            for (const auto& kv : subkey) {
+                key.set(kv.first, kv.second);
+            }
+        }
+        return new dasi_key_t(key);
+    }
+
+    dasi_read_handle_t* handle() const {
+        ASSERT(begin_ != end_);
+        /// @todo implement handle
+        auto* rh = (*begin_).location().uri().path().fileHandle();
+        return new dasi_read_handle_t(rh);
+    }
+
+private:
+    wrapped begin_;
+    wrapped end_;
+};
 
 struct dasi_key_iterator_t {
 public:
@@ -230,7 +242,8 @@ dasi_error dasi_get(dasi_t* session, dasi_query_t* query, dasi_retrieve_result_t
         ASSERT(session != nullptr);
         ASSERT(query != nullptr);
         ASSERT(result != nullptr);
-        *result = new dasi_retrieve_result_t(std::move(session->retrieve(*query)));
+        RetrieveResult r = session->retrieve(*query);
+        *result  = new dasi_retrieve_result_t(r);
     });
 }
 
@@ -385,73 +398,73 @@ dasi_error dasi_query_append(dasi_query_t* query, const char* keyword, const cha
 
 //----------------------------------------------------------------------------------------------------------------------
 
-/// @todo missing implementation
-// dasi_error dasi_retrieve_result_destroy(dasi_retrieve_result_t *result) {
-//   return wrapFunc([result] {
-//     ASSERT(result != nullptr);
-//     delete result;
-//   });
-// }
-//
-// dasi_error dasi_retrieve_result_iterate(dasi_retrieve_result_t *result,
-//                                         dasi_retrieve_iterator_t **iterator) {
-//   return wrapFunc([result, iterator] {
-//     ASSERT(result != nullptr);
-//     ASSERT(iterator != nullptr);
-//     *iterator = new dasi_retrieve_iterator_t(result->begin(), result->end());
-//   });
-// }
-//
-// dasi_error dasi_retrieve_result_get_handle(dasi_retrieve_result_t *result,
-//                                            dasi_read_handle_t **handle) {
-//   return wrapFunc([result, handle] {
-//     ASSERT(result != nullptr);
-//     ASSERT(handle != nullptr);
-//     *handle = new dasi_read_handle_t(result->toHandle());
-//   });
-// }
-//
-// //----------------------------------------------------------------------------------------------------------------------
-//
-// dasi_error dasi_retrieve_iterator_destroy(dasi_retrieve_iterator_t *iterator) {
-//   return wrapFunc([iterator] {
-//     ASSERT(iterator != nullptr);
-//     delete iterator;
-//   });
-// }
-//
-// dasi_error dasi_retrieve_iterator_next(dasi_retrieve_iterator_t *iterator) {
-//   return wrapFunc([iterator](int) {
-//     ASSERT(iterator != nullptr);
-//     return iterator->next() ? DASI_SUCCESS : DASI_ITERATOR_END;
-//   });
-// }
-//
-// dasi_error dasi_retrieve_iterator_get_key(dasi_retrieve_iterator_t *iterator,
-//                                           dasi_key_t **key) {
-//   return wrapFunc([iterator, key] {
-//     ASSERT(iterator != nullptr);
-//     ASSERT(key != nullptr);
-//     *key = iterator->key();
-//   });
-// }
-//
-// dasi_error dasi_retrieve_iterator_get_handle(dasi_retrieve_iterator_t *iterator,
-//                                              dasi_read_handle_t **handle) {
-//   return wrapFunc([iterator, handle] {
-//     ASSERT(iterator != nullptr);
-//     ASSERT(handle != nullptr);
-//     *handle = iterator->handle();
-//   });
-// }
+dasi_error dasi_retrieve_result_destroy(dasi_retrieve_result_t *result) {
+  return wrapFunc([result] {
+    ASSERT(result != nullptr);
+    delete result;
+  });
+}
+
+dasi_error dasi_retrieve_result_iterate(dasi_retrieve_result_t* result,
+                                        dasi_retrieve_iterator_t** iterator) {
+    return wrapFunc([result, iterator] {
+        ASSERT(result != nullptr);
+        ASSERT(iterator != nullptr);
+        *iterator =
+            new dasi_retrieve_iterator_t(result->begin(), result->end());
+    });
+}
+
+dasi_error dasi_retrieve_result_get_handle(dasi_retrieve_result_t* result,
+                                           dasi_read_handle_t** handle) {
+    return wrapFunc([result, handle] {
+        ASSERT(result != nullptr);
+        ASSERT(handle != nullptr);
+        *handle = new dasi_read_handle_t(result->toHandle());
+    });
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 
-dasi_error dasi_read_handle_destroy(dasi_read_handle_t* handle) {
+dasi_error dasi_retrieve_iterator_destroy(dasi_retrieve_iterator_t *iterator) {
+  return wrapFunc([iterator] {
+    ASSERT(iterator != nullptr);
+    delete iterator;
+  });
+}
+
+dasi_error dasi_retrieve_iterator_next(dasi_retrieve_iterator_t *iterator) {
+  return wrapFunc([iterator](int) {
+    ASSERT(iterator != nullptr);
+    return iterator->next() ? DASI_SUCCESS : DASI_ITERATOR_END;
+  });
+}
+
+dasi_error dasi_retrieve_iterator_get_key(dasi_retrieve_iterator_t *iterator,
+                                          dasi_key_t **key) {
+  return wrapFunc([iterator, key] {
+    ASSERT(iterator != nullptr);
+    ASSERT(key != nullptr);
+    *key = iterator->key();
+  });
+}
+
+dasi_error dasi_retrieve_iterator_get_handle(dasi_retrieve_iterator_t *iterator,
+                                             dasi_read_handle_t **handle) {
+  return wrapFunc([iterator, handle] {
+    ASSERT(iterator != nullptr);
+    ASSERT(handle != nullptr);
+    *handle = iterator->handle();
+  });
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+dasi_error dasi_read_handle_destroy(dasi_read_handle_t** handle) {
     return wrapFunc([handle] {
         ASSERT(handle != nullptr);
-        handle->set(nullptr);
-        delete handle;
+        /// @note check this with unique_ptr
+        *handle = nullptr;
     });
 }
 

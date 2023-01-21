@@ -133,8 +133,8 @@ int main(int argc, char** argv) {
 
     dasi_error err;
     dasi_key_t* key;
-    // dasi_retrieve_result_t* result;
-    // dasi_retrieve_iterator_t* iterator;
+    dasi_retrieve_result_t* result;
+    dasi_retrieve_iterator_t* iterator;
     dasi_read_handle_t* handle;
     size_t len;
     char data[20];
@@ -150,41 +150,40 @@ int main(int argc, char** argv) {
         dasi_query_set(query, "level", sbuf_p, 1);
         for (int par = 0; par < num_params; ++par) {
             dasi_query_set(query, "param", &param_names[par], 1);
-            // if (dasi_get(dasi, query, &result) != DASI_SUCCESS) {
-            //     fprintf(stderr, "Could not find step=%d, level=%d, param=%s\n", step, level, param_names[par]);
-            //     dasi_query_destroy(query);
-            //     dasi_close(dasi);
-            //     return 1;
-            // }
-            // dasi_retrieve_result_iterate(result, &iterator);
-            // mean  = 0;
-            // count = 0;
-            // do {
-            //     dasi_retrieve_iterator_get_key(iterator, &key);
-            //     dasi_key_get(key, "number", &kv);
-            //     sscanf(kv, "%d", &number);
-            //     dasi_retrieve_iterator_get_handle(iterator, &handle);
-            //     dasi_read_handle_open(handle);
-            //     dasi_read_handle_read(handle, data, sizeof(data), &len);
-            //     data[len] = 0;
-            //     if (sscanf(data, "%lg", &val) != 1) {
-            //         fprintf(stderr, "Could not read data number=%d, step=%d, level=%d, param=%s\n", number, step,
-            //         level,
-            //                 param_names[par]);
-            //         dasi_read_handle_close(handle);
-            //         dasi_read_handle_destroy(handle);
-            //         dasi_retrieve_iterator_destroy(iterator);
-            //         dasi_retrieve_result_destroy(result);
-            //         dasi_key_destroy(key);
-            //         dasi_query_destroy(query);
-            //         dasi_close(dasi);
-            //         return 1;
-            //     }
-            //     mean += val;
-            //     ++count;
-            // } while ((err = dasi_retrieve_iterator_next(iterator)) == DASI_SUCCESS);
-            // dasi_retrieve_iterator_destroy(iterator);
-            // dasi_retrieve_result_destroy(result);
+            if (dasi_get(dasi, query, &result) != DASI_SUCCESS) {
+                fprintf(stderr, "Could not find step=%d, level=%d, param=%s\n", step, level, param_names[par]);
+                dasi_query_destroy(query);
+                dasi_close(dasi);
+                return 1;
+            }
+            dasi_retrieve_result_iterate(result, &iterator);
+            mean  = 0;
+            count = 0;
+            do {
+                dasi_retrieve_iterator_get_key(iterator, &key);
+                dasi_key_get(key, "number", &kv);
+                sscanf(kv, "%d", &number);
+                dasi_retrieve_iterator_get_handle(iterator, &handle);
+                dasi_read_handle_open(handle);
+                dasi_read_handle_read(handle, data, sizeof(data), &len);
+                data[len] = 0;
+                if (sscanf(data, "%lg", &val) != 1) {
+                    fprintf(stderr, "Could not read data number=%d, step=%d, level=%d, param=%s\n", number, step, level,
+                            param_names[par]);
+                    dasi_read_handle_close(handle);
+                    dasi_read_handle_destroy(handle);
+                    dasi_retrieve_iterator_destroy(iterator);
+                    dasi_retrieve_result_destroy(result);
+                    dasi_key_destroy(key);
+                    dasi_query_destroy(query);
+                    dasi_close(dasi);
+                    return 1;
+                }
+                mean += val;
+                ++count;
+            } while ((err = dasi_retrieve_iterator_next(iterator)) == DASI_SUCCESS);
+            dasi_retrieve_iterator_destroy(iterator);
+            dasi_retrieve_result_destroy(result);
 
             mean /= count;
 

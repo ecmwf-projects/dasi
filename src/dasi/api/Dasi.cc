@@ -75,8 +75,10 @@ fdb5::Config construct_config(const char* dasi_config, const char* application_c
     // Is the dasi_configation a raw yaml, or is it a path?
     // FIXME: TODO: This behaves badly if there is a _path_ that doesn't exist (fails on parsing)
 
+    /// @todo the logic below fails to default schema (etc/fdb/schema): add a warning
     eckit::PathName config_path(dasi_config);
     std::string yaml_config;
+    /// @todo when the yml file does not exist. Also, it causes to break cfg object
     if (config_path.exists()) {
         std::unique_ptr<eckit::DataHandle> dh(config_path.fileHandle());
         size_t sz = dh->size();

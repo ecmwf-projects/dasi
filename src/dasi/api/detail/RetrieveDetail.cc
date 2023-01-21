@@ -9,6 +9,9 @@ namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
 
+RetrieveResult::RetrieveResult(RetrieveResult& result) :
+    impl_(std::move(result.impl_)) {}
+
 RetrieveResult::RetrieveResult(std::unique_ptr<RetrieveResultImpl>&& impl) :
     impl_(std::move(impl)) {}
 
@@ -28,5 +31,4 @@ void RetrieveResult::print(std::ostream& s) const {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-} // namespace dasi
-
+}  // namespace dasi
