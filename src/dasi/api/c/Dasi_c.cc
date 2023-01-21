@@ -10,7 +10,6 @@
 #include "dasi/api/c/Dasi_c.h"
 
 #include "dasi/api/Dasi.h"
-#include "dasi/api/ReadHandle.h"
 #include "dasi/api/detail/RetrieveDetail.h"
 #include "dasi/impl/RetrieveResultImpl.h"
 
