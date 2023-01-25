@@ -27,8 +27,8 @@ ecbuild_add_library(
         api/detail/RetrieveDetail.cc
         api/detail/RetrieveDetail.h
 
-        api/c/Dasi_c.h
-        api/c/Dasi_c.cc
+        api/c/Dasi.h
+        api/c/Dasi.cc
 
         impl/ListGeneratorImpl.cc
         impl/ListGeneratorImpl.h
