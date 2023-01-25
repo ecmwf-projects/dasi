@@ -13,7 +13,8 @@
 #include "eckit/testing/Test.h"
 
 #define ASSERT_SUCCESS(error) EXPECT(dasi_error_get_code(error) == DASI_SUCCESS)
-#define LOG_INFO(msg) eckit::Log::info() << msg << std::endl
+#define LOG_I(msg) eckit::Log::info() << msg << std::endl
+#define LOG_D(msg) eckit::Log::debug() << msg << std::endl
 
 
 constexpr const char SIMPLE_SCHEMA[] = R"(
@@ -44,8 +45,7 @@ TestDasi::TestDasi() {
     const auto cwd = eckit::LocalPathName::cwd();
     this->TmpDir   = std::make_unique<eckit::TmpDir>(cwd.c_str());
 
-    eckit::Log::info() << "- Working directory: " << this->TmpDir->path()
-                       << std::endl;
+    LOG_I("- Working directory: " << this->TmpDir->path());
 
     this->TmpDir->mkdir();
     (*TmpDir / "root").mkdir();
@@ -55,16 +55,16 @@ TestDasi::TestDasi() {
         dh.openForWrite(0);
         eckit::AutoClose close(dh);
         dh.write(SIMPLE_SCHEMA, sizeof(SIMPLE_SCHEMA));
-        eckit::Log::info() << "- Schema: " << dh.path() << std::endl;
-        eckit::Log::debug() << SIMPLE_SCHEMA << std::endl;
+        LOG_I("- Schema: " << dh.path());
+        LOG_D(SIMPLE_SCHEMA);
     }
 
     this->Config = "schema: " + *TmpDir + "/simple_schema\n" +
                    "catalogue: toc\nstore: file\nspaces:\n - roots:" +
                    "\n   - path: " + *TmpDir + "/root";
 
-    eckit::Log::info() << "- Configuration ..." << std::endl;
-    eckit::Log::debug() << Config << std::endl;
+    LOG_I("- Configuration ...");
+    LOG_D(Config);
 }
 
 const char* TestDasi::GetConfig() const {
@@ -121,7 +121,7 @@ CASE("[C API] Query Test: session + key + archive + query") {
              {data2, sizeof(data2) - 1, "value2"},
              {data3, sizeof(data3) - 1, "value3"}}) {
 
-        LOG_INFO("Element: " << std::get<0>(elem));
+        LOG_I("Element: " << std::get<0>(elem));
 
         dasi_key_t key = dasi_key_new(&err);
         ASSERT_SUCCESS(err);
@@ -149,7 +149,6 @@ CASE("[C API] Query Test: session + key + archive + query") {
     dasi_query_append(query, "key1", "value1", &err);
     dasi_query_append(query, "key2", "123", &err);
     dasi_query_append(query, "key3", "value1", &err);
-
 }
 
 int main(int argc, char** argv) {
