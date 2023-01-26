@@ -129,9 +129,10 @@ dasi_key_t dasi_key_new(dasi_error_t* error) {
 
 void dasi_key_delete(dasi_key_t p_key, dasi_error_t* error) {
     auto* key = reinterpret_cast<dasi::Key*>(p_key);
-    tryCatch(error, [key] {
+    tryCatch(error, [&key] {
         ASSERT(key != nullptr);
         delete key;
+        key = nullptr;
     });
 }
 
