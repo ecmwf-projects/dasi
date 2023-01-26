@@ -95,10 +95,10 @@ void dasi_delete(dasi_t p_session, dasi_error_t* error) {
     });
 }
 
-void dasi_archive(dasi_t p_session, dasi_key_t p_key, const void* data,
-                size_t length, dasi_error_t* error) {
+void dasi_archive(dasi_t p_session, const dasi_key_t p_key, const void* data,
+                  size_t length, dasi_error_t* error) {
     auto* session = reinterpret_cast<dasi::Dasi*>(p_session);
-    auto* key     = reinterpret_cast<dasi::Key*>(p_key);
+    auto* key     = reinterpret_cast<const dasi::Key*>(p_key);
     tryCatch(error, [session, key, data, length] {
         ASSERT(session != nullptr);
         ASSERT(key != nullptr);
@@ -178,7 +178,8 @@ void dasi_query_delete(dasi_query_t p_query, dasi_error_t* error) {
 }
 
 void dasi_query_set(dasi_query_t p_query, const char* keyword,
-                    const char* values[], size_t num, dasi_error_t* error) {
+                    const char* values[], const size_t num,
+                    dasi_error_t* error) {
     auto* query = reinterpret_cast<dasi::Query*>(p_query);
     tryCatch(error, [query, keyword, values, num] {
         ASSERT(query != nullptr);

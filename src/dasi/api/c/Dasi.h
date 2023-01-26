@@ -125,7 +125,8 @@ void dasi_query_delete(dasi_query_t p_query, dasi_error_t* error);
 /// Set all values for a keyword at once.
 /// @note The keyword is added if it's missing.
 void dasi_query_set(dasi_query_t p_query, const char* keyword,
-                    const char* values[], size_t num, dasi_error_t* error);
+                    const char* values[], const size_t num,
+                    dasi_error_t* error);
 
 /// Append one value to the set for the given keyword.
 /// @note The keyword is added if it's missing.
