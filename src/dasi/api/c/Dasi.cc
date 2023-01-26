@@ -169,9 +169,10 @@ dasi_query_t dasi_query_new(dasi_error_t* error) {
 
 void dasi_query_delete(dasi_query_t p_query, dasi_error_t* error) {
     auto* query = reinterpret_cast<dasi::Query*>(p_query);
-    tryCatch(error, [query] {
+    tryCatch(error, [&query] {
         ASSERT(query != nullptr);
         delete query;
+        query = nullptr;
     });
 }
 
