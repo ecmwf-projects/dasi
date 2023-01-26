@@ -77,7 +77,7 @@ dasi_t dasi_new(const char* filename, dasi_error_t* error);
 void dasi_delete(dasi_t p_session, dasi_error_t* error);
 
 /**
- * @brief Write data to the object
+ * @brief Writes data to the object store.
  *
  * @note Data is not guaranteed accessible nor persisted (wrt. failure),
  * until dasi_flush() is called.

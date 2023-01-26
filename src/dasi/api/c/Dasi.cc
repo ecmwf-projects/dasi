@@ -82,16 +82,17 @@ dasi_t dasi_new(const char* filename, dasi_error_t* error) {
     dasi::Dasi* result = nullptr;
     tryCatch(error, [filename, &result] {
         ASSERT(filename != nullptr);
-        result = std::make_unique<dasi::Dasi>(filename).release();
+        result = new dasi::Dasi(filename);
     });
     return reinterpret_cast<dasi_t>(result);
 }
 
 void dasi_delete(dasi_t p_session, dasi_error_t* error) {
     auto* session = reinterpret_cast<dasi::Dasi*>(p_session);
-    tryCatch(error, [session] {
+    tryCatch(error, [&session] {
         ASSERT(session != nullptr);
         delete session;
+        session = nullptr;
     });
 }
 
@@ -121,8 +122,7 @@ void dasi_flush(dasi_t p_session, dasi_error_t* error) {
 
 dasi_key_t dasi_key_new(dasi_error_t* error) {
     dasi::Key* result = nullptr;
-    tryCatch(error,
-             [&result] { result = std::make_unique<dasi::Key>().release(); });
+    tryCatch(error, [&result] { result = new dasi::Key(); });
     return reinterpret_cast<dasi_key_t>(result);
     ;
 }
@@ -163,8 +163,7 @@ void dasi_key_erase(dasi_key_t p_key, const char* keyword,
 
 dasi_query_t dasi_query_new(dasi_error_t* error) {
     dasi::Query* result = nullptr;
-    tryCatch(error,
-             [&result] { result = std::make_unique<dasi::Query>().release(); });
+    tryCatch(error, [&result] { result = new dasi::Query(); });
     return reinterpret_cast<dasi_query_t>(result);
 }
 
