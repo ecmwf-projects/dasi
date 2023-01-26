@@ -17,13 +17,15 @@
 // -----------------------------------------------------------------------------
 
 struct DasiError {
-    DasiError() : Code(DASI_SUCCESS) {}
+    DasiError() {}
     void Set(const std::string& msg, const dasi_error_enum_t code) {
         this->Code    = code;
         this->Message = msg;
     }
+
+public:
     std::string Message;
-    dasi_error_enum_t Code;
+    dasi_error_enum_t Code{DASI_SUCCESS};
 };
 
 const char* dasi_error_get_message(const dasi_error_t error) {
@@ -98,8 +100,8 @@ void dasi_delete(dasi_t p_session, dasi_error_t* error) {
 
 void dasi_archive(dasi_t p_session, const dasi_key_t p_key, const void* data,
                   size_t length, dasi_error_t* error) {
-    auto* session = reinterpret_cast<dasi::Dasi*>(p_session);
-    auto* key     = reinterpret_cast<const dasi::Key*>(p_key);
+    auto* session   = reinterpret_cast<dasi::Dasi*>(p_session);
+    const auto* key = reinterpret_cast<const dasi::Key*>(p_key);
     tryCatch(error, [session, key, data, length] {
         ASSERT(session != nullptr);
         ASSERT(key != nullptr);

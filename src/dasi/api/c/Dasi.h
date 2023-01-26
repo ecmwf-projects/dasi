@@ -88,7 +88,7 @@ void dasi_delete(dasi_t p_session, dasi_error_t* error);
  * @param length Length of "data" in bytes
  * @param error Error object
  */
-void dasi_archive(dasi_t p_session, dasi_key_t p_key, const void* data,
+void dasi_archive(dasi_t p_session, const dasi_key_t p_key, const void* data,
                   size_t length, dasi_error_t* error);
 
 /// Flushes all buffers and ensures the internal state is safe.

@@ -121,7 +121,7 @@ CASE("[C API] Query Test: session + key + archive + query") {
              {data2, sizeof(data2) - 1, "value2"},
              {data3, sizeof(data3) - 1, "value3"}}) {
 
-        LOG_I("Element: " << std::get<0>(elem));
+        LOG_D("Element: " << std::get<0>(elem));
 
         dasi_key_t key = dasi_key_new(&err);
         ASSERT_SUCCESS(err);
@@ -143,6 +143,8 @@ CASE("[C API] Query Test: session + key + archive + query") {
     }
     dasi_flush(dasi, &err);
     ASSERT_SUCCESS(err);
+
+    LOG_I("Let's check if we can list correctly...");
 
     dasi_query_t query = dasi_query_new(&err);
     ASSERT_SUCCESS(err);
