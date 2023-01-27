@@ -238,9 +238,14 @@ dasi_list_elem_t* dasi_list_first(dasi_list_t* p_list) {
     return reinterpret_cast<dasi_list_elem_t*>(result);
 }
 
-dasi_list_elem_t* dasi_list_next(dasi_list_t* p_list) {
+dasi_list_elem_t* dasi_list_next(dasi_list_t* p_list,
+                                 dasi_list_elem_t* p_element) {
     auto* list = reinterpret_cast<dasi::ListGenerator*>(p_list);
+    auto* elem = reinterpret_cast<dasi::ListElement*>(p_element);
     ASSERT(list != nullptr);
+    ASSERT(elem != nullptr);
+    delete elem;
+    p_element = nullptr;
     ++list->begin();
     const auto& next = *list->begin();
     auto* result     = new dasi::ListElement(next);

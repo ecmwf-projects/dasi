@@ -155,7 +155,8 @@ dasi_key_t* dasi_list_elem_get_key(dasi_list_elem_t* p_element);
 
 dasi_list_elem_t* dasi_list_first(dasi_list_t* p_list);
 
-dasi_list_elem_t* dasi_list_next(dasi_list_t* p_list);
+dasi_list_elem_t* dasi_list_next(dasi_list_t* p_list,
+                                 dasi_list_elem_t* p_element);
 
 int dasi_list_done(dasi_list_t* p_list);
 
