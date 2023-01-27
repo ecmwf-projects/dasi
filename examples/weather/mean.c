@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    dasi_error_t err;
+    dasi_error_t* err = NULL;
     dasi_t* dasi = dasi_new(config_path, &err);
     ASSERT_SUCCESS(err);
 

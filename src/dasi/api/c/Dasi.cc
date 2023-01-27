@@ -28,11 +28,11 @@ public:
     dasi_error_enum_t Code{DASI_SUCCESS};
 };
 
-const char* dasi_error_get_message(const dasi_error_t error) {
+const char* dasi_error_get_message(const dasi_error_t* error) {
     return error->Message.c_str();
 }
 
-dasi_error_enum_t dasi_error_get_code(const dasi_error_t error) {
+dasi_error_enum_t dasi_error_get_code(const dasi_error_t* error) {
     return error->Code;
 }
 
@@ -46,7 +46,7 @@ DasiError* g_error = new DasiError();
  * @return false Exception caught
  */
 template <typename F>
-bool tryCatch(dasi_error_t* error, F&& fn) {
+bool tryCatch(dasi_error_t** error, F&& fn) {
     *error = g_error;
     try {
         fn();
@@ -80,7 +80,7 @@ bool tryCatch(dasi_error_t* error, F&& fn) {
 //                           SESSION
 // -----------------------------------------------------------------------------
 
-dasi_t* dasi_new(const char* filename, dasi_error_t* error) {
+dasi_t* dasi_new(const char* filename, dasi_error_t** error) {
     dasi::Dasi* result = nullptr;
     tryCatch(error, [filename, &result] {
         ASSERT(filename != nullptr);
@@ -89,7 +89,7 @@ dasi_t* dasi_new(const char* filename, dasi_error_t* error) {
     return reinterpret_cast<dasi_t*>(result);
 }
 
-void dasi_delete(dasi_t* p_session, dasi_error_t* error) {
+void dasi_delete(dasi_t* p_session, dasi_error_t** error) {
     auto* session = reinterpret_cast<dasi::Dasi*>(p_session);
     tryCatch(error, [&session] {
         ASSERT(session != nullptr);
@@ -99,7 +99,7 @@ void dasi_delete(dasi_t* p_session, dasi_error_t* error) {
 }
 
 void dasi_archive(dasi_t* p_session, const dasi_key_t* p_key, const void* data,
-                  size_t length, dasi_error_t* error) {
+                  size_t length, dasi_error_t** error) {
     auto* session   = reinterpret_cast<dasi::Dasi*>(p_session);
     const auto* key = reinterpret_cast<const dasi::Key*>(p_key);
     tryCatch(error, [session, key, data, length] {
@@ -111,7 +111,7 @@ void dasi_archive(dasi_t* p_session, const dasi_key_t* p_key, const void* data,
 }
 
 dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* p_query,
-                       dasi_error_t* error) {
+                       dasi_error_t** error) {
     dasi_list_t* result = nullptr;
     auto* session       = reinterpret_cast<dasi::Dasi*>(p_session);
     const auto* query   = reinterpret_cast<const dasi::Query*>(p_query);
@@ -125,7 +125,7 @@ dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* p_query,
     return result;
 }
 
-void dasi_flush(dasi_t* p_session, dasi_error_t* error) {
+void dasi_flush(dasi_t* p_session, dasi_error_t** error) {
     auto* session = reinterpret_cast<dasi::Dasi*>(p_session);
     tryCatch(error, [session] {
         ASSERT(session != nullptr);
@@ -137,14 +137,14 @@ void dasi_flush(dasi_t* p_session, dasi_error_t* error) {
 //                           KEY
 // -----------------------------------------------------------------------------
 
-dasi_key_t* dasi_key_new(dasi_error_t* error) {
+dasi_key_t* dasi_key_new(dasi_error_t** error) {
     dasi::Key* result = nullptr;
     tryCatch(error, [&result] { result = new dasi::Key(); });
     return reinterpret_cast<dasi_key_t*>(result);
     ;
 }
 
-void dasi_key_delete(dasi_key_t* p_key, dasi_error_t* error) {
+void dasi_key_delete(dasi_key_t* p_key, dasi_error_t** error) {
     auto* key = reinterpret_cast<dasi::Key*>(p_key);
     tryCatch(error, [&key] {
         ASSERT(key != nullptr);
@@ -154,7 +154,7 @@ void dasi_key_delete(dasi_key_t* p_key, dasi_error_t* error) {
 }
 
 void dasi_key_set(dasi_key_t* p_key, const char* keyword, const char* value,
-                  dasi_error_t* error) {
+                  dasi_error_t** error) {
     auto* key = reinterpret_cast<dasi::Key*>(p_key);
     tryCatch(error, [key, keyword, value] {
         ASSERT(key != nullptr);
@@ -165,7 +165,7 @@ void dasi_key_set(dasi_key_t* p_key, const char* keyword, const char* value,
 }
 
 void dasi_key_erase(dasi_key_t* p_key, const char* keyword,
-                    dasi_error_t* error) {
+                    dasi_error_t** error) {
     auto* key = reinterpret_cast<dasi::Key*>(p_key);
     tryCatch(error, [key, keyword] {
         ASSERT(key != nullptr);
@@ -178,13 +178,13 @@ void dasi_key_erase(dasi_key_t* p_key, const char* keyword,
 //                           QUERY
 // -----------------------------------------------------------------------------
 
-dasi_query_t* dasi_query_new(dasi_error_t* error) {
+dasi_query_t* dasi_query_new(dasi_error_t** error) {
     dasi::Query* result = nullptr;
     tryCatch(error, [&result] { result = new dasi::Query(); });
     return reinterpret_cast<dasi_query_t*>(result);
 }
 
-void dasi_query_delete(dasi_query_t* p_query, dasi_error_t* error) {
+void dasi_query_delete(dasi_query_t* p_query, dasi_error_t** error) {
     auto* query = reinterpret_cast<dasi::Query*>(p_query);
     tryCatch(error, [&query] {
         ASSERT(query != nullptr);
@@ -195,7 +195,7 @@ void dasi_query_delete(dasi_query_t* p_query, dasi_error_t* error) {
 
 void dasi_query_set(dasi_query_t* p_query, const char* keyword,
                     const char* values[], const size_t num,
-                    dasi_error_t* error) {
+                    dasi_error_t** error) {
     auto* query = reinterpret_cast<dasi::Query*>(p_query);
     tryCatch(error, [query, keyword, values, num] {
         ASSERT(query != nullptr);
@@ -206,7 +206,7 @@ void dasi_query_set(dasi_query_t* p_query, const char* keyword,
 }
 
 void dasi_query_append(dasi_query_t* p_query, const char* keyword,
-                       const char* value, dasi_error_t* error) {
+                       const char* value, dasi_error_t** error) {
     auto* query = reinterpret_cast<dasi::Query*>(p_query);
     tryCatch(error, [query, keyword, value] {
         ASSERT(query != nullptr);

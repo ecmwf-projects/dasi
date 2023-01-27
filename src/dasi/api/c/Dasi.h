@@ -32,7 +32,7 @@
 typedef struct Dasi dasi_t;
 typedef struct Key dasi_key_t;
 typedef struct Query dasi_query_t;
-typedef struct DasiError* dasi_error_t;
+typedef struct DasiError dasi_error_t;
 typedef struct ListGenerator dasi_list_t;
 typedef struct ListElement dasi_list_elem_t;
 
@@ -59,24 +59,24 @@ extern "C" {
  * @param error Error object.
  * @return const char* Error message.
  */
-const char* dasi_error_get_message(const dasi_error_t error);
+const char* dasi_error_get_message(const dasi_error_t* error);
 
 /**
  * @brief Get the error code from the error object.
  * @param error Error object.
  * @return dasi_error_enum_t Error code.
  */
-dasi_error_enum_t dasi_error_get_code(const dasi_error_t error);
+dasi_error_enum_t dasi_error_get_code(const dasi_error_t* error);
 
 // -----------------------------------------------------------------------------
 //                           SESSION
 // -----------------------------------------------------------------------------
 
 /// Create a new session object using the given configuration file.
-dasi_t* dasi_new(const char* filename, dasi_error_t* error);
+dasi_t* dasi_new(const char* filename, dasi_error_t** error);
 
 /// Release the session and delete the object.
-void dasi_delete(dasi_t* p_session, dasi_error_t* error);
+void dasi_delete(dasi_t* p_session, dasi_error_t** error);
 
 /**
  * @brief Writes data to the object store.
@@ -91,7 +91,7 @@ void dasi_delete(dasi_t* p_session, dasi_error_t* error);
  * @param error Error object
  */
 void dasi_archive(dasi_t* p_session, const dasi_key_t* p_key, const void* data,
-                  size_t length, dasi_error_t* error);
+                  size_t length, dasi_error_t** error);
 
 /**
  * @brief Returns the (meta)list of the data described by the query.
@@ -102,50 +102,50 @@ void dasi_archive(dasi_t* p_session, const dasi_key_t* p_key, const void* data,
  * @return dasi_list_t List object
  */
 dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* p_query,
-                       dasi_error_t* error);
+                       dasi_error_t** error);
 
 /// Flushes all buffers and ensures the internal state is safe.
-void dasi_flush(dasi_t* p_session, dasi_error_t* error);
+void dasi_flush(dasi_t* p_session, dasi_error_t** error);
 
 // -----------------------------------------------------------------------------
 //                           KEY
 // -----------------------------------------------------------------------------
 
 /// Create a new key object.
-dasi_key_t* dasi_key_new(dasi_error_t* error);
+dasi_key_t* dasi_key_new(dasi_error_t** error);
 
 /// Release the key and delete the object.
-void dasi_key_delete(dasi_key_t* p_key, dasi_error_t* error);
+void dasi_key_delete(dasi_key_t* p_key, dasi_error_t** error);
 
 /// Set the value of the specified keyword.
 /// @note The keyword is added if it's missing.
 void dasi_key_set(dasi_key_t* p_key, const char* keyword, const char* value,
-                  dasi_error_t* error);
+                  dasi_error_t** error);
 
 /// Erase the keyword:value pair specified by its keyword.
 void dasi_key_erase(dasi_key_t* p_key, const char* keyword,
-                    dasi_error_t* error);
+                    dasi_error_t** error);
 
 // -----------------------------------------------------------------------------
 //                           QUERY
 // -----------------------------------------------------------------------------
 
 /// Create a new query object.
-dasi_query_t* dasi_query_new(dasi_error_t* error);
+dasi_query_t* dasi_query_new(dasi_error_t** error);
 
 /// Release a query object.
-void dasi_query_delete(dasi_query_t* p_query, dasi_error_t* error);
+void dasi_query_delete(dasi_query_t* p_query, dasi_error_t** error);
 
 /// Set all values for a keyword at once.
 /// @note The keyword is added if it's missing.
 void dasi_query_set(dasi_query_t* p_query, const char* keyword,
                     const char* values[], const size_t num,
-                    dasi_error_t* error);
+                    dasi_error_t** error);
 
 /// Append one value to the set for the given keyword.
 /// @note The keyword is added if it's missing.
 void dasi_query_append(dasi_query_t* p_query, const char* keyword,
-                       const char* value, dasi_error_t* error);
+                       const char* value, dasi_error_t** error);
 
 // -----------------------------------------------------------------------------
 //                           LIST

@@ -75,7 +75,7 @@ const char* TestDasi::GetConfig() const {
 
 CASE("[C API] Archive Test: session + key + archive") {
     TestDasi test;
-    dasi_error_t err;
+    dasi_error_t* err = NULL;
 
     dasi_t* dasi = dasi_new(test.GetConfig(), &err);
     ASSERT_SUCCESS(err);
@@ -106,7 +106,7 @@ CASE("[C API] Archive Test: session + key + archive") {
 
 CASE("[C API] Query Test: session + key + archive + query") {
     TestDasi test;
-    dasi_error_t err;
+    dasi_error_t* err = NULL;
 
     dasi_t* dasi = dasi_new(test.GetConfig(), &err);
     ASSERT_SUCCESS(err);
