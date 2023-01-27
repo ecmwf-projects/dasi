@@ -77,7 +77,7 @@ CASE("[C API] Archive Test: session + key + archive") {
     TestDasi test;
     dasi_error_t err;
 
-    dasi_t dasi = dasi_new(test.GetConfig(), &err);
+    dasi_t* dasi = dasi_new(test.GetConfig(), &err);
     ASSERT_SUCCESS(err);
 
     dasi_key_t* key = dasi_key_new(&err);
@@ -108,7 +108,7 @@ CASE("[C API] Query Test: session + key + archive + query") {
     TestDasi test;
     dasi_error_t err;
 
-    dasi_t dasi = dasi_new(test.GetConfig(), &err);
+    dasi_t* dasi = dasi_new(test.GetConfig(), &err);
     ASSERT_SUCCESS(err);
 
     constexpr const char data1[] = "TESTING ARCHIVE 1111111111";

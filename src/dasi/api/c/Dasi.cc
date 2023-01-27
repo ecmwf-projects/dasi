@@ -80,16 +80,16 @@ bool tryCatch(dasi_error_t* error, F&& fn) {
 //                           SESSION
 // -----------------------------------------------------------------------------
 
-dasi_t dasi_new(const char* filename, dasi_error_t* error) {
+dasi_t* dasi_new(const char* filename, dasi_error_t* error) {
     dasi::Dasi* result = nullptr;
     tryCatch(error, [filename, &result] {
         ASSERT(filename != nullptr);
         result = new dasi::Dasi(filename);
     });
-    return reinterpret_cast<dasi_t>(result);
+    return reinterpret_cast<dasi_t*>(result);
 }
 
-void dasi_delete(dasi_t p_session, dasi_error_t* error) {
+void dasi_delete(dasi_t* p_session, dasi_error_t* error) {
     auto* session = reinterpret_cast<dasi::Dasi*>(p_session);
     tryCatch(error, [&session] {
         ASSERT(session != nullptr);
@@ -98,7 +98,7 @@ void dasi_delete(dasi_t p_session, dasi_error_t* error) {
     });
 }
 
-void dasi_archive(dasi_t p_session, const dasi_key_t* p_key, const void* data,
+void dasi_archive(dasi_t* p_session, const dasi_key_t* p_key, const void* data,
                   size_t length, dasi_error_t* error) {
     auto* session   = reinterpret_cast<dasi::Dasi*>(p_session);
     const auto* key = reinterpret_cast<const dasi::Key*>(p_key);
@@ -110,7 +110,7 @@ void dasi_archive(dasi_t p_session, const dasi_key_t* p_key, const void* data,
     });
 }
 
-dasi_list_t* dasi_list(dasi_t p_session, const dasi_query_t* p_query,
+dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* p_query,
                        dasi_error_t* error) {
     dasi_list_t* result = nullptr;
     auto* session       = reinterpret_cast<dasi::Dasi*>(p_session);
@@ -118,14 +118,14 @@ dasi_list_t* dasi_list(dasi_t p_session, const dasi_query_t* p_query,
     tryCatch(error, [session, query, &result] {
         ASSERT(session != nullptr);
         ASSERT(query != nullptr);
-        auto tmp  = session->list(*query);
+        auto tmp   = session->list(*query);
         auto* list = new dasi::ListGenerator(tmp);
-        result    = reinterpret_cast<dasi_list_t*>(list);
+        result     = reinterpret_cast<dasi_list_t*>(list);
     });
     return result;
 }
 
-void dasi_flush(dasi_t p_session, dasi_error_t* error) {
+void dasi_flush(dasi_t* p_session, dasi_error_t* error) {
     auto* session = reinterpret_cast<dasi::Dasi*>(p_session);
     tryCatch(error, [session] {
         ASSERT(session != nullptr);

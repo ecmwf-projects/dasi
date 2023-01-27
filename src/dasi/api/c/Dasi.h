@@ -29,7 +29,7 @@
 //                           TYPES
 // -----------------------------------------------------------------------------
 
-typedef struct Dasi* dasi_t;
+typedef struct Dasi dasi_t;
 typedef struct Key dasi_key_t;
 typedef struct Query dasi_query_t;
 typedef struct DasiError* dasi_error_t;
@@ -73,10 +73,10 @@ dasi_error_enum_t dasi_error_get_code(const dasi_error_t error);
 // -----------------------------------------------------------------------------
 
 /// Create a new session object using the given configuration file.
-dasi_t dasi_new(const char* filename, dasi_error_t* error);
+dasi_t* dasi_new(const char* filename, dasi_error_t* error);
 
 /// Release the session and delete the object.
-void dasi_delete(dasi_t p_session, dasi_error_t* error);
+void dasi_delete(dasi_t* p_session, dasi_error_t* error);
 
 /**
  * @brief Writes data to the object store.
@@ -90,7 +90,7 @@ void dasi_delete(dasi_t p_session, dasi_error_t* error);
  * @param length Length of "data" in bytes
  * @param error Error object
  */
-void dasi_archive(dasi_t p_session, const dasi_key_t* p_key, const void* data,
+void dasi_archive(dasi_t* p_session, const dasi_key_t* p_key, const void* data,
                   size_t length, dasi_error_t* error);
 
 /**
@@ -101,11 +101,11 @@ void dasi_archive(dasi_t p_session, const dasi_key_t* p_key, const void* data,
  * @param error Error object
  * @return dasi_list_t List object
  */
-dasi_list_t* dasi_list(dasi_t p_session, const dasi_query_t* p_query,
+dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* p_query,
                        dasi_error_t* error);
 
 /// Flushes all buffers and ensures the internal state is safe.
-void dasi_flush(dasi_t p_session, dasi_error_t* error);
+void dasi_flush(dasi_t* p_session, dasi_error_t* error);
 
 // -----------------------------------------------------------------------------
 //                           KEY
@@ -123,7 +123,8 @@ void dasi_key_set(dasi_key_t* p_key, const char* keyword, const char* value,
                   dasi_error_t* error);
 
 /// Erase the keyword:value pair specified by its keyword.
-void dasi_key_erase(dasi_key_t* p_key, const char* keyword, dasi_error_t* error);
+void dasi_key_erase(dasi_key_t* p_key, const char* keyword,
+                    dasi_error_t* error);
 
 // -----------------------------------------------------------------------------
 //                           QUERY

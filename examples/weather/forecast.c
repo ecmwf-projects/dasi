@@ -9,7 +9,6 @@
 
 #define ASSERT_SUCCESS(error) assert(dasi_error_get_code(error) == DASI_SUCCESS)
 
-
 int main(int argc, char** argv) {
     const char* config_path = NULL;
     char type[]             = "ensemble";
@@ -119,7 +118,7 @@ int main(int argc, char** argv) {
     }
 
     dasi_error_t err;
-    dasi_t dasi = dasi_new(config_path, &err);
+    dasi_t* dasi = dasi_new(config_path, &err);
     ASSERT_SUCCESS(err);
 
     dasi_key_t* key = dasi_key_new(&err);
