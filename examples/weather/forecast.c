@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
     dasi_t dasi = dasi_new(config_path, &err);
     ASSERT_SUCCESS(err);
 
-    dasi_key_t key = dasi_key_new(&err);
+    dasi_key_t* key = dasi_key_new(&err);
     ASSERT_SUCCESS(err);
     dasi_key_set(key, "type", type, &err);
     dasi_key_set(key, "version", version, &err);

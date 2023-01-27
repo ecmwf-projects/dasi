@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
     double mean;
     int count;
 
-    dasi_key_t key = dasi_key_new(&err);
+    dasi_key_t* key = dasi_key_new(&err);
     ASSERT_SUCCESS(err);
 
     const char* sbuf_p[] = {sbuf};

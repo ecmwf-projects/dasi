@@ -30,7 +30,7 @@
 // -----------------------------------------------------------------------------
 
 typedef struct Dasi* dasi_t;
-typedef struct Key* dasi_key_t;
+typedef struct Key dasi_key_t;
 typedef struct Query dasi_query_t;
 typedef struct DasiError* dasi_error_t;
 typedef struct ListGenerator dasi_list_t;
@@ -90,7 +90,7 @@ void dasi_delete(dasi_t p_session, dasi_error_t* error);
  * @param length Length of "data" in bytes
  * @param error Error object
  */
-void dasi_archive(dasi_t p_session, const dasi_key_t p_key, const void* data,
+void dasi_archive(dasi_t p_session, const dasi_key_t* p_key, const void* data,
                   size_t length, dasi_error_t* error);
 
 /**
@@ -112,18 +112,18 @@ void dasi_flush(dasi_t p_session, dasi_error_t* error);
 // -----------------------------------------------------------------------------
 
 /// Create a new key object.
-dasi_key_t dasi_key_new(dasi_error_t* error);
+dasi_key_t* dasi_key_new(dasi_error_t* error);
 
 /// Release the key and delete the object.
-void dasi_key_delete(dasi_key_t p_key, dasi_error_t* error);
+void dasi_key_delete(dasi_key_t* p_key, dasi_error_t* error);
 
 /// Set the value of the specified keyword.
 /// @note The keyword is added if it's missing.
-void dasi_key_set(dasi_key_t p_key, const char* keyword, const char* value,
+void dasi_key_set(dasi_key_t* p_key, const char* keyword, const char* value,
                   dasi_error_t* error);
 
 /// Erase the keyword:value pair specified by its keyword.
-void dasi_key_erase(dasi_key_t p_key, const char* keyword, dasi_error_t* error);
+void dasi_key_erase(dasi_key_t* p_key, const char* keyword, dasi_error_t* error);
 
 // -----------------------------------------------------------------------------
 //                           QUERY
@@ -150,7 +150,7 @@ void dasi_query_append(dasi_query_t* p_query, const char* keyword,
 //                           LIST
 // -----------------------------------------------------------------------------
 
-dasi_key_t dasi_list_elem_get_key(dasi_list_elem_t* p_element);
+dasi_key_t* dasi_list_elem_get_key(dasi_list_elem_t* p_element);
 
 dasi_list_elem_t* dasi_list_first(dasi_list_t* p_list);
 

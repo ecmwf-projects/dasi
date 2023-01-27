@@ -98,7 +98,7 @@ void dasi_delete(dasi_t p_session, dasi_error_t* error) {
     });
 }
 
-void dasi_archive(dasi_t p_session, const dasi_key_t p_key, const void* data,
+void dasi_archive(dasi_t p_session, const dasi_key_t* p_key, const void* data,
                   size_t length, dasi_error_t* error) {
     auto* session   = reinterpret_cast<dasi::Dasi*>(p_session);
     const auto* key = reinterpret_cast<const dasi::Key*>(p_key);
@@ -119,7 +119,7 @@ dasi_list_t* dasi_list(dasi_t p_session, const dasi_query_t* p_query,
         ASSERT(session != nullptr);
         ASSERT(query != nullptr);
         auto tmp  = session->list(*query);
-        auto list = new dasi::ListGenerator(tmp);
+        auto* list = new dasi::ListGenerator(tmp);
         result    = reinterpret_cast<dasi_list_t*>(list);
     });
     return result;
@@ -137,14 +137,14 @@ void dasi_flush(dasi_t p_session, dasi_error_t* error) {
 //                           KEY
 // -----------------------------------------------------------------------------
 
-dasi_key_t dasi_key_new(dasi_error_t* error) {
+dasi_key_t* dasi_key_new(dasi_error_t* error) {
     dasi::Key* result = nullptr;
     tryCatch(error, [&result] { result = new dasi::Key(); });
-    return reinterpret_cast<dasi_key_t>(result);
+    return reinterpret_cast<dasi_key_t*>(result);
     ;
 }
 
-void dasi_key_delete(dasi_key_t p_key, dasi_error_t* error) {
+void dasi_key_delete(dasi_key_t* p_key, dasi_error_t* error) {
     auto* key = reinterpret_cast<dasi::Key*>(p_key);
     tryCatch(error, [&key] {
         ASSERT(key != nullptr);
@@ -153,7 +153,7 @@ void dasi_key_delete(dasi_key_t p_key, dasi_error_t* error) {
     });
 }
 
-void dasi_key_set(dasi_key_t p_key, const char* keyword, const char* value,
+void dasi_key_set(dasi_key_t* p_key, const char* keyword, const char* value,
                   dasi_error_t* error) {
     auto* key = reinterpret_cast<dasi::Key*>(p_key);
     tryCatch(error, [key, keyword, value] {
@@ -164,7 +164,7 @@ void dasi_key_set(dasi_key_t p_key, const char* keyword, const char* value,
     });
 }
 
-void dasi_key_erase(dasi_key_t p_key, const char* keyword,
+void dasi_key_erase(dasi_key_t* p_key, const char* keyword,
                     dasi_error_t* error) {
     auto* key = reinterpret_cast<dasi::Key*>(p_key);
     tryCatch(error, [key, keyword] {
@@ -220,11 +220,11 @@ void dasi_query_append(dasi_query_t* p_query, const char* keyword,
 //                           LIST
 // -----------------------------------------------------------------------------
 
-dasi_key_t dasi_list_elem_get_key(dasi_list_elem_t* p_element) {
+dasi_key_t* dasi_list_elem_get_key(dasi_list_elem_t* p_element) {
     auto* elem = reinterpret_cast<dasi::ListElement*>(p_element);
     ASSERT(elem != nullptr);
     auto* key = new dasi::Key(elem->key);
-    return reinterpret_cast<dasi_key_t>(key);
+    return reinterpret_cast<dasi_key_t*>(key);
 }
 
 // List: Triple-iterator
@@ -234,7 +234,7 @@ dasi_list_elem_t* dasi_list_first(dasi_list_t* p_list) {
     auto* list = reinterpret_cast<dasi::ListGenerator*>(p_list);
     ASSERT(list != nullptr);
     const auto& current = *list->begin();
-    auto result         = new dasi::ListElement(current);
+    auto* result        = new dasi::ListElement(current);
     return reinterpret_cast<dasi_list_elem_t*>(result);
 }
 

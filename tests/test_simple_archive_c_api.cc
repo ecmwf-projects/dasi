@@ -80,7 +80,7 @@ CASE("[C API] Archive Test: session + key + archive") {
     dasi_t dasi = dasi_new(test.GetConfig(), &err);
     ASSERT_SUCCESS(err);
 
-    dasi_key_t key = dasi_key_new(&err);
+    dasi_key_t* key = dasi_key_new(&err);
     ASSERT_SUCCESS(err);
 
     dasi_key_set(key, "key1", "value1", &err);
@@ -123,7 +123,7 @@ CASE("[C API] Query Test: session + key + archive + query") {
 
         LOG_D("Element: " << std::get<0>(elem));
 
-        dasi_key_t key = dasi_key_new(&err);
+        dasi_key_t* key = dasi_key_new(&err);
         ASSERT_SUCCESS(err);
         dasi_key_set(key, "key1", "value1", &err);
         dasi_key_set(key, "key2", "123", &err);
@@ -176,7 +176,7 @@ CASE("[C API] Query Test: session + key + archive + query") {
     dasi_list_t* list   = dasi_list(dasi, query, &err);
     dasi_list_elem_t* e = dasi_list_first(list);
     for (; dasi_list_done(list) == 0; e = dasi_list_next(list)) {
-        dasi_key_t p_key = dasi_list_elem_get_key(e);
+        dasi_key_t* p_key = dasi_list_elem_get_key(e);
         /// @note C++ API
         auto key = *reinterpret_cast<dasi::Key*>(p_key);
         checklist.erase(key);
