@@ -110,6 +110,21 @@ void dasi_archive(dasi_t p_session, const dasi_key_t p_key, const void* data,
     });
 }
 
+dasi_list_t* dasi_list(dasi_t p_session, const dasi_query_t p_query,
+                       dasi_error_t* error) {
+    dasi_list_t* result = nullptr;
+    auto* session       = reinterpret_cast<dasi::Dasi*>(p_session);
+    const auto* query   = reinterpret_cast<const dasi::Query*>(p_query);
+    tryCatch(error, [session, query, &result] {
+        ASSERT(session != nullptr);
+        ASSERT(query != nullptr);
+        auto tmp  = session->list(*query);
+        auto list = new dasi::ListGenerator(tmp);
+        result    = reinterpret_cast<dasi_list_t*>(list);
+    });
+    return result;
+}
+
 void dasi_flush(dasi_t p_session, dasi_error_t* error) {
     auto* session = reinterpret_cast<dasi::Dasi*>(p_session);
     tryCatch(error, [session] {
@@ -199,4 +214,41 @@ void dasi_query_append(dasi_query_t p_query, const char* keyword,
         ASSERT(value != nullptr);
         query->append(keyword, value);
     });
+}
+
+// -----------------------------------------------------------------------------
+//                           LIST
+// -----------------------------------------------------------------------------
+
+dasi_key_t dasi_list_elem_get_key(dasi_list_elem_t* p_element) {
+    auto* elem = reinterpret_cast<dasi::ListElement*>(p_element);
+    ASSERT(elem != nullptr);
+    auto* key = new dasi::Key(elem->key);
+    return reinterpret_cast<dasi_key_t>(key);
+}
+
+// List: Triple-iterator
+// -----------------------------------------------------------------------------
+
+dasi_list_elem_t* dasi_list_first(dasi_list_t* p_list) {
+    auto* list = reinterpret_cast<dasi::ListGenerator*>(p_list);
+    ASSERT(list != nullptr);
+    const auto& current = *list->begin();
+    auto result         = new dasi::ListElement(current);
+    return reinterpret_cast<dasi_list_elem_t*>(result);
+}
+
+dasi_list_elem_t* dasi_list_next(dasi_list_t* p_list) {
+    auto* list = reinterpret_cast<dasi::ListGenerator*>(p_list);
+    ASSERT(list != nullptr);
+    ++list->begin();
+    const auto& next = *list->begin();
+    auto* result     = new dasi::ListElement(next);
+    return reinterpret_cast<dasi_list_elem_t*>(result);
+}
+
+int dasi_list_done(dasi_list_t* p_list) {
+    auto* list = reinterpret_cast<dasi::ListGenerator*>(p_list);
+    ASSERT(list != nullptr);
+    return static_cast<int>(list->begin().done());
 }

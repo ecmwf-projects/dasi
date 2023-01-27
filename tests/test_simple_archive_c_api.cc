@@ -4,6 +4,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "dasi/api/Dasi.h"
 #include "dasi/api/c/Dasi.h"
 
 #include "eckit/filesystem/LocalPathName.h"
@@ -15,7 +16,6 @@
 #define ASSERT_SUCCESS(error) EXPECT(dasi_error_get_code(error) == DASI_SUCCESS)
 #define LOG_I(msg) eckit::Log::info() << msg << std::endl
 #define LOG_D(msg) eckit::Log::debug() << msg << std::endl
-
 
 constexpr const char SIMPLE_SCHEMA[] = R"(
 # Keys are by default Strings, unless otherwise specified
@@ -151,6 +151,38 @@ CASE("[C API] Query Test: session + key + archive + query") {
     dasi_query_append(query, "key1", "value1", &err);
     dasi_query_append(query, "key2", "123", &err);
     dasi_query_append(query, "key3", "value1", &err);
+
+    // checklist to compare the list
+    std::set<dasi::Key> checklist{{{"key1", "value1"},
+                                   {"key2", "123"},
+                                   {"key3", "value1"},
+                                   {"key1a", "value1"},
+                                   {"key2a", "value1"},
+                                   {"key3a", "321"},
+                                   {"key1b", "value1"},
+                                   {"key2b", "value1"},
+                                   {"key3b", "value1"}},
+                                  {{"key1", "value1"},
+                                   {"key2", "123"},
+                                   {"key3", "value1"},
+                                   {"key1a", "value1"},
+                                   {"key2a", "value1"},
+                                   {"key3a", "321"},
+                                   {"key1b", "value1"},
+                                   {"key2b", "value1"},
+                                   {"key3b", "value3"}}};
+
+    // Loop over the list elements (C API)
+    dasi_list_t* list   = dasi_list(dasi, query, &err);
+    dasi_list_elem_t* e = dasi_list_first(list);
+    for (; dasi_list_done(list) == 0; e = dasi_list_next(list)) {
+        dasi_key_t p_key = dasi_list_elem_get_key(e);
+        /// @note C++ API
+        auto key = *reinterpret_cast<dasi::Key*>(p_key);
+        checklist.erase(key);
+    }
+    EXPECT(checklist.empty());
+    LOG_D("Checklist Finished!");
 }
 
 int main(int argc, char** argv) {

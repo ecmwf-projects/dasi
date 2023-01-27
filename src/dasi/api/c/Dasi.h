@@ -33,6 +33,8 @@ typedef struct Dasi* dasi_t;
 typedef struct Key* dasi_key_t;
 typedef struct Query* dasi_query_t;
 typedef struct DasiError* dasi_error_t;
+typedef struct ListGenerator dasi_list_t;
+typedef struct ListElement dasi_list_elem_t;
 
 /// DASI Error Codes
 typedef enum dasi_error_enum_t
@@ -91,6 +93,17 @@ void dasi_delete(dasi_t p_session, dasi_error_t* error);
 void dasi_archive(dasi_t p_session, const dasi_key_t p_key, const void* data,
                   size_t length, dasi_error_t* error);
 
+/**
+ * @brief Returns the (meta)list of the data described by the query.
+ *
+ * @param p_session Dasi session that has the archive
+ * @param p_query Description of the metadata to be listed
+ * @param error Error object
+ * @return dasi_list_t List object
+ */
+dasi_list_t* dasi_list(dasi_t p_session, const dasi_query_t p_query,
+                       dasi_error_t* error);
+
 /// Flushes all buffers and ensures the internal state is safe.
 void dasi_flush(dasi_t p_session, dasi_error_t* error);
 
@@ -132,6 +145,18 @@ void dasi_query_set(dasi_query_t p_query, const char* keyword,
 /// @note The keyword is added if it's missing.
 void dasi_query_append(dasi_query_t p_query, const char* keyword,
                        const char* value, dasi_error_t* error);
+
+// -----------------------------------------------------------------------------
+//                           LIST
+// -----------------------------------------------------------------------------
+
+dasi_key_t dasi_list_elem_get_key(dasi_list_elem_t* p_element);
+
+dasi_list_elem_t* dasi_list_first(dasi_list_t* p_list);
+
+dasi_list_elem_t* dasi_list_next(dasi_list_t* p_list);
+
+int dasi_list_done(dasi_list_t* p_list);
 
 #ifdef __cplusplus
 }
