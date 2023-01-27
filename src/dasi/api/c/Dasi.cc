@@ -110,7 +110,7 @@ void dasi_archive(dasi_t p_session, const dasi_key_t p_key, const void* data,
     });
 }
 
-dasi_list_t* dasi_list(dasi_t p_session, const dasi_query_t p_query,
+dasi_list_t* dasi_list(dasi_t p_session, const dasi_query_t* p_query,
                        dasi_error_t* error) {
     dasi_list_t* result = nullptr;
     auto* session       = reinterpret_cast<dasi::Dasi*>(p_session);
@@ -178,13 +178,13 @@ void dasi_key_erase(dasi_key_t p_key, const char* keyword,
 //                           QUERY
 // -----------------------------------------------------------------------------
 
-dasi_query_t dasi_query_new(dasi_error_t* error) {
+dasi_query_t* dasi_query_new(dasi_error_t* error) {
     dasi::Query* result = nullptr;
     tryCatch(error, [&result] { result = new dasi::Query(); });
-    return reinterpret_cast<dasi_query_t>(result);
+    return reinterpret_cast<dasi_query_t*>(result);
 }
 
-void dasi_query_delete(dasi_query_t p_query, dasi_error_t* error) {
+void dasi_query_delete(dasi_query_t* p_query, dasi_error_t* error) {
     auto* query = reinterpret_cast<dasi::Query*>(p_query);
     tryCatch(error, [&query] {
         ASSERT(query != nullptr);
@@ -193,7 +193,7 @@ void dasi_query_delete(dasi_query_t p_query, dasi_error_t* error) {
     });
 }
 
-void dasi_query_set(dasi_query_t p_query, const char* keyword,
+void dasi_query_set(dasi_query_t* p_query, const char* keyword,
                     const char* values[], const size_t num,
                     dasi_error_t* error) {
     auto* query = reinterpret_cast<dasi::Query*>(p_query);
@@ -205,7 +205,7 @@ void dasi_query_set(dasi_query_t p_query, const char* keyword,
     });
 }
 
-void dasi_query_append(dasi_query_t p_query, const char* keyword,
+void dasi_query_append(dasi_query_t* p_query, const char* keyword,
                        const char* value, dasi_error_t* error) {
     auto* query = reinterpret_cast<dasi::Query*>(p_query);
     tryCatch(error, [query, keyword, value] {

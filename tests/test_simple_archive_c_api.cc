@@ -146,7 +146,7 @@ CASE("[C API] Query Test: session + key + archive + query") {
 
     LOG_I("Let's check if we can list correctly...");
 
-    dasi_query_t query = dasi_query_new(&err);
+    dasi_query_t* query = dasi_query_new(&err);
     ASSERT_SUCCESS(err);
     dasi_query_append(query, "key1", "value1", &err);
     dasi_query_append(query, "key2", "123", &err);

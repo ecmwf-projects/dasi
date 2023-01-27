@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
     dasi_t dasi = dasi_new(config_path, &err);
     ASSERT_SUCCESS(err);
 
-    dasi_query_t query = dasi_query_new(&err);
+    dasi_query_t* query = dasi_query_new(&err);
     ASSERT_SUCCESS(err);
     dasi_query_append(query, "type", in_type, &err);
     dasi_query_append(query, "version", version, &err);
