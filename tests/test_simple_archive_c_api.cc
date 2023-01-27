@@ -180,10 +180,18 @@ CASE("[C API] Query Test: session + key + archive + query") {
         /// @note C++ API
         auto key = *reinterpret_cast<dasi::Key*>(p_key);
         checklist.erase(key);
+        LOG_D(" - keyword: " << key);
     }
-    dasi_list_delete(&list, &err);
+    dasi_list_delete(list, &err);
     EXPECT(checklist.empty());
-    LOG_D("Checklist Finished!");
+
+    // dasi_key_delete(e, &err);
+    // ASSERT_SUCCESS(err);
+
+    dasi_delete(dasi, &err);
+    ASSERT_SUCCESS(err);
+
+    LOG_D("SUCCESS!");
 }
 
 int main(int argc, char** argv) {

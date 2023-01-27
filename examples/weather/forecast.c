@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
     }
 
     dasi_error_t* err = NULL;
-    dasi_t* dasi = dasi_new(config_path, &err);
+    dasi_t* dasi      = dasi_new(config_path, &err);
     ASSERT_SUCCESS(err);
 
     dasi_key_t* key = dasi_key_new(&err);

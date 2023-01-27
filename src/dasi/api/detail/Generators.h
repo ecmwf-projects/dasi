@@ -76,9 +76,7 @@ template <typename T>
 class GenericGenerator {
 
 public: // methods
-    /// @note asssign op silently steals the "impl_" from rhs! (obj1 = obj2)
-    GenericGenerator(GenericGenerator& rhs) : impl_{std::move(rhs.impl_)} {}
-
+    GenericGenerator(GenericGenerator&& rhs) : impl_{std::move(rhs.impl_)} {}
     explicit GenericGenerator(std::unique_ptr<APIGeneratorImpl<T>>&& impl) : impl_{std::move(impl)} {}
     ~GenericGenerator() = default;
 
