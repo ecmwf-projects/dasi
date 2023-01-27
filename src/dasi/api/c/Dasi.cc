@@ -125,6 +125,15 @@ dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* p_query,
     return result;
 }
 
+void dasi_list_delete(dasi_list_t** p_list, dasi_error_t** error) {
+    auto* list = reinterpret_cast<dasi::ListGenerator*>(*p_list);
+    tryCatch(error, [&list, &p_list] {
+        ASSERT(list != nullptr);
+        delete list;
+        *p_list = nullptr;
+    });
+}
+
 void dasi_flush(dasi_t* p_session, dasi_error_t** error) {
     auto* session = reinterpret_cast<dasi::Dasi*>(p_session);
     tryCatch(error, [session] {

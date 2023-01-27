@@ -181,6 +181,7 @@ CASE("[C API] Query Test: session + key + archive + query") {
         auto key = *reinterpret_cast<dasi::Key*>(p_key);
         checklist.erase(key);
     }
+    dasi_list_delete(&list, &err);
     EXPECT(checklist.empty());
     LOG_D("Checklist Finished!");
 }

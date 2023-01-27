@@ -104,6 +104,14 @@ void dasi_archive(dasi_t* p_session, const dasi_key_t* p_key, const void* data,
 dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* p_query,
                        dasi_error_t** error);
 
+/**
+ * @brief Destroy the given list object.
+ *
+ * @param p_list Pointer to the list object
+ * @param error Error object
+ */
+void dasi_list_delete(dasi_list_t** p_list, dasi_error_t** error);
+
 /// Flushes all buffers and ensures the internal state is safe.
 void dasi_flush(dasi_t* p_session, dasi_error_t** error);
 
