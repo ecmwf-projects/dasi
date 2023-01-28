@@ -49,6 +49,10 @@ public: // methods
         return generator_.value();
     }
 
+    const T* operator->() const {
+        return &generator_.value();
+    }
+
     [[ nodiscard ]]
     bool done() const {
         return generator_.done();
@@ -67,6 +71,10 @@ class APIIteratorSentinel {
     friend bool operator!=(const LHS& lhs, const APIIteratorSentinel& rhs) { return !lhs.done(); }
     template <typename RHS>
     friend bool operator!=(const APIIteratorSentinel& lhs, const RHS& rhs) { return !rhs.done(); }
+    template <typename LHS>
+    friend bool operator==(const LHS& lhs, const APIIteratorSentinel& rhs) { return lhs.done(); }
+    template <typename RHS>
+    friend bool operator==(const APIIteratorSentinel& lhs, const RHS& rhs) { return rhs.done(); }
 };
 
 
@@ -76,11 +84,14 @@ template <typename T>
 class GenericGenerator {
 
 public: // methods
-    GenericGenerator(GenericGenerator&& rhs) : impl_{std::move(rhs.impl_)} {}
+
+    using const_iterator = APIIterator<T>;
+
+    explicit GenericGenerator(GenericGenerator&& rhs) : impl_{std::move(rhs.impl_)} {}
     explicit GenericGenerator(std::unique_ptr<APIGeneratorImpl<T>>&& impl) : impl_{std::move(impl)} {}
     ~GenericGenerator() = default;
 
-    APIIterator<T> begin() { return APIIterator<T>{*impl_}; }
+    const_iterator begin() { return APIIterator<T>{*impl_}; }
     static APIIteratorSentinel end() { return {}; }
 
 private: // members

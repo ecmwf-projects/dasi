@@ -24,6 +24,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <time.h>
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * TYPES
@@ -38,13 +39,8 @@ typedef struct Key dasi_key_t;
 struct Query;
 typedef struct Query dasi_query_t;
 
-/*struc DasiError;
-typedef struct DasiError dasi_error_t;
-
-
-typedef struct ListGenerator dasi_list_t;
-typedef struct ListElement dasi_list_elem_t;
- */
+struct dasi_list_t;
+typedef struct dasi_list_t dasi_list_t;
 
 /// DASI Error Codes
 typedef enum dasi_error_values_t
@@ -107,6 +103,22 @@ int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data, long len
 
 int dasi_flush(dasi_t* dasi);
 
+/* *** List functionality */
+
+int dasi_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list);
+
+int dasi_free_list(const dasi_list_t* list);
+
+int dasi_list_next(dasi_list_t* list);
+
+int dasi_list_attrs(const dasi_list_t* list,
+                    dasi_key_t** key,
+                    time_t* timestamp,
+                    const char** uri,
+                    long* offset,
+                    long* length);
+
+
 #if 0
 dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* query,
                        dasi_error_t** error);
@@ -140,11 +152,14 @@ int dasi_free_key(const dasi_key_t* key);
  */
 int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value);
 
+/** Get the name of a numbered key */
+int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword, const char** value);
+
 /**
  * Get the value of a specified keyword in a key
  * @param value The value to be returned. This will point towards an internal character buffer with a lifetime equal to that of the key
  */
-int dasi_key_get(dasi_key_t* k, const char* keyword, const char** value);
+int dasi_key_get(dasi_key_t* key, const char* keyword, const char** value);
 
 /** Does the key have a specified keyword */
 int dasi_key_has(dasi_key_t* key, const char* keyword, bool* has);

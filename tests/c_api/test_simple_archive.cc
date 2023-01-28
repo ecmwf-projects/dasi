@@ -17,7 +17,6 @@
 #include "dasi/api/dasi_c.h"
 
 #include <tuple>
-#include <string.h>
 #include <memory>
 
 #define CHECK_RETURN(x) EXPECT((x) == DASI_SUCCESS);
@@ -31,6 +30,9 @@ template <> struct default_delete<dasi_key_t> {
 };
 template <> struct default_delete<dasi_t> {
     void operator() (const dasi_t* d) { CHECK_RETURN(dasi_close(d)); }
+};
+template <> struct default_delete<dasi_list_t> {
+    void operator() (const dasi_list_t* l) { CHECK_RETURN(dasi_free_list(l)); }
 };
 }
 
@@ -66,18 +68,18 @@ std::string simple_config(const eckit::PathName& basedir) {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-/*
 class ListResultChecker {
 
 public:
-    ListResultChecker(std::initializer_list<dasi::Key> init) : expectedValues_(init), validated_(false) {}
+    ListResultChecker(std::initializer_list<std::map<std::string, std::string>> init) : expectedValues_(init), validated_(false) {}
 
     ~ListResultChecker() noexcept(false) {
-        validate();
+//        validate();
     }
 
-    void found(const dasi::Key& k) {
+    void found(const std::map<std::string, std::string>& k) {
         ASSERT(!validated_);
+        eckit::Log::info() << "Erasing: " << k << std::endl;
         EXPECT(expectedValues_.erase(k) == 1);
     }
 
@@ -86,6 +88,41 @@ public:
             validated_ = true;
             EXPECT(expectedValues_.empty());
         }
+    }
+
+    void check(dasi_t* dasi, const dasi_query_t* query) {
+
+        dasi_list_t* list;
+        CHECK_RETURN(dasi_list(dasi, query, &list));
+        EXPECT(list);
+        std::unique_ptr<dasi_list_t> ldeleter(list);
+
+        int rc;
+        int cnt = 0;
+        while ((rc = dasi_list_next(list)) == DASI_SUCCESS) {
+
+            /// @todo - test all the return values in list, PROPERLY
+
+            dasi_key_t* key;
+            CHECK_RETURN(dasi_list_attrs(list, &key, /* timestamp */ nullptr, /* uri */ nullptr, /* offset */ nullptr, /* length */ nullptr))
+            ASSERT(key);
+            std::unique_ptr<dasi_key_t> kdeleter(key);
+
+            long count;
+            CHECK_RETURN(dasi_key_count(key, &count));
+
+            std::map<std::string, std::string> current_key;
+            for (long i = 0; i < count; ++i) {
+                const char* k;
+                const char* v;
+                CHECK_RETURN(dasi_key_get_index(key, i, &k, &v));
+                current_key[k] = v;
+            }
+            found(current_key);
+        }
+
+        EXPECT(rc == DASI_ITERATION_COMPLETE);
+        validate();
     }
 
     template <typename GENERATOR>
@@ -97,9 +134,9 @@ public:
     }
 
 private:
-    std::set<dasi::Key> expectedValues_;
+    std::set<std::map<std::string, std::string>> expectedValues_;
     bool validated_;
-};*/
+};
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -147,7 +184,6 @@ CASE("simple archive") {
 }
 
 
-#if 0
 CASE("Accessing data that has been archived") {
 
     eckit::TmpDir test_wd(eckit::LocalPathName::cwd().c_str());
@@ -163,7 +199,10 @@ CASE("Accessing data that has been archived") {
         dh.write(SIMPLE_SCHEMA, sizeof(SIMPLE_SCHEMA));
     }
 
-    dasi::Dasi dasi(simple_config(test_wd).c_str());
+    dasi_t* dasi;
+    CHECK_RETURN(dasi_open(&dasi, simple_config(test_wd).c_str()));
+    EXPECT(dasi);
+    std::unique_ptr<dasi_t> ddeleter(dasi);
 
     constexpr const char test_data1[] = "TESTING SIMPLE ARCHIVE";
     constexpr const char test_data2[] = "TESTING SIMPLE ARCHIVE 2222222222";
@@ -174,29 +213,36 @@ CASE("Accessing data that has been archived") {
                 {test_data2, sizeof(test_data2)-1, "value2"},
                 {test_data3, sizeof(test_data3)-1, "value3"}}) {
 
-            dasi::Key key{
-                {"key1",  "value1"},
-                {"key2",  "123"},
-                {"key3",  "value1"},
-                {"key1a", "value1"},
-                {"key2a", "value1"},
-                {"key3a", "321"},
-                {"key1b", "value1"},
-                {"key2b", "value1"},
-                {"key3b", std::get<2>(elems)},
-            };
+        dasi_key_t* key;
+        CHECK_RETURN(dasi_new_key(&key));
+        ASSERT(key);
+        std::unique_ptr<dasi_key_t> kdeleter(key);
 
-            dasi.archive(key, std::get<0>(elems), std::get<1>(elems));
+        CHECK_RETURN(dasi_key_set(key, "key1", "value1"));
+        CHECK_RETURN(dasi_key_set(key, "key2", "123"));
+        CHECK_RETURN(dasi_key_set(key, "key3", "value1"));
+        CHECK_RETURN(dasi_key_set(key, "key1a", "value1"));
+        CHECK_RETURN(dasi_key_set(key, "key2a", "value1"));
+        CHECK_RETURN(dasi_key_set(key, "key3a", "321"));
+        CHECK_RETURN(dasi_key_set(key, "key1b", "value1"));
+        CHECK_RETURN(dasi_key_set(key, "key2b", "value1"));
+        CHECK_RETURN(dasi_key_set(key, "key3b", std::get<2>(elems)));
+
+        CHECK_RETURN(dasi_archive(dasi, key, std::get<0>(elems), std::get<1>(elems)));
     }
-    dasi.flush();
+
+    CHECK_RETURN(dasi_flush(dasi));
 
     SECTION("We can list all of the data correctly") {
 
-        dasi::Query query {
-            {"key1",  {"value1"}},
-            {"key2",  {"123"}},
-            {"key3",  {"value1"}},
-        };
+        dasi_query_t* query;
+        CHECK_RETURN(dasi_new_query(&query));
+        ASSERT(query);
+        std::unique_ptr<dasi_query_t> qdeleter(query);
+
+        CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2", "123"));
+        CHECK_RETURN(dasi_query_append(query, "key3", "value1"));
 
         ListResultChecker checker{
             {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
@@ -207,17 +253,21 @@ CASE("Accessing data that has been archived") {
              {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value3"}},
         };
 
-        checker.iterate(dasi.list(query));
+        checker.check(dasi, query);
     }
 
     SECTION("We can list a subset of the data") {
 
-        dasi::Query query {
-                {"key1",  {"value1"}},
-                {"key2",  {"123"}},
-                {"key3",  {"value1"}},
-                {"key3b",  {"value1", "value3"}},
-        };
+        dasi_query_t* query;
+        CHECK_RETURN(dasi_new_query(&query));
+        ASSERT(query);
+        std::unique_ptr<dasi_query_t> qdeleter(query);
+
+        CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2", "123"));
+        CHECK_RETURN(dasi_query_append(query, "key3", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value3"));
 
         ListResultChecker checker{
                 {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
@@ -226,30 +276,41 @@ CASE("Accessing data that has been archived") {
                  {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value3"}},
         };
 
-        checker.iterate(dasi.list(query));
+        checker.check(dasi, query);
     }
 
     SECTION("We can match no data") {
 
-        dasi::Query query {
-                {"key1",  {"value1"}},
-                {"key2",  {"123"}},
-                {"key3",  {"value1"}},
-                {"key3b",  {"value4", "value5"}},
-        };
+        dasi_query_t* query;
+        CHECK_RETURN(dasi_new_query(&query));
+        ASSERT(query);
+        std::unique_ptr<dasi_query_t> qdeleter(query);
+
+        CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2", "123"));
+        CHECK_RETURN(dasi_query_append(query, "key3", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value4"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value5"));
 
         ListResultChecker checker{};
-        checker.iterate(dasi.list(query));
+        checker.check(dasi, query);
     }
 
     SECTION("We can have only some of the query matched") {
 
-        dasi::Query query {
-                {"key1",  {"value1"}},
-                {"key2",  {"123", "321"}},
-                {"key3",  {"value1"}},
-                {"key3b",  {"value1", "value3", "value4", "value5"}},
-        };
+        dasi_query_t* query;
+        CHECK_RETURN(dasi_new_query(&query));
+        ASSERT(query);
+        std::unique_ptr<dasi_query_t> qdeleter(query);
+
+        CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2", "123"));
+        CHECK_RETURN(dasi_query_append(query, "key2", "321"));
+        CHECK_RETURN(dasi_query_append(query, "key3", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value3"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value4"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value5"));
 
         ListResultChecker checker{
                 {{"key1",  "value1"}, {"key2",  "123"}, {"key3",  "value1"}, {"key1a", "value1"}, {"key2a", "value1"},
@@ -258,25 +319,27 @@ CASE("Accessing data that has been archived") {
                  {"key3a", "321"}, {"key1b", "value1"}, {"key2b", "value1"}, {"key3b", "value3"}},
         };
 
-        checker.iterate(dasi.list(query));
+        checker.check(dasi, query);
     }
 
     SECTION("We get no results from a query with no hits") {
 
-        dasi::Query query {
-            {"key1",  {"value1"}},
-            {"key2",  {"123"}},
-            {"key3",  {"value1"}},
-            {"key3b",  {"unknown", "values"}},
-        };
+        dasi_query_t* query;
+        CHECK_RETURN(dasi_new_query(&query));
+        ASSERT(query);
+        std::unique_ptr<dasi_query_t> qdeleter(query);
 
-        int cnt = 0;
-        for (const auto& elem : dasi.list(query)) {
-            ++cnt;
-        }
-        EXPECT(cnt == 0);
+        CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2", "123"));
+        CHECK_RETURN(dasi_query_append(query, "key3", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "unknown"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "values"));
+
+        ListResultChecker checker{};
+        checker.check(dasi, query);
     }
 
+#if 0
     SECTION("simple retrieve") {
         dasi::Query query {
             {"key1",  {"value1"}},
@@ -300,6 +363,7 @@ CASE("Accessing data that has been archived") {
         EXPECT(len == eckit::Length(55));
         EXPECT(memcmp(mh.data(), "TESTING SIMPLE ARCHIVE 3333333333TESTING SIMPLE ARCHIVE", 55) == 0);
     }
+#endif
 
     /*
     SECTION("Retrieval fails if not fully qualified") {
@@ -314,7 +378,6 @@ CASE("Accessing data that has been archived") {
 //CASE("Arhive data that should be masked...") {
 //    EXPECT(false);
 //}
-#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 

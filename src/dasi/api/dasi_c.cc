@@ -24,21 +24,23 @@ struct Dasi : public dasi::Dasi {
 
 struct Key : public dasi::Key {
     using dasi::Key::Key;
+    Key(const dasi::Key& k) : dasi::Key(k) {}
 };
 
 struct Query : public dasi::Query {
     using dasi::Query::Query;
 };
 
-struct ListGenerator : public dasi::ListGenerator {
-    ListGenerator(dasi::ListGenerator&& iter) :
-            dasi::ListGenerator(std::move(iter)) {}
-};
+struct dasi_list_t {
+    dasi_list_t(dasi::ListGenerator&& gen) :
+        first(true),
+        generator(std::move(gen)),
+        iterator(generator.begin()) {}
 
-struct ListElement : public dasi::ListElement {
-    using dasi::ListElement::ListElement;
-
-    ListElement(const dasi::ListElement& other) : dasi::ListElement(other) {}
+    bool first;
+    dasi::ListGenerator generator;
+    dasi::ListGenerator::const_iterator iterator;
+    std::string uri_cache;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -141,32 +143,59 @@ int dasi_flush(dasi_t* dasi) {
     });
 }
 
-#if 0
-
-dasi_list_t* dasi_list(dasi_t* session, const dasi_query_t* query,
-                       dasi_error_t** error) {
-    ListGenerator* result = nullptr;
-    tryCatch(error, [session, query, &result] {
-        ASSERT(session != nullptr);
-        ASSERT(query != nullptr);
-        auto&& list = session->list(*query);
-        result      = new ListGenerator(std::move(list));
+int dasi_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list) {
+    return tryCatch([dasi, query, list] {
+        ASSERT(dasi);
+        ASSERT(query);
+        ASSERT(list);
+        *list = new dasi_list_t(dasi->list(*query));
     });
-    return result;
 }
 
-void dasi_list_delete(dasi_list_t* list, dasi_error_t** error) {
-    tryCatch(error, [&list] {
-        ASSERT(list != nullptr);
+int dasi_free_list(const dasi_list_t* list) {
+    return tryCatch([list] {
+        ASSERT(list);
         delete list;
-        list = nullptr;
     });
 }
 
-#endif
-// -----------------------------------------------------------------------------
-//                           KEY
-// -----------------------------------------------------------------------------
+int dasi_list_next(dasi_list_t* list) {
+    return tryCatch(std::function<int()> {[list] {
+        if (list->iterator == list->generator.end()) {
+            if (list->first) list->uri_cache = list->iterator->location.uri.asRawString();
+            return DASI_ITERATION_COMPLETE;
+        }
+        if (!list->first) ++list->iterator;
+        if (list->iterator == list->generator.end()) return DASI_ITERATION_COMPLETE;
+        list->uri_cache = list->iterator->location.uri.asRawString();
+        list->first = false;
+        return DASI_SUCCESS;
+    }});
+}
+
+int dasi_list_attrs(const dasi_list_t* list,
+                    dasi_key_t** key,
+                    time_t* timestamp,
+                    const char** uri,
+                    long* offset,
+                    long* length) {
+    return tryCatch([list, key, timestamp, uri, offset, length] {
+        ASSERT(list);
+        ASSERT(list->iterator != list->generator.end());
+        if (key) {
+            *key = new Key(list->iterator->key);
+        }
+        if (timestamp) *timestamp = list->iterator->timestamp;
+        if (uri) {
+            *uri = list->uri_cache.c_str();
+        }
+        if (offset) *offset = list->iterator->location.offset;
+        if (length) *length = list->iterator->location.length;
+    });
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// KEY
 
 int dasi_new_key(dasi_key_t** key) {
     return tryCatch([key] {
@@ -193,6 +222,17 @@ int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value) {
         ASSERT(keyword);
         ASSERT(value);
         key->set(keyword, value);
+    });
+}
+
+int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword, const char** value) {
+    return tryCatch([key, n, keyword, value] {
+        ASSERT(key);
+        ASSERT(n >= 0);
+        auto it = key->begin();
+        std::advance(it, n);
+        if (keyword) *keyword = it->first.c_str();
+        if (value) *value = it->second.c_str();
     });
 }
 
@@ -237,9 +277,8 @@ int dasi_key_clear(dasi_key_t* key) {
     });
 }
 
-// -----------------------------------------------------------------------------
-//                           QUERY
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
+// QUERY
 
 int dasi_new_query(dasi_query_t** query) {
     return tryCatch([query] {
@@ -334,40 +373,6 @@ int dasi_query_clear(dasi_query_t* query) {
         query->clear();
     });
 }
-
-#if 0
-// -----------------------------------------------------------------------------
-//                           LIST
-// -----------------------------------------------------------------------------
-
-dasi_key_t* dasi_list_elem_get_key(dasi_list_elem_t* element) {
-    ASSERT(element != nullptr);
-    return new Key(std::move(element->key));
-}
-
-// List: Triple-iterator
-// -----------------------------------------------------------------------------
-
-dasi_list_elem_t* dasi_list_first(dasi_list_t* list) {
-    ASSERT(list != nullptr);
-    const auto& current = *list->begin();
-    return new ListElement(current);
-}
-
-dasi_list_elem_t* dasi_list_next(dasi_list_t* list, dasi_list_elem_t* element) {
-    ASSERT(element != nullptr);
-    delete element;
-    ASSERT(list != nullptr);
-    ++list->begin();
-    return dasi_list_first(list);
-}
-
-int dasi_list_done(dasi_list_t* p_list) {
-    auto* list = reinterpret_cast<dasi::ListGenerator*>(p_list);
-    ASSERT(list != nullptr);
-    return static_cast<int>(list->begin().done());
-}
-#endif
 
 // ---------------------------------------------------------------------------------------------------------------------
 
