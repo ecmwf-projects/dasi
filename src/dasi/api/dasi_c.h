@@ -81,15 +81,16 @@ const char* dasi_error_get_message(const dasi_error_t* error);
  */
 dasi_error_enum_t dasi_error_get_code(const dasi_error_t* error);
 
-// -----------------------------------------------------------------------------
-//                           SESSION
-// -----------------------------------------------------------------------------
+#endif
+/* ---------------------------------------------------------------------------------------------------------------------
+ * DASI SESSION
+ * ------------*/
 
 /// Create a new session object using the given configuration file.
-dasi_t* dasi_new(const char* filename, dasi_error_t** error);
+int dasi_open(dasi_t** dasi, const char* filename);
 
 /// Release the session and delete the object.
-void dasi_delete(dasi_t* session, dasi_error_t** error);
+int dasi_close(const dasi_t* dasi);
 
 /**
  * @brief Writes data to the object store.
@@ -97,36 +98,21 @@ void dasi_delete(dasi_t* session, dasi_error_t** error);
  * @note Data is not guaranteed accessible nor persisted (wrt. failure),
  * until dasi_flush() is called.
  *
- * @param p_session Dasi session
+ * @param dasi Dasi session
  * @param key Metadata description of the data to store and index
  * @param data Pointer to the read-only data
  * @param length Length of "data" in bytes
- * @param error Error object
  */
-void dasi_archive(dasi_t* p_session, const dasi_key_t* key, const void* data,
-                  size_t length, dasi_error_t** error);
+int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data, long length);
 
-/**
- * @brief Returns the (meta)list of the data described by the query.
- *
- * @param p_session Dasi session that has the archive
- * @param query Description of the metadata to be listed
- * @param error Error object
- * @return dasi_list_t List object
- */
+int dasi_flush(dasi_t* dasi);
+
+#if 0
 dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* query,
                        dasi_error_t** error);
 
-/**
- * @brief Destroy the given list object.
- *
- * @param list Pointer to the list object
- * @param error Error object
- */
 void dasi_list_delete(dasi_list_t* list, dasi_error_t** error);
 
-/// Flushes all buffers and ensures the internal state is safe.
-void dasi_flush(dasi_t* p_session, dasi_error_t** error);
 
 #endif
 /* ---------------------------------------------------------------------------------------------------------------------

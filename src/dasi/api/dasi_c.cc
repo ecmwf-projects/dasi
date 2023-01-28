@@ -109,32 +109,39 @@ extern "C" {
 //                           SESSION
 // -----------------------------------------------------------------------------
 
+int dasi_open(dasi_t** dasi, const char* filename) {
+    return tryCatch([dasi, filename] {
+        ASSERT(dasi);
+        ASSERT(filename);
+        *dasi = new Dasi(filename);
+    });
+}
+
+int dasi_close(const dasi_t* dasi) {
+    return tryCatch([dasi] {
+        ASSERT(dasi);
+        delete dasi;
+    });
+}
+
+int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data, long length) {
+    return tryCatch([dasi, key, data, length] {
+        ASSERT(dasi);
+        ASSERT(key);
+        ASSERT(data);
+        ASSERT(length >= 0);
+        dasi->archive(*key, data, length);
+    });
+}
+
+int dasi_flush(dasi_t* dasi) {
+    return tryCatch([dasi] {
+        ASSERT(dasi);
+        dasi->flush();
+    });
+}
+
 #if 0
-dasi_t* dasi_new(const char* filename, dasi_error_t** error) {
-    Dasi* result = nullptr;
-    return tryCatch([filename, &result] {
-        ASSERT(filename != nullptr);
-        result = new Dasi(filename);
-    });
-}
-
-void dasi_delete(dasi_t* session, dasi_error_t** error) {
-    tryCatch(error, [&session] {
-        ASSERT(session != nullptr);
-        delete session;
-        session = nullptr;
-    });
-}
-
-void dasi_archive(dasi_t* session, const dasi_key_t* key, const void* data,
-                  size_t length, dasi_error_t** error) {
-    tryCatch(error, [session, key, data, length] {
-        ASSERT(session != nullptr);
-        ASSERT(key != nullptr);
-        ASSERT(data != nullptr);
-        session->archive(*key, data, length);
-    });
-}
 
 dasi_list_t* dasi_list(dasi_t* session, const dasi_query_t* query,
                        dasi_error_t** error) {
@@ -153,13 +160,6 @@ void dasi_list_delete(dasi_list_t* list, dasi_error_t** error) {
         ASSERT(list != nullptr);
         delete list;
         list = nullptr;
-    });
-}
-
-void dasi_flush(dasi_t* session, dasi_error_t** error) {
-    tryCatch(error, [session] {
-        ASSERT(session != nullptr);
-        session->flush();
     });
 }
 

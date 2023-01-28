@@ -1,7 +1,6 @@
 
 list( APPEND _dasi_tests
-#    simple_archive
-#    simple_archive_c_api
+    simple_archive
     key
     query
 #    policydict

@@ -47,11 +47,9 @@ public: // methods
     /// @param length The length of the data to store in bytes
     void archive(const Key& key, const void* data, size_t length);
 
-    /// List data present and retrievable from the archive
-    /// @param query A description of the span of metadata to list within
-    /// @returns An iterable generator object of ListElements, containing details of the objects found, the
-    ///          keys describing them and a timestamp of object archival.
-    ListGenerator list(const Query& query);
+    /// Flushes all buffers and ensures all internal state is safe wrt. failure
+    /// @note always safe to call
+    void flush();
 
     /// Retrieve data objects from the archive
     /// @todo - a retrieve function that gets data sizes as well.
@@ -62,9 +60,11 @@ public: // methods
     /// @returns A generic data handle, that will retrieve the data.
     RetrieveResult retrieve(const Query& query);
 
-    /// Flushes all buffers and ensures all internal state is safe wrt. failure
-    /// @note always safe to call
-    void flush();
+    /// List data present and retrievable from the archive
+    /// @param query A description of the span of metadata to list within
+    /// @returns An iterable generator object of ListElements, containing details of the objects found, the
+    ///          keys describing them and a timestamp of object archival.
+    ListGenerator list(const Query& query);
 
     /// Set a named policy, or set of policies, for the data collections identified by the query
     /// @param query The data collections to modify

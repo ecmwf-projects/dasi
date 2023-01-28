@@ -9,7 +9,6 @@
 namespace std {
 template <> struct default_delete<dasi_query_t> {
     void operator() (const dasi_query_t* q) { CHECK_RETURN(dasi_free_query(q)); }
-
 };
 }
 
