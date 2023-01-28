@@ -25,16 +25,26 @@
 
 #include <stddef.h>
 
-// -----------------------------------------------------------------------------
-//                           TYPES
-// -----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------------------------------
+ * TYPES
+ * -----*/
 
+struct Dasi;
 typedef struct Dasi dasi_t;
+
+struct Key;
 typedef struct Key dasi_key_t;
+
+struct Query;
 typedef struct Query dasi_query_t;
+
+/*struc DasiError;
 typedef struct DasiError dasi_error_t;
+
+
 typedef struct ListGenerator dasi_list_t;
 typedef struct ListElement dasi_list_elem_t;
+ */
 
 /// DASI Error Codes
 typedef enum dasi_error_values_t
@@ -44,7 +54,8 @@ typedef enum dasi_error_values_t
     DASI_ERROR               = 2, /* Operation failed. */
     DASI_ERROR_UNKNOWN       = 3, /* Failed with an unknown error. */
     DASI_ERROR_USER          = 4, /* Failed with an user error. */
-    DASI_ERROR_ITERATOR      = 5,  /* Failed with an iterator error. */
+    DASI_ERROR_ITERATOR      = 5, /* Failed with an iterator error. */
+    DASI_ERROR_ASSERT        = 6, /* Failed with an assert() */
 } dasi_error_enum_t;
 
 #ifdef __cplusplus
@@ -118,9 +129,9 @@ void dasi_list_delete(dasi_list_t* list, dasi_error_t** error);
 void dasi_flush(dasi_t* p_session, dasi_error_t** error);
 
 #endif
-// -----------------------------------------------------------------------------
-//                           KEY
-// -----------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------------------------------------------------
+ * KEY
+ * ---*/
 
 /**
  * @brief Construct a new Dasi key object
@@ -161,28 +172,33 @@ int dasi_key_erase(dasi_key_t* key, const char* keyword);
 /** Erase all elements in the key */
 int dasi_key_clear(dasi_key_t* key);
 
+/* ---------------------------------------------------------------------------------------------------------------------
+ * QUERY
+ * -----*/
+
+int dasi_new_query(dasi_query_t** query);
+
+int dasi_new_query_from_string(dasi_query_t** query, const char* str);
+
+int dasi_free_query(const dasi_query_t* query);
+
+int dasi_query_set(dasi_query_t* query, const char* keyword, const char* values[], int num);
+
+int dasi_query_append(dasi_query_t* query, const char* keyword, const char* value);
+
+int dasi_query_keyword_count(dasi_query_t* query, long* count);
+
+int dasi_query_value_count(dasi_query_t* query, const char* keyword, long* count);
+
+int dasi_query_get(dasi_query_t* query, const char* keyword, int num, const char** value);
+
+int dasi_query_has(dasi_query_t* query, const char* keyword, bool* has);
+
+int dasi_query_erase(dasi_query_t* query, const char* keyword);
+
+int dasi_query_clear(dasi_query_t* query);
+
 #if 0
-// -----------------------------------------------------------------------------
-//                           QUERY
-// -----------------------------------------------------------------------------
-
-/// Create a new query object.
-dasi_query_t* dasi_query_new(dasi_error_t** error);
-
-/// Release a query object.
-void dasi_query_delete(dasi_query_t* query, dasi_error_t** error);
-
-/// Set all values for a keyword at once.
-/// @note The keyword is added if it's missing.
-void dasi_query_set(dasi_query_t* query, const char* keyword,
-                    const char* values[], const size_t num,
-                    dasi_error_t** error);
-
-/// Append one value to the set for the given keyword.
-/// @note The keyword is added if it's missing.
-void dasi_query_append(dasi_query_t* query, const char* keyword,
-                       const char* value, dasi_error_t** error);
-
 // -----------------------------------------------------------------------------
 //                           LIST
 // -----------------------------------------------------------------------------

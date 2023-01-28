@@ -60,6 +60,10 @@ auto Query::get(const std::string_view& name) const -> const value_type& {
     return it->second;
 }
 
+Query::map_type::size_type Query::size() const {
+    return values_.size();
+}
+
 Query::map_type::const_iterator Query::begin() const {
     return cbegin();
 }
@@ -74,6 +78,28 @@ Query::map_type::const_iterator Query::cbegin() const {
 
 Query::map_type::const_iterator Query::cend() const {
     return values_.cend();
+}
+
+void Query::erase(const std::string& k) {
+    auto it = values_.find(k);
+    if (it != values_.end()) {
+        values_.erase(it);
+    }
+}
+
+void Query::erase(const std::string_view& k) {
+    auto it = values_.find(k);
+    if (it != values_.end()) {
+        values_.erase(it);
+    }
+}
+
+void Query::erase(const char* k) {
+    erase(std::string_view(k));
+}
+
+void Query::clear() {
+    values_.clear();
 }
 
 //-------------------------------------------------------------------------------------------------

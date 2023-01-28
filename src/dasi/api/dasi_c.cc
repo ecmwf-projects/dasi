@@ -24,11 +24,10 @@ struct Dasi : public dasi::Dasi {
 
 struct Key : public dasi::Key {
     using dasi::Key::Key;
-
-    Key(const dasi::Key& other) : dasi::Key(other) {}
 };
 
 struct Query : public dasi::Query {
+    using dasi::Query::Query;
 };
 
 struct ListGenerator : public dasi::ListGenerator {
@@ -81,6 +80,11 @@ int tryCatch(FN&& fn) {
         eckit::Log::error() << "User Error: " << e.what() << std::endl;
         g_current_error_string = e.what();
         return DASI_ERROR_USER;
+    }
+    catch (const eckit::AssertionFailed& e) {
+        eckit::Log::error() << "Assertion Failed: " << e.what() << std::endl;
+        g_current_error_string = e.what();
+        return DASI_ERROR_ASSERT;
     }
     catch (const eckit::Exception& e) {
         eckit::Log::error() << "DASI Error: " << e.what() << std::endl;
@@ -237,42 +241,101 @@ int dasi_key_clear(dasi_key_t* key) {
 //                           QUERY
 // -----------------------------------------------------------------------------
 
-#if 0
-dasi_query_t* dasi_query_new(dasi_error_t** error) {
-    Query* result = nullptr;
-    tryCatch(error, [&result] { result = new Query(); });
-    return result;
+int dasi_new_query(dasi_query_t** query) {
+    return tryCatch([query] {
+        *query = new Query();
+    });
 }
 
-void dasi_query_delete(dasi_query_t* query, dasi_error_t** error) {
-    tryCatch(error, [&query] {
-        ASSERT(query != nullptr);
+int dasi_new_query_from_string(dasi_query_t** query, const char* str) {
+    return tryCatch([query, str] {
+        *query = new Query(str);
+    });
+}
+
+int dasi_free_query(const dasi_query_t* query) {
+    return tryCatch([query] {
+        ASSERT(query);
         delete query;
-        query = nullptr;
     });
 }
 
-void dasi_query_set(dasi_query_t* query, const char* keyword,
-                    const char* values[], const size_t num,
-                    dasi_error_t** error) {
-    tryCatch(error, [query, keyword, values, num] {
-        ASSERT(query != nullptr);
-        ASSERT(keyword != nullptr);
-        ASSERT(values != nullptr);
-        query->set(keyword, Query::value_type{values, values + num});
+int dasi_query_set(dasi_query_t* query, const char* keyword, const char* values[], int num) {
+    return tryCatch([query, keyword, values, num] {
+        ASSERT(query);
+        ASSERT(keyword);
+        ASSERT(values);
+        ASSERT(num >= 0);
+        std::vector<std::string> vals;
+        for (int i = 0; i < num; i++) {
+            vals.push_back(values[i]);
+        }
+        query->set(keyword, vals);
     });
 }
 
-void dasi_query_append(dasi_query_t* query, const char* keyword,
-                       const char* value, dasi_error_t** error) {
-    tryCatch(error, [query, keyword, value] {
-        ASSERT(query != nullptr);
-        ASSERT(keyword != nullptr);
-        ASSERT(value != nullptr);
+int dasi_query_append(dasi_query_t* query, const char* keyword, const char* value) {
+    return tryCatch([query, keyword, value] {
+        ASSERT(query);
+        ASSERT(keyword);
+        ASSERT(value);
         query->append(keyword, value);
     });
 }
 
+int dasi_query_get(dasi_query_t* query, const char* keyword, int num, const char** value) {
+    return tryCatch([query, keyword, num, value] {
+        ASSERT(query);
+        ASSERT(keyword);
+        ASSERT(value);
+        ASSERT(num >= 0);
+        const auto& values(query->get(keyword));
+        ASSERT( num < values.size());
+        *value = values[num].c_str();
+    });
+}
+
+int dasi_query_has(dasi_query_t* query, const char* keyword, bool* has) {
+    return tryCatch([query, keyword, has] {
+        ASSERT(query);
+        ASSERT(keyword);
+        ASSERT(has);
+        *has = query->has(keyword);
+    });
+}
+
+int dasi_query_keyword_count(dasi_query_t* query, long* count) {
+    return tryCatch([query, count] {
+        ASSERT(query);
+        ASSERT(count);
+        *count = query->size();
+    });
+}
+
+int dasi_query_value_count(dasi_query_t* query, const char* keyword, long* count) {
+    return tryCatch([query, keyword, count] {
+        ASSERT(query);
+        ASSERT(count);
+        *count = query->get(keyword).size();
+    });
+}
+
+int dasi_query_erase(dasi_query_t* query, const char* keyword) {
+    return tryCatch([query, keyword] {
+        ASSERT(query != nullptr);
+        ASSERT(keyword != nullptr);
+        query->erase(keyword);
+    });
+}
+
+int dasi_query_clear(dasi_query_t* query) {
+    return tryCatch([query] {
+        ASSERT(query != nullptr);
+        query->clear();
+    });
+}
+
+#if 0
 // -----------------------------------------------------------------------------
 //                           LIST
 // -----------------------------------------------------------------------------
