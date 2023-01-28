@@ -79,7 +79,6 @@ public:
 
     void found(const std::map<std::string, std::string>& k) {
         ASSERT(!validated_);
-        eckit::Log::info() << "Erasing: " << k << std::endl;
         EXPECT(expectedValues_.erase(k) == 1);
     }
 
@@ -143,7 +142,7 @@ private:
 CASE("simple archive") {
 
     eckit::TmpDir test_wd(eckit::LocalPathName::cwd().c_str());
-    std::cout << "Working directory: " << test_wd << std::endl;
+//    std::cout << "Working directory: " << test_wd << std::endl;
 
     test_wd.mkdir();
     (test_wd / "root").mkdir();
