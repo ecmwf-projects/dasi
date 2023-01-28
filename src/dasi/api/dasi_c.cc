@@ -7,10 +7,16 @@
  * nor does it submit to any jurisdiction.
  */
 
-#include "dasi/api/c/Dasi.h"
+#include "dasi_c.h"
 #include "dasi/api/Dasi.h"
 
-#include <eckit/exception/Exceptions.h>
+#include "eckit/exception/Exceptions.h"
+
+#include <functional>
+
+extern "C" {
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 struct Dasi : public dasi::Dasi {
     using dasi::Dasi::Dasi;
@@ -18,45 +24,45 @@ struct Dasi : public dasi::Dasi {
 
 struct Key : public dasi::Key {
     using dasi::Key::Key;
+
     Key(const dasi::Key& other) : dasi::Key(other) {}
 };
 
-struct Query : public dasi::Query {};
+struct Query : public dasi::Query {
+};
 
 struct ListGenerator : public dasi::ListGenerator {
     ListGenerator(dasi::ListGenerator&& iter) :
-        dasi::ListGenerator(std::move(iter)) {}
+            dasi::ListGenerator(std::move(iter)) {}
 };
 
 struct ListElement : public dasi::ListElement {
     using dasi::ListElement::ListElement;
+
     ListElement(const dasi::ListElement& other) : dasi::ListElement(other) {}
 };
 
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 //                           ERROR HANDLING
-// -----------------------------------------------------------------------------
 
-struct DasiError {
-    void Set(const std::string& msg, const dasi_error_enum_t code) {
-        this->Code    = code;
-        this->Message = msg;
-    }
+} // extern "C"
 
-public:
-    std::string Message;
-    dasi_error_enum_t Code{DASI_SUCCESS};
-};
+// template can't have C linkage
 
-extern "C" const char* dasi_error_get_message(const dasi_error_t* error) {
-    return error->Message.c_str();
+static thread_local std::string g_current_error_string;
+
+const char* dasi_error_get_message(int) {
+    return g_current_error_string.c_str();
 }
 
-extern "C" dasi_error_enum_t dasi_error_get_code(const dasi_error_t* error) {
-    return error->Code;
+int innerWrapFn(std::function<int()> f) {
+    return f();
 }
 
-DasiError* g_error = new DasiError();
+int innerWrapFn(std::function<void()> f) {
+    f();
+    return DASI_SUCCESS;
+}
 
 /**
  * @brief Catch the exceptions and capture the detail in dasi_error_t.
@@ -65,35 +71,32 @@ DasiError* g_error = new DasiError();
  * @return true  No exception caught
  * @return false Exception caught
  */
-template <typename F>
-bool tryCatch(dasi_error_t** error, F&& fn) {
-    *error = g_error;
+template <typename FN>
+[[ nodiscard ]]
+int tryCatch(FN&& fn) {
     try {
-        fn();
-        // eckit::Log::debug() << "[Success]" << std::endl;
-        g_error->Set("Success", DASI_SUCCESS);
+        return innerWrapFn(fn);
     }
     catch (const eckit::UserError& e) {
         eckit::Log::error() << "User Error: " << e.what() << std::endl;
-        g_error->Set(e.what(), DASI_ERROR_USER);
-        return false;
+        g_current_error_string = e.what();
+        return DASI_ERROR_USER;
     }
     catch (const eckit::Exception& e) {
         eckit::Log::error() << "DASI Error: " << e.what() << std::endl;
-        g_error->Set(e.what(), DASI_ERROR);
-        return false;
+        g_current_error_string = e.what();
+        return DASI_ERROR;
     }
     catch (const std::exception& e) {
-        eckit::Log::error() << "Unkown Error: " << e.what() << std::endl;
-        g_error->Set(e.what(), DASI_ERROR_UNKNOWN);
-        return false;
+        eckit::Log::error() << "Unknown Error: " << e.what() << std::endl;
+        g_current_error_string = e.what();
+        return DASI_ERROR_UNKNOWN;
     }
     catch (...) {
-        eckit::Log::error() << "Unkown Error!" << std::endl;
-        g_error->Set("Unknown Error", DASI_ERROR_UNKNOWN);
-        return false;
+        eckit::Log::error() << "Unknown Error!" << std::endl;
+        g_current_error_string = "<unknown>";
+        return DASI_ERROR_UNKNOWN;
     }
-    return true;
 }
 
 extern "C" {
@@ -102,13 +105,13 @@ extern "C" {
 //                           SESSION
 // -----------------------------------------------------------------------------
 
+#if 0
 dasi_t* dasi_new(const char* filename, dasi_error_t** error) {
     Dasi* result = nullptr;
-    tryCatch(error, [filename, &result] {
+    return tryCatch([filename, &result] {
         ASSERT(filename != nullptr);
         result = new Dasi(filename);
     });
-    return result;
 }
 
 void dasi_delete(dasi_t* session, dasi_error_t** error) {
@@ -156,40 +159,77 @@ void dasi_flush(dasi_t* session, dasi_error_t** error) {
     });
 }
 
+#endif
 // -----------------------------------------------------------------------------
 //                           KEY
 // -----------------------------------------------------------------------------
 
-dasi_key_t* dasi_key_new(dasi_error_t** error) {
-    Key* result = nullptr;
-    tryCatch(error, [&result] { result = new Key(); });
-    return result;
-}
-
-void dasi_key_delete(dasi_key_t* key, dasi_error_t** error) {
-    tryCatch(error, [&key] {
-        ASSERT(key != nullptr);
-        delete key;
-        key = nullptr;
+int dasi_new_key(dasi_key_t** key) {
+    return tryCatch([key] {
+        *key = new Key();
     });
 }
 
-void dasi_key_set(dasi_key_t* key, const char* keyword, const char* value,
-                  dasi_error_t** error) {
-    tryCatch(error, [key, keyword, value] {
-        ASSERT(key != nullptr);
-        ASSERT(keyword != nullptr);
-        ASSERT(value != nullptr);
+int dasi_new_key_from_string(dasi_key_t** key, const char* str) {
+    return tryCatch([key, str] {
+        *key = new Key(str);
+    });
+}
+
+int dasi_free_key(const dasi_key_t* key) {
+    return tryCatch([key] {
+        ASSERT(key);
+        delete key;
+    });
+}
+
+int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value) {
+    return tryCatch([key, keyword, value] {
+        ASSERT(key);
+        ASSERT(keyword);
+        ASSERT(value);
         key->set(keyword, value);
     });
 }
 
-void dasi_key_erase(dasi_key_t* key, const char* keyword,
-                    dasi_error_t** error) {
-    tryCatch(error, [key, keyword] {
+int dasi_key_get(dasi_key_t* key, const char* keyword, const char** value) {
+    return tryCatch([key, keyword, value] {
+        ASSERT(key);
+        ASSERT(keyword);
+        ASSERT(value);
+        *value = key->get(keyword).c_str();
+    });
+}
+
+int dasi_key_has(dasi_key_t* key, const char* keyword, bool* has) {
+    return tryCatch([key, keyword, has] {
+        ASSERT(key);
+        ASSERT(keyword);
+        ASSERT(has);
+        *has = key->has(keyword);
+    });
+}
+
+int dasi_key_count(dasi_key_t* key, long* count) {
+    return tryCatch([key, count] {
+        ASSERT(key);
+        ASSERT(count);
+        *count = key->size();
+    });
+}
+
+int dasi_key_erase(dasi_key_t* key, const char* keyword) {
+    return tryCatch([key, keyword] {
         ASSERT(key != nullptr);
         ASSERT(keyword != nullptr);
         key->erase(keyword);
+    });
+}
+
+int dasi_key_clear(dasi_key_t* key) {
+    return tryCatch([key] {
+        ASSERT(key != nullptr);
+        key->clear();
     });
 }
 
@@ -197,6 +237,7 @@ void dasi_key_erase(dasi_key_t* key, const char* keyword,
 //                           QUERY
 // -----------------------------------------------------------------------------
 
+#if 0
 dasi_query_t* dasi_query_new(dasi_error_t** error) {
     Query* result = nullptr;
     tryCatch(error, [&result] { result = new Query(); });
@@ -263,4 +304,8 @@ int dasi_list_done(dasi_list_t* p_list) {
     ASSERT(list != nullptr);
     return static_cast<int>(list->begin().done());
 }
-}
+#endif
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+}  // extern "C"

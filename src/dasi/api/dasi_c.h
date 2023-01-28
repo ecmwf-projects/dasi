@@ -37,13 +37,14 @@ typedef struct ListGenerator dasi_list_t;
 typedef struct ListElement dasi_list_elem_t;
 
 /// DASI Error Codes
-typedef enum dasi_error_enum_t
+typedef enum dasi_error_values_t
 {
-    DASI_SUCCESS        = 0, /* Operation succeded. */
-    DASI_ERROR          = 1, /* Operation failed. */
-    DASI_ERROR_UNKNOWN  = 2, /* Failed with an unknown error. */
-    DASI_ERROR_USER     = 3, /* Failed with an user error. */
-    DASI_ERROR_ITERATOR = 4  /* Failed with an iterator error. */
+    DASI_SUCCESS             = 0, /* Operation succeded. */
+    DASI_ITERATION_COMPLETE  = 1, /* All elements have been returned */
+    DASI_ERROR               = 2, /* Operation failed. */
+    DASI_ERROR_UNKNOWN       = 3, /* Failed with an unknown error. */
+    DASI_ERROR_USER          = 4, /* Failed with an user error. */
+    DASI_ERROR_ITERATOR      = 5,  /* Failed with an iterator error. */
 } dasi_error_enum_t;
 
 #ifdef __cplusplus
@@ -54,6 +55,7 @@ extern "C" {
 //                           ERROR HANDLING
 // -----------------------------------------------------------------------------
 
+#if 0
 /**
  * @brief Get the error message from the error object.
  * @param error Error object.
@@ -115,24 +117,51 @@ void dasi_list_delete(dasi_list_t* list, dasi_error_t** error);
 /// Flushes all buffers and ensures the internal state is safe.
 void dasi_flush(dasi_t* p_session, dasi_error_t** error);
 
+#endif
 // -----------------------------------------------------------------------------
 //                           KEY
 // -----------------------------------------------------------------------------
 
-/// Create a new key object.
-dasi_key_t* dasi_key_new(dasi_error_t** error);
+/**
+ * @brief Construct a new Dasi key object
+ * @param Key instance. Returned value must be freed using dasi_free_key
+ * @return Return code (#dasi_error_values_t)
+ */
+int dasi_new_key(dasi_key_t** key);
 
-/// Release the key and delete the object.
-void dasi_key_delete(dasi_key_t* key, dasi_error_t** error);
+/**
+ * Construct a Dasi key from a string
+ */
+int dasi_new_key_from_string(dasi_key_t** key, const char* str);
 
-/// Set the value of the specified keyword.
-/// @note The keyword is added if it's missing.
-void dasi_key_set(dasi_key_t* key, const char* keyword, const char* value,
-                  dasi_error_t** error);
+/** Release the key and delete the object. */
+int dasi_free_key(const dasi_key_t* key);
 
-/// Erase the keyword:value pair specified by its keyword.
-void dasi_key_erase(dasi_key_t* key, const char* keyword, dasi_error_t** error);
+/**
+ * Set the value of the specified keyword.
+ * @note The keyword is added if it's missing.
+ */
+int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value);
 
+/**
+ * Get the value of a specified keyword in a key
+ * @param value The value to be returned. This will point towards an internal character buffer with a lifetime equal to that of the key
+ */
+int dasi_key_get(dasi_key_t* k, const char* keyword, const char** value);
+
+/** Does the key have a specified keyword */
+int dasi_key_has(dasi_key_t* key, const char* keyword, bool* has);
+
+/** How many keys have been set */
+int dasi_key_count(dasi_key_t* key, long* count);
+
+/** Erase the keyword:value pair specified by its keyword. */
+int dasi_key_erase(dasi_key_t* key, const char* keyword);
+
+/** Erase all elements in the key */
+int dasi_key_clear(dasi_key_t* key);
+
+#if 0
 // -----------------------------------------------------------------------------
 //                           QUERY
 // -----------------------------------------------------------------------------
@@ -165,6 +194,7 @@ dasi_list_elem_t* dasi_list_first(dasi_list_t* list);
 dasi_list_elem_t* dasi_list_next(dasi_list_t* list, dasi_list_elem_t* element);
 
 int dasi_list_done(dasi_list_t* list);
+#endif
 
 #ifdef __cplusplus
 }

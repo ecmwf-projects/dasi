@@ -18,6 +18,8 @@ ecbuild_add_library(
         api/Key.h
         api/Query.cc
         api/Query.h
+        api/dasi_c.h
+        api/dasi_c.cc
 
         api/detail/Generators.h
         api/detail/ListDetail.cc
@@ -26,9 +28,6 @@ ecbuild_add_library(
         api/detail/PolicyDetail.h
         api/detail/RetrieveDetail.cc
         api/detail/RetrieveDetail.h
-
-        api/c/Dasi.h
-        api/c/Dasi.cc
 
         impl/ListGeneratorImpl.cc
         impl/ListGeneratorImpl.h
