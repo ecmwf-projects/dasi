@@ -18,9 +18,11 @@ class RetrieveResult {
 
 public: // methods
 
-    explicit RetrieveResult(RetrieveResult& result);
     explicit RetrieveResult(std::unique_ptr<RetrieveResultImpl>&& impl);
     ~RetrieveResult();
+
+    RetrieveResult(RetrieveResult&&) noexcept;
+    RetrieveResult& operator=(RetrieveResult&&) noexcept;
 
     [[ nodiscard ]]
     std::unique_ptr<eckit::DataHandle> dataHandle() const;

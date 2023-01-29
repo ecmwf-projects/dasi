@@ -9,11 +9,15 @@ namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-RetrieveResult::RetrieveResult(RetrieveResult& result) :
-    impl_(std::move(result.impl_)) {}
-
 RetrieveResult::RetrieveResult(std::unique_ptr<RetrieveResultImpl>&& impl) :
     impl_(std::move(impl)) {}
+
+RetrieveResult::RetrieveResult(RetrieveResult&& rhs) noexcept : impl_(std::move(rhs.impl_)) {}
+
+RetrieveResult& RetrieveResult::operator=(RetrieveResult&& rhs) noexcept {
+    impl_ = std::move(rhs.impl_);
+    return *this;
+}
 
 RetrieveResult::~RetrieveResult() {}
 

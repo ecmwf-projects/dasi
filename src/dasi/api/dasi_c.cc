@@ -11,6 +11,7 @@
 #include "dasi/api/Dasi.h"
 
 #include "eckit/exception/Exceptions.h"
+#include "eckit/utils/Optional.h"
 
 #include <functional>
 
@@ -43,6 +44,13 @@ struct dasi_list_t {
     std::string uri_cache;
 };
 
+struct dasi_retrieve_t {
+    dasi_retrieve_t(dasi::RetrieveResult&& ret) : retrieve(std::move(ret)) {}
+    dasi::RetrieveResult retrieve;
+    std::unique_ptr<eckit::DataHandle> dh;
+    eckit::Optional<eckit::AutoClose> closer;
+};
+
 // ---------------------------------------------------------------------------------------------------------------------
 //                           ERROR HANDLING
 
@@ -52,7 +60,7 @@ struct dasi_list_t {
 
 static thread_local std::string g_current_error_string;
 
-const char* dasi_error_get_message(int) {
+const char* dasi_get_error_string(int) {
     return g_current_error_string.c_str();
 }
 
@@ -191,6 +199,49 @@ int dasi_list_attrs(const dasi_list_t* list,
         }
         if (offset) *offset = list->iterator->location.offset;
         if (length) *length = list->iterator->location.length;
+    });
+}
+
+int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve) {
+    return tryCatch([dasi, query, retrieve] {
+        ASSERT(dasi);
+        ASSERT(query);
+        ASSERT(retrieve);
+        *retrieve = new dasi_retrieve_t(dasi->retrieve(*query));
+    });
+}
+
+int dasi_free_retrieve(const dasi_retrieve_t* retrieve) {
+    return tryCatch([retrieve] {
+        ASSERT(retrieve);
+        delete retrieve;
+    });
+}
+
+int dasi_retrieve_read(dasi_retrieve_t* retrieve, void* data, long* length) {
+    return tryCatch(std::function<int()> {[retrieve, data, length] {
+        ASSERT(retrieve);
+        ASSERT(data);
+        ASSERT(length);
+        ASSERT(*length > 0);
+
+        if (!retrieve->dh) {
+            retrieve->dh = retrieve->retrieve.dataHandle();
+            retrieve->dh->openForRead();
+            retrieve->closer.emplace(*retrieve->dh);
+        }
+
+        *length = retrieve->dh->read(data, *length);
+        if (*length == 0) return DASI_ITERATION_COMPLETE;
+        return DASI_SUCCESS;
+    }});
+}
+
+int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count) {
+    return tryCatch([retrieve, count] {
+        ASSERT(retrieve);
+        ASSERT(count);
+        *count = retrieve->retrieve.count();
     });
 }
 

@@ -34,6 +34,9 @@ template <> struct default_delete<dasi_t> {
 template <> struct default_delete<dasi_list_t> {
     void operator() (const dasi_list_t* l) { CHECK_RETURN(dasi_free_list(l)); }
 };
+template <> struct default_delete<dasi_retrieve_t> {
+    void operator() (const dasi_retrieve_t* r) { CHECK_RETURN(dasi_free_retrieve(r)); }
+};
 }
 
 
@@ -104,7 +107,7 @@ public:
 
             dasi_key_t* key;
             CHECK_RETURN(dasi_list_attrs(list, &key, /* timestamp */ nullptr, /* uri */ nullptr, /* offset */ nullptr, /* length */ nullptr))
-            ASSERT(key);
+            EXPECT(key);
             std::unique_ptr<dasi_key_t> kdeleter(key);
 
             long count;
@@ -164,7 +167,7 @@ CASE("simple archive") {
 
         dasi_key_t* key;
         CHECK_RETURN(dasi_new_key(&key));
-        ASSERT(key);
+        EXPECT(key);
         std::unique_ptr<dasi_key_t> kdeleter(key);
 
         CHECK_RETURN(dasi_key_set(key, "key1", "value1"));
@@ -214,7 +217,7 @@ CASE("Accessing data that has been archived") {
 
         dasi_key_t* key;
         CHECK_RETURN(dasi_new_key(&key));
-        ASSERT(key);
+        EXPECT(key);
         std::unique_ptr<dasi_key_t> kdeleter(key);
 
         CHECK_RETURN(dasi_key_set(key, "key1", "value1"));
@@ -236,7 +239,7 @@ CASE("Accessing data that has been archived") {
 
         dasi_query_t* query;
         CHECK_RETURN(dasi_new_query(&query));
-        ASSERT(query);
+        EXPECT(query);
         std::unique_ptr<dasi_query_t> qdeleter(query);
 
         CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
@@ -259,7 +262,7 @@ CASE("Accessing data that has been archived") {
 
         dasi_query_t* query;
         CHECK_RETURN(dasi_new_query(&query));
-        ASSERT(query);
+        EXPECT(query);
         std::unique_ptr<dasi_query_t> qdeleter(query);
 
         CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
@@ -282,7 +285,7 @@ CASE("Accessing data that has been archived") {
 
         dasi_query_t* query;
         CHECK_RETURN(dasi_new_query(&query));
-        ASSERT(query);
+        EXPECT(query);
         std::unique_ptr<dasi_query_t> qdeleter(query);
 
         CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
@@ -299,7 +302,7 @@ CASE("Accessing data that has been archived") {
 
         dasi_query_t* query;
         CHECK_RETURN(dasi_new_query(&query));
-        ASSERT(query);
+        EXPECT(query);
         std::unique_ptr<dasi_query_t> qdeleter(query);
 
         CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
@@ -325,7 +328,7 @@ CASE("Accessing data that has been archived") {
 
         dasi_query_t* query;
         CHECK_RETURN(dasi_new_query(&query));
-        ASSERT(query);
+        EXPECT(query);
         std::unique_ptr<dasi_query_t> qdeleter(query);
 
         CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
@@ -338,31 +341,53 @@ CASE("Accessing data that has been archived") {
         checker.check(dasi, query);
     }
 
-#if 0
-    SECTION("simple retrieve") {
-        dasi::Query query {
-            {"key1",  {"value1"}},
-            {"key2",  {"123"}},
-            {"key3",  {"value1"}},
-            {"key1a", {"value1"}},
-            {"key2a", {"value1"}},
-            {"key3a", {"321"}},
-            {"key1b", {"value1"}},
-            {"key2b", {"value1"}},
-            {"key3b",  {"value3", "value1"}},
-        };
+    SECTION("simple retrieve reading all data in one pass") {
 
-        dasi::RetrieveResult ret = dasi.retrieve(query);
-        EXPECT(ret.count() == 2);
+        dasi_query_t* query;
+        CHECK_RETURN(dasi_new_query(&query));
+        EXPECT(query);
+        std::unique_ptr<dasi_query_t> qdeleter(query);
 
-        std::unique_ptr<eckit::DataHandle> dh = ret.dataHandle();
-        eckit::MemoryHandle mh;
-        auto len = dh->saveInto(mh);
+        CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2", "123"));
+        CHECK_RETURN(dasi_query_append(query, "key3", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key1a", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2a", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3a", "321"));
+        CHECK_RETURN(dasi_query_append(query, "key1b", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2b", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value3"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value1"));
 
-        EXPECT(len == eckit::Length(55));
-        EXPECT(memcmp(mh.data(), "TESTING SIMPLE ARCHIVE 3333333333TESTING SIMPLE ARCHIVE", 55) == 0);
+        dasi_retrieve_t* ret;
+        CHECK_RETURN(dasi_retrieve(dasi, query, &ret));
+        EXPECT(ret);
+        std::unique_ptr<dasi_retrieve_t> rdeleter(ret);
+
+        long count;
+        CHECK_RETURN(dasi_retrieve_count(ret, &count));
+        EXPECT(count == 2);
+
+//        EXPECT(data sizes on iteration);
+
+        // Check with a length that is shorter than the data --> iterate through it...
+
+        char buffer[128];
+        char* pos = buffer;
+        long length = 12;
+        long total_read = 0;
+        int rc;
+        while ((rc = dasi_retrieve_read(ret, pos, &length)) == DASI_SUCCESS) {
+            EXPECT(length == 12 || length == 7);
+            pos += length;
+            total_read += length;
+        }
+
+        EXPECT(rc == DASI_ITERATION_COMPLETE);
+        EXPECT(length == 0);
+        EXPECT(total_read == 55);
+        EXPECT(::memcmp(buffer, "TESTING SIMPLE ARCHIVE 3333333333TESTING SIMPLE ARCHIVE", 55) == 0);
     }
-#endif
 
     /*
     SECTION("Retrieval fails if not fully qualified") {

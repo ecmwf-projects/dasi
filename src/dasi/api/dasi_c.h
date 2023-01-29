@@ -21,10 +21,17 @@
  *
  */
 
-#pragma once
+#ifndef dasi_api_dasi_c_h
+#define dasi_api_dasi_c_h
+
+/* @todo - test this file against an actual C compiler, running in C mode */
 
 #include <stddef.h>
 #include <time.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * TYPES
@@ -42,7 +49,15 @@ typedef struct Query dasi_query_t;
 struct dasi_list_t;
 typedef struct dasi_list_t dasi_list_t;
 
-/// DASI Error Codes
+struct dasi_retrieve_t;
+typedef struct dasi_retrieve_t dasi_retrieve_t;
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * ERROR HANDLING
+ * -------------- */
+
+/* DASI Error Codes */
+
 typedef enum dasi_error_values_t
 {
     DASI_SUCCESS             = 0, /* Operation succeded. */
@@ -54,38 +69,16 @@ typedef enum dasi_error_values_t
     DASI_ERROR_ASSERT        = 6, /* Failed with an assert() */
 } dasi_error_enum_t;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+const char* dasi_get_error_string(int err);
 
-// -----------------------------------------------------------------------------
-//                           ERROR HANDLING
-// -----------------------------------------------------------------------------
-
-#if 0
-/**
- * @brief Get the error message from the error object.
- * @param error Error object.
- * @return const char* Error message.
- */
-const char* dasi_error_get_message(const dasi_error_t* error);
-
-/**
- * @brief Get the error code from the error object.
- * @param error Error object.
- * @return dasi_error_enum_t Error code.
- */
-dasi_error_enum_t dasi_error_get_code(const dasi_error_t* error);
-
-#endif
 /* ---------------------------------------------------------------------------------------------------------------------
  * DASI SESSION
- * ------------*/
+ * ------------ */
 
-/// Create a new session object using the given configuration file.
+/** Create a new session object using the given configuration file. */
 int dasi_open(dasi_t** dasi, const char* filename);
 
-/// Release the session and delete the object.
+/** Release the session and delete the object. */
 int dasi_close(const dasi_t* dasi);
 
 /**
@@ -118,18 +111,19 @@ int dasi_list_attrs(const dasi_list_t* list,
                     long* offset,
                     long* length);
 
+/* *** Retrieve functionality */
 
-#if 0
-dasi_list_t* dasi_list(dasi_t* p_session, const dasi_query_t* query,
-                       dasi_error_t** error);
+int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve);
 
-void dasi_list_delete(dasi_list_t* list, dasi_error_t** error);
+int dasi_free_retrieve(const dasi_retrieve_t* retrieve);
 
+int dasi_retrieve_read(dasi_retrieve_t* retrieve, void* data, long* length);
 
-#endif
+int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count);
+
 /* ---------------------------------------------------------------------------------------------------------------------
  * KEY
- * ---*/
+ * --- */
 
 /**
  * @brief Construct a new Dasi key object
@@ -175,7 +169,7 @@ int dasi_key_clear(dasi_key_t* key);
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * QUERY
- * -----*/
+ * ----- */
 
 int dasi_new_query(dasi_query_t** query);
 
@@ -199,20 +193,10 @@ int dasi_query_erase(dasi_query_t* query, const char* keyword);
 
 int dasi_query_clear(dasi_query_t* query);
 
-#if 0
-// -----------------------------------------------------------------------------
-//                           LIST
-// -----------------------------------------------------------------------------
-
-dasi_key_t* dasi_list_elem_get_key(dasi_list_elem_t* element);
-
-dasi_list_elem_t* dasi_list_first(dasi_list_t* list);
-
-dasi_list_elem_t* dasi_list_next(dasi_list_t* list, dasi_list_elem_t* element);
-
-int dasi_list_done(dasi_list_t* list);
-#endif
+/* -------------------------------------------------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* dasi_api_dasi_c_h */
