@@ -121,6 +121,10 @@ int dasi_retrieve_read(dasi_retrieve_t* retrieve, void* data, long* length);
 
 int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count);
 
+int dasi_retrieve_next(dasi_retrieve_t* retrieve);
+
+int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, time_t* timestamp, long* offset, long* length);
+
 /* ---------------------------------------------------------------------------------------------------------------------
  * KEY
  * --- */

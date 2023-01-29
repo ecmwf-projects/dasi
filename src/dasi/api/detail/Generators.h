@@ -94,7 +94,7 @@ public: // methods
     const_iterator begin() { return APIIterator<T>{*impl_}; }
     static APIIteratorSentinel end() { return {}; }
 
-private: // members
+protected: // members
     std::unique_ptr<APIGeneratorImpl<T>> impl_;
 };
 

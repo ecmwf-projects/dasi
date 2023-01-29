@@ -389,6 +389,58 @@ CASE("Accessing data that has been archived") {
         EXPECT(::memcmp(buffer, "TESTING SIMPLE ARCHIVE 3333333333TESTING SIMPLE ARCHIVE", 55) == 0);
     }
 
+    SECTION("Retrieve data one object at a time") {
+
+        dasi_query_t* query;
+        CHECK_RETURN(dasi_new_query(&query));
+        EXPECT(query);
+        std::unique_ptr<dasi_query_t> qdeleter(query);
+
+        CHECK_RETURN(dasi_query_append(query, "key1", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2", "123"));
+        CHECK_RETURN(dasi_query_append(query, "key3", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key1a", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2a", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3a", "321"));
+        CHECK_RETURN(dasi_query_append(query, "key1b", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key2b", "value1"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value3"));
+        CHECK_RETURN(dasi_query_append(query, "key3b", "value1"));
+
+        dasi_retrieve_t* ret;
+        CHECK_RETURN(dasi_retrieve(dasi, query, &ret));
+        EXPECT(ret);
+        std::unique_ptr<dasi_retrieve_t> rdeleter(ret);
+
+        long count;
+        CHECK_RETURN(dasi_retrieve_count(ret, &count));
+        EXPECT(count == 2);
+
+        const char* expected_data[] = {test_data3, test_data1};
+
+        int rc;
+        long length;
+        long total_read = 0;
+        char buffer[128];
+        count = 0;
+        while ((rc = dasi_retrieve_next(ret)) == DASI_SUCCESS) {
+
+            EXPECT(count < 2);
+            long expected_len = ::strlen(expected_data[count]);
+            CHECK_RETURN(dasi_retrieve_attrs(ret, nullptr, nullptr, nullptr, &length));
+            EXPECT(length == expected_len);
+            CHECK_RETURN(dasi_retrieve_read(ret, buffer, &length));
+            EXPECT(length == expected_len);
+            EXPECT(::strncmp(expected_data[count], buffer, length) == 0);
+            total_read += length;
+            count++;
+        }
+
+        EXPECT(rc == DASI_ITERATION_COMPLETE);
+        EXPECT(count = 2);
+        EXPECT(total_read == 55);
+    }
+
     /*
     SECTION("Retrieval fails if not fully qualified") {
         EXPECT(false);

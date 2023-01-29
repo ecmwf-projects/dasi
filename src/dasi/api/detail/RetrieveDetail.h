@@ -5,6 +5,7 @@
 #pragma once
 
 #include "eckit/io/DataHandle.h"
+#include "dasi/api/detail/ListDetail.h"
 
 #include <memory>
 
@@ -14,15 +15,15 @@ namespace dasi {
 
 class RetrieveResultImpl;
 
-class RetrieveResult {
+using RetrieveElement = ListElement;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+class RetrieveResult : public GenericGenerator<RetrieveElement> {
 
 public: // methods
 
-    explicit RetrieveResult(std::unique_ptr<RetrieveResultImpl>&& impl);
-    ~RetrieveResult();
-
-    RetrieveResult(RetrieveResult&&) noexcept;
-    RetrieveResult& operator=(RetrieveResult&&) noexcept;
+    using GenericGenerator<RetrieveElement>::GenericGenerator;
 
     [[ nodiscard ]]
     std::unique_ptr<eckit::DataHandle> dataHandle() const;
@@ -37,11 +38,10 @@ private: // members
         return s;
     };
 
+    [[ nodiscard ]] const RetrieveResultImpl& impl() const;
+    [[ nodiscard ]] RetrieveResultImpl& impl();
+
     void print(std::ostream& s) const;
-
-protected: // members
-
-    std::unique_ptr<RetrieveResultImpl> impl_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

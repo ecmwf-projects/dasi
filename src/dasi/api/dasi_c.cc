@@ -45,8 +45,13 @@ struct dasi_list_t {
 };
 
 struct dasi_retrieve_t {
-    dasi_retrieve_t(dasi::RetrieveResult&& ret) : retrieve(std::move(ret)) {}
+    dasi_retrieve_t(dasi::RetrieveResult&& ret) :
+        first(true),
+        retrieve(std::move(ret)),
+        iterator(retrieve.begin()) {}
+    bool first;
     dasi::RetrieveResult retrieve;
+    dasi::RetrieveResult::const_iterator iterator;
     std::unique_ptr<eckit::DataHandle> dh;
     eckit::Optional<eckit::AutoClose> closer;
 };
@@ -169,14 +174,16 @@ int dasi_free_list(const dasi_list_t* list) {
 
 int dasi_list_next(dasi_list_t* list) {
     return tryCatch(std::function<int()> {[list] {
+        ASSERT(list);
+        if (list->first) {
+            list->first = false;
+        } else {
+            ++list->iterator;
+        }
         if (list->iterator == list->generator.end()) {
-            if (list->first) list->uri_cache = list->iterator->location.uri.asRawString();
             return DASI_ITERATION_COMPLETE;
         }
-        if (!list->first) ++list->iterator;
-        if (list->iterator == list->generator.end()) return DASI_ITERATION_COMPLETE;
         list->uri_cache = list->iterator->location.uri.asRawString();
-        list->first = false;
         return DASI_SUCCESS;
     }});
 }
@@ -242,6 +249,34 @@ int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count) {
         ASSERT(retrieve);
         ASSERT(count);
         *count = retrieve->retrieve.count();
+    });
+}
+
+int dasi_retrieve_next(dasi_retrieve_t* retrieve) {
+    return tryCatch(std::function<int()> {[retrieve] {
+        ASSERT(retrieve);
+        if (retrieve->first) {
+            retrieve->first = false;
+        } else {
+            ++retrieve->iterator;
+        }
+        if (retrieve->iterator == retrieve->retrieve.end()) {
+            return DASI_ITERATION_COMPLETE;
+        }
+        return DASI_SUCCESS;
+    }});
+}
+
+int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, time_t* timestamp, long* offset, long* length) {
+    return tryCatch([retrieve, key, timestamp, offset, length] {
+        ASSERT(retrieve);
+        ASSERT(retrieve->iterator != retrieve->retrieve.end());
+        if (key) {
+            *key = new Key(retrieve->iterator->key);
+        }
+        if (timestamp) *timestamp = retrieve->iterator->timestamp;
+        if (offset) *offset = retrieve->iterator->location.offset;
+        if (length) *length = retrieve->iterator->location.length;
     });
 }
 

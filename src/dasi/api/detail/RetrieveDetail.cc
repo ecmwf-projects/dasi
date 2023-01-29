@@ -9,24 +9,24 @@ namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-RetrieveResult::RetrieveResult(std::unique_ptr<RetrieveResultImpl>&& impl) :
-    impl_(std::move(impl)) {}
-
-RetrieveResult::RetrieveResult(RetrieveResult&& rhs) noexcept : impl_(std::move(rhs.impl_)) {}
-
-RetrieveResult& RetrieveResult::operator=(RetrieveResult&& rhs) noexcept {
-    impl_ = std::move(rhs.impl_);
-    return *this;
-}
-
-RetrieveResult::~RetrieveResult() {}
-
 std::unique_ptr<eckit::DataHandle> RetrieveResult::dataHandle() const {
-    return impl_->dataHandle();
+    return impl().dataHandle();
 }
 
 size_t RetrieveResult::count() const {
-    return impl_->count();
+    return impl().count();
+}
+
+const RetrieveResultImpl& RetrieveResult::impl() const {
+    const auto* ret = static_cast<const RetrieveResultImpl*>(impl_.get());
+    ASSERT(ret);
+    return *ret;
+}
+
+RetrieveResultImpl& RetrieveResult::impl() {
+    auto* ret = static_cast<RetrieveResultImpl*>(impl_.get());
+    ASSERT(ret);
+    return *ret;
 }
 
 void RetrieveResult::print(std::ostream& s) const {
