@@ -7,9 +7,12 @@
 
 #include "dasi/api/dasi_c.h"
 
-#define ASSERT_SUCCESS(dasi_fn) assert(dasi_fn == DASI_SUCCESS)
+#define ASSERT_SUCCESS(stat, dasi_fn) \
+    stat = dasi_fn;                   \
+    assert(stat == DASI_SUCCESS)
 
 int main(int argc, char** argv) {
+    int stat                = DASI_ERROR_UNKNOWN;
     const char* config_path = NULL;
     char type[]             = "ensemble";
     char version[5]         = "0001";
@@ -119,14 +122,14 @@ int main(int argc, char** argv) {
     }
 
     dasi_t* dasi;
-    ASSERT_SUCCESS(dasi_open(&dasi, config_path));
+    ASSERT_SUCCESS(stat, dasi_open(&dasi, config_path));
 
     dasi_key_t* key;
-    ASSERT_SUCCESS(dasi_new_key(&key));
-    ASSERT_SUCCESS(dasi_key_set(key, "type", type));
-    ASSERT_SUCCESS(dasi_key_set(key, "version", version));
-    ASSERT_SUCCESS(dasi_key_set(key, "date", fc_date));
-    ASSERT_SUCCESS(dasi_key_set(key, "time", fc_time));
+    ASSERT_SUCCESS(stat, dasi_new_key(&key));
+    ASSERT_SUCCESS(stat, dasi_key_set(key, "type", type));
+    ASSERT_SUCCESS(stat, dasi_key_set(key, "version", version));
+    ASSERT_SUCCESS(stat, dasi_key_set(key, "date", fc_date));
+    ASSERT_SUCCESS(stat, dasi_key_set(key, "time", fc_time));
 
     char sbuf[5];
     char data[20];
@@ -140,20 +143,20 @@ int main(int argc, char** argv) {
 
         printf("Member %d\n", number);
         snprintf(sbuf, sizeof(sbuf), "%d", number);
-        ASSERT_SUCCESS(dasi_key_set(key, "number", sbuf));
+        ASSERT_SUCCESS(stat, dasi_key_set(key, "number", sbuf));
         int step = 1;
         for (step = 1; step <= num_steps; ++step) {
             printf("Step %d\n", step);
             snprintf(sbuf, sizeof(sbuf), "%d", step);
-            ASSERT_SUCCESS(dasi_key_set(key, "step", sbuf));
+            ASSERT_SUCCESS(stat, dasi_key_set(key, "step", sbuf));
             int level = 0;
             for (level = 0; level < num_levels; ++level) {
                 snprintf(sbuf, sizeof(sbuf), "%d", level);
-                ASSERT_SUCCESS(dasi_key_set(key, "level", sbuf));
+                ASSERT_SUCCESS(stat, dasi_key_set(key, "level", sbuf));
                 int par = 0;
                 for (par = 0; par < num_params; ++par) {
                     ASSERT_SUCCESS(
-                        dasi_key_set(key, "param", param_names[par]));
+                        stat, dasi_key_set(key, "param", param_names[par]));
                     snprintf(data, sizeof(data), "%.10lg\n",
                              vals[par] - level * incr[par]);
 
@@ -163,8 +166,8 @@ int main(int argc, char** argv) {
                                 "Could not write data number=%d, step=%d, "
                                 "level=%d, param=%s\n",
                                 number, step, level, param_names[par]);
-                        ASSERT_SUCCESS(dasi_free_key(key));
-                        ASSERT_SUCCESS(dasi_close(dasi));
+                        ASSERT_SUCCESS(stat, dasi_free_key(key));
+                        ASSERT_SUCCESS(stat, dasi_close(dasi));
                         return 1;
                     }
                 }
@@ -176,8 +179,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    ASSERT_SUCCESS(dasi_free_key(key));
-    ASSERT_SUCCESS(dasi_close(dasi));
+    ASSERT_SUCCESS(stat, dasi_free_key(key));
+    ASSERT_SUCCESS(stat, dasi_close(dasi));
 
     return 0;
 }
