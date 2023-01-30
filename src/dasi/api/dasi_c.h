@@ -37,6 +37,8 @@ extern "C" {
  * TYPES
  * -----*/
 
+typedef int dasi_bool_t;
+
 struct Dasi;
 typedef struct Dasi dasi_t;
 
@@ -160,7 +162,7 @@ int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword, const char*
 int dasi_key_get(dasi_key_t* key, const char* keyword, const char** value);
 
 /** Does the key have a specified keyword */
-int dasi_key_has(dasi_key_t* key, const char* keyword, bool* has);
+int dasi_key_has(dasi_key_t* key, const char* keyword, dasi_bool_t* has);
 
 /** How many keys have been set */
 int dasi_key_count(dasi_key_t* key, long* count);
@@ -191,7 +193,7 @@ int dasi_query_value_count(dasi_query_t* query, const char* keyword, long* count
 
 int dasi_query_get(dasi_query_t* query, const char* keyword, int num, const char** value);
 
-int dasi_query_has(dasi_query_t* query, const char* keyword, bool* has);
+int dasi_query_has(dasi_query_t* query, const char* keyword, dasi_bool_t* has);
 
 int dasi_query_erase(dasi_query_t* query, const char* keyword);
 

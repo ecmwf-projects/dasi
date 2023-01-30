@@ -35,7 +35,7 @@ CASE("Construct from empty key") {
     EXPECT(k);
     std::unique_ptr<dasi_key_t> kdeleter(k);
 
-    bool has;
+    dasi_bool_t has;
     CHECK_RETURN(dasi_key_has(k, "key1", &has));
     EXPECT(!has);
     CHECK_RETURN(dasi_key_has(k, "key2", &has));
@@ -73,7 +73,7 @@ CASE("Construct from string") {
     EXPECT(k);
     std::unique_ptr<dasi_key_t> kdeleter(k);
 
-    bool has;
+    dasi_bool_t has;
     CHECK_RETURN(dasi_key_has(k, "key1", &has));
     EXPECT(has);
     CHECK_RETURN(dasi_key_has(k, "key2", &has));

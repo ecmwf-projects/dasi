@@ -23,7 +23,7 @@ CASE("Construct from empty request") {
     EXPECT(r);
     std::unique_ptr<dasi_query_t> rdeleter(r);
 
-    bool has;
+    dasi_bool_t has;
     CHECK_RETURN(dasi_query_has(r, "key1", &has));
     EXPECT(!has);
     CHECK_RETURN(dasi_query_has(r, "key2", &has));

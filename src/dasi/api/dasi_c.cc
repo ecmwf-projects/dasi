@@ -331,7 +331,7 @@ int dasi_key_get(dasi_key_t* key, const char* keyword, const char** value) {
     });
 }
 
-int dasi_key_has(dasi_key_t* key, const char* keyword, bool* has) {
+int dasi_key_has(dasi_key_t* key, const char* keyword, dasi_bool_t* has) {
     return tryCatch([key, keyword, has] {
         ASSERT(key);
         ASSERT(keyword);
@@ -420,7 +420,7 @@ int dasi_query_get(dasi_query_t* query, const char* keyword, int num, const char
     });
 }
 
-int dasi_query_has(dasi_query_t* query, const char* keyword, bool* has) {
+int dasi_query_has(dasi_query_t* query, const char* keyword, dasi_bool_t* has) {
     return tryCatch([query, keyword, has] {
         ASSERT(query);
         ASSERT(keyword);
