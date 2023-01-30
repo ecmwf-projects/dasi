@@ -4,6 +4,8 @@ find_package(ecbuild 3.4 REQUIRED)
 
 project(forecast VERSION 0.1 LANGUAGES C)
 
+set(CMAKE_C_STANDARD 90)
+
 find_package(dasi REQUIRED)
 
 ecbuild_find_package( NAME eckit  VERSION 1.20 REQUIRED )

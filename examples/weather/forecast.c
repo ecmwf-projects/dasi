@@ -5,9 +5,9 @@
 #include <string.h>
 #include <time.h>
 
-#include "dasi/api/c/Dasi.h"
+#include "dasi/api/dasi_c.h"
 
-#define ASSERT_SUCCESS(error) assert(dasi_error_get_code(error) == DASI_SUCCESS)
+#define ASSERT_SUCCESS(dasi_fn) assert(dasi_fn == DASI_SUCCESS)
 
 int main(int argc, char** argv) {
     const char* config_path = NULL;
@@ -30,7 +30,8 @@ int main(int argc, char** argv) {
     strftime(fc_time, sizeof(fc_time), "%H%M", tm);
 
     const char* arg;
-    for (char** argp = argv + 1; *argp != NULL; ++argp) {
+    char** argp;
+    for (argp = argv + 1; *argp != NULL; ++argp) {
         if (strcmp(*argp, "-c") == 0 || strcmp(*argp, "--config") == 0) {
             config_path = *(++argp);
             if (config_path == NULL) {
@@ -117,61 +118,66 @@ int main(int argc, char** argv) {
         }
     }
 
-    dasi_error_t* err = NULL;
-    dasi_t* dasi      = dasi_new(config_path, &err);
-    ASSERT_SUCCESS(err);
+    dasi_t* dasi;
+    ASSERT_SUCCESS(dasi_open(&dasi, config_path));
 
-    dasi_key_t* key = dasi_key_new(&err);
-    ASSERT_SUCCESS(err);
-    dasi_key_set(key, "type", type, &err);
-    dasi_key_set(key, "version", version, &err);
-    dasi_key_set(key, "date", fc_date, &err);
-    dasi_key_set(key, "time", fc_time, &err);
+    dasi_key_t* key;
+    ASSERT_SUCCESS(dasi_new_key(&key));
+    ASSERT_SUCCESS(dasi_key_set(key, "type", type));
+    ASSERT_SUCCESS(dasi_key_set(key, "version", version));
+    ASSERT_SUCCESS(dasi_key_set(key, "date", fc_date));
+    ASSERT_SUCCESS(dasi_key_set(key, "time", fc_time));
 
     char sbuf[5];
     char data[20];
     double vals[num_params];
-    for (int number = 0; number < num_members; ++number) {
-        for (int par = 0; par < num_params; ++par) {
+    int number = 0;
+    for (number = 0; number < num_members; ++number) {
+        int par = 0;
+        for (par = 0; par < num_params; ++par) {
             vals[par] = init[par] + number * incr[par];
         }
 
         printf("Member %d\n", number);
         snprintf(sbuf, sizeof(sbuf), "%d", number);
-        dasi_key_set(key, "number", sbuf, &err);
-        for (int step = 1; step <= num_steps; ++step) {
+        ASSERT_SUCCESS(dasi_key_set(key, "number", sbuf));
+        int step = 1;
+        for (step = 1; step <= num_steps; ++step) {
             printf("Step %d\n", step);
             snprintf(sbuf, sizeof(sbuf), "%d", step);
-            dasi_key_set(key, "step", sbuf, &err);
-            for (int level = 0; level < num_levels; ++level) {
+            ASSERT_SUCCESS(dasi_key_set(key, "step", sbuf));
+            int level = 0;
+            for (level = 0; level < num_levels; ++level) {
                 snprintf(sbuf, sizeof(sbuf), "%d", level);
-                dasi_key_set(key, "level", sbuf, &err);
-                for (int par = 0; par < num_params; ++par) {
-                    dasi_key_set(key, "param", param_names[par], &err);
+                ASSERT_SUCCESS(dasi_key_set(key, "level", sbuf));
+                int par = 0;
+                for (par = 0; par < num_params; ++par) {
+                    ASSERT_SUCCESS(
+                        dasi_key_set(key, "param", param_names[par]));
                     snprintf(data, sizeof(data), "%.10lg\n",
                              vals[par] - level * incr[par]);
 
-                    dasi_archive(dasi, key, (void*)data, strlen(data), &err);
-                    if (dasi_error_get_code(err) != DASI_SUCCESS) {
+                    if (dasi_archive(dasi, key, (void*)data, strlen(data)) !=
+                        DASI_SUCCESS) {
                         fprintf(stderr,
                                 "Could not write data number=%d, step=%d, "
                                 "level=%d, param=%s\n",
                                 number, step, level, param_names[par]);
-                        dasi_key_delete(key, &err);
-                        dasi_delete(dasi, &err);
+                        ASSERT_SUCCESS(dasi_free_key(key));
+                        ASSERT_SUCCESS(dasi_close(dasi));
                         return 1;
                     }
                 }
             }
 
-            for (int par = 0; par < num_params; ++par) {
+            for (par = 0; par < num_params; ++par) {
                 vals[par] += incr[par];
             }
         }
     }
 
-    dasi_key_delete(key, &err);
-    dasi_delete(dasi, &err);
+    ASSERT_SUCCESS(dasi_free_key(key));
+    ASSERT_SUCCESS(dasi_close(dasi));
 
     return 0;
 }
