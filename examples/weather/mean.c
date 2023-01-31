@@ -3,35 +3,51 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "dasi/api/dasi_c.h"
+#include "utils.h"
 
 #define ASSERT_SUCCESS(stat, dasi_fn) \
     stat = dasi_fn;                   \
     assert(stat == DASI_SUCCESS)
 
 int main(int argc, char** argv) {
-    int stat                = DASI_ERROR_UNKNOWN;
-    const char* config_path = NULL;
-    char in_type[]          = "ensemble";
-    char out_type[]         = "ens_mean";
-    char version[5]         = "0001";
-    char fc_date[9];
-    char fc_time[5];
-    int num_members           = 5;
-    int step                  = 0;
-    int num_levels            = 20;
-    const char* param_names[] = {"p", "t", "u", "v"};
-    const int num_params      = 4;
+    const char* config_path    = NULL;
+    const char in_type[]       = "ensemble";
+    const char out_type[]      = "ens_mean";
+    const int n_params         = 4;
+    const char* param_names[4] = {"p", "t", "u", "v"};
+    int num_members            = 5;
+    int num_steps              = 10;
+    int num_levels             = 20;
+    int stat                   = DASI_ERROR_UNKNOWN;
+    char version[5]            = "0001";
+    char fc_date[9]            = "12345678";
+    char fc_time[5]            = "0000";
 
-    time_t t      = time(NULL);
-    struct tm* tm = localtime(&t);
-    strftime(fc_date, sizeof(fc_date), "%Y%m%d", tm);
-    strftime(fc_time, sizeof(fc_time), "%H%M", tm);
-
-    const char* arg;
     char** argp;
+    const char* arg;
+    const char* kv;
+
+    int level;
+    int par;
+    int number;
+    char sbuf[5];
+    int count    = 0;
+    double mean  = 0;
+    long length  = 0;
+    double value = 0;
+    char buffer[128];
+
+    dasi_t* dasi;
+    dasi_key_t* key;
+    dasi_query_t* query;
+    dasi_retrieve_t* ret;
+
+    (void)argc;
+
+    set_time(fc_date, fc_time);
+
     for (argp = argv + 1; *argp != NULL; ++argp) {
         if (strcmp(*argp, "-c") == 0 || strcmp(*argp, "--config") == 0) {
             config_path = *(++argp);
@@ -95,7 +111,7 @@ int main(int argc, char** argv) {
                 fprintf(stderr, "Argument needed for -s/--step\n");
                 return 1;
             }
-            if (sscanf(arg, "%d", &step) != 1 || step <= 0) {
+            if (sscanf(arg, "%d", &num_steps) != 1 || num_steps <= 0) {
                 fprintf(stderr, "Invalid value for -s/--step\n");
                 return 1;
             }
@@ -119,85 +135,79 @@ int main(int argc, char** argv) {
         }
     }
 
-    dasi_t* dasi;
     ASSERT_SUCCESS(stat, dasi_open(&dasi, config_path));
 
-    dasi_query_t* query;
     ASSERT_SUCCESS(stat, dasi_new_query(&query));
     ASSERT_SUCCESS(stat, dasi_query_append(query, "type", in_type));
     ASSERT_SUCCESS(stat, dasi_query_append(query, "version", version));
     ASSERT_SUCCESS(stat, dasi_query_append(query, "date", fc_date));
     ASSERT_SUCCESS(stat, dasi_query_append(query, "time", fc_time));
 
-    char sbuf[5];
-    snprintf(sbuf, sizeof(sbuf), "%d", step);
+    snprintf(sbuf, sizeof(sbuf), "%d", num_steps);
     ASSERT_SUCCESS(stat, dasi_query_append(query, "step", sbuf));
-    int number = 0;
+
     for (number = 0; number < num_members; ++number) {
         snprintf(sbuf, sizeof(sbuf), "%d", number);
         ASSERT_SUCCESS(stat, dasi_query_append(query, "number", sbuf));
     }
 
-    int count    = 0;
-    double mean  = 0;
-    long length  = 0;
-    double value = 0;
-    char buffer[128];
-    dasi_retrieve_t* ret;
+    printf("Reading ...\n");
 
-    const char* kv;
-    dasi_key_t* key;
     ASSERT_SUCCESS(stat, dasi_new_key(&key));
 
-    const char* sbuf_p[] = {sbuf};
-    int level            = 0;
+    const char* sbuf_p[] = {sbuf}; /* not C90 */
     for (level = 0; level < num_levels; ++level) {
+        printf("Level: %d\n", level);
         snprintf(sbuf, sizeof(sbuf), "%d", level);
         ASSERT_SUCCESS(stat, dasi_query_set(query, "level", sbuf_p, 1));
-        int par = 0;
-        for (par = 0; par < num_params; ++par) {
+        for (par = 0; par < n_params; ++par) {
+            printf("\tParam: %s\n", param_names[par]);
             ASSERT_SUCCESS(
                 stat, dasi_query_set(query, "param", &param_names[par], 1));
 
-            if (dasi_retrieve(dasi, query, &ret) != DASI_SUCCESS) {
+            stat = dasi_retrieve(dasi, query, &ret);
+            if (stat != DASI_SUCCESS) {
                 fprintf(stderr, "Could not find step=%d, level=%d, param=%s\n",
-                        step, level, param_names[par]);
+                        num_steps, level, param_names[par]);
+                ASSERT_SUCCESS(stat, dasi_free_key(key));
                 ASSERT_SUCCESS(stat, dasi_free_query(query));
-                dasi_close(dasi);
+                ASSERT_SUCCESS(stat, dasi_close(dasi));
                 return 1;
             }
             assert(ret != NULL);
+            ASSERT_SUCCESS(stat, dasi_retrieve_count(ret, &length));
 
             count  = 0;
             mean   = 0;
             length = 0;
             do {
                 ASSERT_SUCCESS(
-                    stat, dasi_retrieve_attrs(ret, &key, NULL, NULL, NULL));
+                    stat, dasi_retrieve_attrs(ret, &key, NULL, NULL, &length));
+                assert(length > 0);
                 ASSERT_SUCCESS(stat, dasi_key_get(key, "number", &kv));
-                sscanf(kv, "number: %d", &number);
+                sscanf(kv, "%d", &number);
 
                 buffer[length] = 0;
-                if (sscanf(buffer, "%lg", &value) != 1) {
+                stat           = dasi_retrieve_read(ret, buffer, &length);
+                if (stat != DASI_SUCCESS && stat != DASI_ITERATION_COMPLETE) {
                     fprintf(stderr,
-                            "Could not read data number=%d, step=%d, level = % "
-                            "d, param = %s\n ",
-                            number, step, level, param_names[par]);
-                }
-                if (dasi_retrieve_read(ret, buffer, &length) != DASI_SUCCESS) {
-                    fprintf(stderr,
-                            "Could not read data number=%d, step=%d, level = % "
-                            "d, param = %s\n ",
-                            number, step, level, param_names[par]);
+                            "Could not read data! "
+                            "number = %d, step = %d, level = %d, param = %s\n ",
+                            number, num_steps, level, param_names[par]);
                     ASSERT_SUCCESS(stat, dasi_free_retrieve(ret));
                     ASSERT_SUCCESS(stat, dasi_free_key(key));
                     ASSERT_SUCCESS(stat, dasi_free_query(query));
-                    dasi_close(dasi);
+                    ASSERT_SUCCESS(stat, dasi_close(dasi));
                     return 1;
+                }
+                stat = sscanf(buffer, "%lg", &value);
+                if (stat != 1) {
+                    fprintf(stderr, "Could not read data!");
                 }
                 mean += value;
                 count++;
             } while ((stat = dasi_retrieve_next(ret)) == DASI_SUCCESS);
+            assert(stat == DASI_ITERATION_COMPLETE);
 
             ASSERT_SUCCESS(stat, dasi_free_retrieve(ret));
 
@@ -208,19 +218,19 @@ int main(int argc, char** argv) {
 
             snprintf(buffer, sizeof(buffer), "%.10lg\n", mean);
 
-            if (dasi_archive(dasi, key, (void*)buffer, strlen(buffer)) !=
-                DASI_SUCCESS) {
+            stat = dasi_archive(dasi, key, (void*)buffer, (long)strlen(buffer));
+            if (stat != DASI_SUCCESS) {
                 fprintf(stderr,
                         "Could not write data step=%d, level=%d, param=%s\n",
-                        step, level, param_names[par]);
+                        num_steps, level, param_names[par]);
                 ASSERT_SUCCESS(stat, dasi_free_key(key));
                 ASSERT_SUCCESS(stat, dasi_free_query(query));
                 ASSERT_SUCCESS(stat, dasi_close(dasi));
                 return 1;
             }
             ASSERT_SUCCESS(stat, dasi_free_key(key));
-        }
-    }
+        } /* parameters */
+    }     /* levels */
 
     ASSERT_SUCCESS(stat, dasi_free_query(query));
     ASSERT_SUCCESS(stat, dasi_close(dasi));

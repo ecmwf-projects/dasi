@@ -3,37 +3,47 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "dasi/api/dasi_c.h"
+#include "utils.h"
 
 #define ASSERT_SUCCESS(stat, dasi_fn) \
     stat = dasi_fn;                   \
     assert(stat == DASI_SUCCESS)
 
 int main(int argc, char** argv) {
-    int stat                = DASI_ERROR_UNKNOWN;
-    const char* config_path = NULL;
-    char type[]             = "ensemble";
-    char version[5]         = "0001";
-    char fc_date[9];
-    char fc_time[5];
-    int num_members           = 5;
-    int num_steps             = 10;
-    int num_levels            = 20;
-    const char* param_names[] = {"p", "t", "u", "v"};
-    const int num_params      = 4;
+    const char* config_path    = NULL;
+    const char type[]          = "ensemble";
+    const int n_params         = 4;
+    const char* param_names[4] = {"p", "t", "u", "v"};
+    int num_members            = 5;
+    int num_steps              = 10;
+    int num_levels             = 20;
+    int stat                   = DASI_ERROR_UNKNOWN;
+    char version[5]            = "0001";
+    char fc_date[9]            = "12345678";
+    char fc_time[5]            = "0000";
 
+    char** argp;
+    const char* arg;
+
+    dasi_t* dasi;
+    dasi_key_t* key;
+
+    int step;
+    int level;
+    int par;
+    int number;
+    char sbuf[5];
+
+    double vals[n_params];
     const double init[] = {1010.0l, 300.0l, 5.0l, -3.0l};
     const double incr[] = {0.5l, 0.1l, -0.1l, 0.1l};
 
-    time_t t      = time(NULL);
-    struct tm* tm = localtime(&t);
-    strftime(fc_date, sizeof(fc_date), "%Y%m%d", tm);
-    strftime(fc_time, sizeof(fc_time), "%H%M", tm);
+    (void)argc;
 
-    const char* arg;
-    char** argp;
+    set_time(fc_date, fc_time);
+
     for (argp = argv + 1; *argp != NULL; ++argp) {
         if (strcmp(*argp, "-c") == 0 || strcmp(*argp, "--config") == 0) {
             config_path = *(++argp);
@@ -121,66 +131,68 @@ int main(int argc, char** argv) {
         }
     }
 
-    dasi_t* dasi;
     ASSERT_SUCCESS(stat, dasi_open(&dasi, config_path));
-
-    dasi_key_t* key;
     ASSERT_SUCCESS(stat, dasi_new_key(&key));
     ASSERT_SUCCESS(stat, dasi_key_set(key, "type", type));
     ASSERT_SUCCESS(stat, dasi_key_set(key, "version", version));
     ASSERT_SUCCESS(stat, dasi_key_set(key, "date", fc_date));
     ASSERT_SUCCESS(stat, dasi_key_set(key, "time", fc_time));
 
-    char sbuf[5];
-    char data[20];
-    double vals[num_params];
-    int number = 0;
     for (number = 0; number < num_members; ++number) {
-        int par = 0;
-        for (par = 0; par < num_params; ++par) {
+        /* generate parameter values */
+
+        for (par = 0; par < n_params; ++par) {
             vals[par] = init[par] + number * incr[par];
         }
-
-        printf("Member %d\n", number);
+        printf("Member %d", number);
         snprintf(sbuf, sizeof(sbuf), "%d", number);
         ASSERT_SUCCESS(stat, dasi_key_set(key, "number", sbuf));
-        int step = 1;
+
+        /* STEPS */
         for (step = 1; step <= num_steps; ++step) {
-            printf("Step %d\n", step);
+            printf("\tStep %d", step);
             snprintf(sbuf, sizeof(sbuf), "%d", step);
             ASSERT_SUCCESS(stat, dasi_key_set(key, "step", sbuf));
-            int level = 0;
+
+            /* LEVELS */
             for (level = 0; level < num_levels; ++level) {
                 snprintf(sbuf, sizeof(sbuf), "%d", level);
                 ASSERT_SUCCESS(stat, dasi_key_set(key, "level", sbuf));
-                int par = 0;
-                for (par = 0; par < num_params; ++par) {
+
+                /* PARAMETERS */
+                for (par = 0; par < n_params; ++par) {
+                    char data[20];
                     ASSERT_SUCCESS(
                         stat, dasi_key_set(key, "param", param_names[par]));
                     snprintf(data, sizeof(data), "%.10lg\n",
                              vals[par] - level * incr[par]);
 
-                    if (dasi_archive(dasi, key, (void*)data, strlen(data)) !=
-                        DASI_SUCCESS) {
+                    /* ARCHIVE */
+                    stat = dasi_archive(dasi, key, (void*)data,
+                                        (long)strlen(data));
+                    if (stat != DASI_SUCCESS) {
                         fprintf(stderr,
-                                "Could not write data number=%d, step=%d, "
-                                "level=%d, param=%s\n",
-                                number, step, level, param_names[par]);
+                                "Could not write data! Level: %d Param: %s\n",
+                                level, param_names[par]);
                         ASSERT_SUCCESS(stat, dasi_free_key(key));
                         ASSERT_SUCCESS(stat, dasi_close(dasi));
                         return 1;
                     }
-                }
-            }
 
-            for (par = 0; par < num_params; ++par) {
+                } /* parameters */
+            }     /* levels */
+            /* increment values */
+            for (par = 0; par < n_params; ++par) {
                 vals[par] += incr[par];
             }
-        }
-    }
+        } /* steps */
+        printf("\n");
+    } /* numbers */
 
     ASSERT_SUCCESS(stat, dasi_free_key(key));
     ASSERT_SUCCESS(stat, dasi_close(dasi));
+
+    printf("Finished successfully!\n");
 
     return 0;
 }
