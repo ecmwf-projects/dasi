@@ -181,8 +181,6 @@ public: // methods
                 if (key == "archive") identifiers |= fdb5::ControlIdentifier::Archive;
                 if (key == "wipe") identifiers |= fdb5::ControlIdentifier::Wipe;
 
-                bool val = access.getBool(key);
-
                 fdb5::ControlAction newAction = access.getBool(key) ?
                         fdb5::ControlAction::Enable : fdb5::ControlAction::Disable;
                 if (foundAny) {
