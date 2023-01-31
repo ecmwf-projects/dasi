@@ -60,6 +60,7 @@ typedef struct dasi_retrieve_t dasi_retrieve_t;
 
 /* DASI Error Codes */
 
+/* comma is C99 */
 typedef enum dasi_error_values_t
 {
     DASI_SUCCESS             = 0, /* Operation succeded. */

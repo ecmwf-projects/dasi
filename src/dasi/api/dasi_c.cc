@@ -270,6 +270,7 @@ int dasi_retrieve_next(dasi_retrieve_t* retrieve) {
 int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, time_t* timestamp, long* offset, long* length) {
     return tryCatch([retrieve, key, timestamp, offset, length] {
         ASSERT(retrieve);
+        /// @note what happens if retrieve is empty
         ASSERT(retrieve->iterator != retrieve->retrieve.end());
         if (key) {
             *key = new Key(retrieve->iterator->key);
@@ -415,6 +416,7 @@ int dasi_query_get(dasi_query_t* query, const char* keyword, int num, const char
         ASSERT(value);
         ASSERT(num >= 0);
         const auto& values(query->get(keyword));
+        /// @note different type comparison
         ASSERT( num < values.size());
         *value = values[num].c_str();
     });
