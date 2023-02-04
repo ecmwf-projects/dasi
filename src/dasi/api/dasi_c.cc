@@ -14,10 +14,15 @@
 #include "eckit/utils/Optional.h"
 
 #include <functional>
+#include <time.h>
 
 extern "C" {
 
 // ---------------------------------------------------------------------------------------------------------------------
+
+struct DasiTime {
+    time_t value;
+};
 
 struct Dasi : public dasi::Dasi {
     using dasi::Dasi::Dasi;
@@ -190,7 +195,7 @@ int dasi_list_next(dasi_list_t* list) {
 
 int dasi_list_attrs(const dasi_list_t* list,
                     dasi_key_t** key,
-                    time_t* timestamp,
+                    dasi_time_t* timestamp,
                     const char** uri,
                     long* offset,
                     long* length) {
@@ -200,7 +205,7 @@ int dasi_list_attrs(const dasi_list_t* list,
         if (key) {
             *key = new Key(list->iterator->key);
         }
-        if (timestamp) *timestamp = list->iterator->timestamp;
+        if (timestamp) timestamp->value = list->iterator->timestamp;
         if (uri) {
             *uri = list->uri_cache.c_str();
         }
@@ -267,7 +272,7 @@ int dasi_retrieve_next(dasi_retrieve_t* retrieve) {
     }});
 }
 
-int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, time_t* timestamp, long* offset, long* length) {
+int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, dasi_time_t* timestamp, long* offset, long* length) {
     return tryCatch([retrieve, key, timestamp, offset, length] {
         ASSERT(retrieve);
         /// @note what happens if retrieve is empty
@@ -275,7 +280,7 @@ int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, time_
         if (key) {
             *key = new Key(retrieve->iterator->key);
         }
-        if (timestamp) *timestamp = retrieve->iterator->timestamp;
+        if (timestamp) timestamp->value = retrieve->iterator->timestamp;
         if (offset) *offset = retrieve->iterator->location.offset;
         if (length) *length = retrieve->iterator->location.length;
     });

@@ -24,10 +24,7 @@
 #ifndef dasi_api_dasi_c_h
 #define dasi_api_dasi_c_h
 
-/* @todo - test this file against an actual C compiler, running in C mode */
-
 #include <stddef.h>
-#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,6 +35,8 @@ extern "C" {
  * -----*/
 
 typedef int dasi_bool_t;
+
+typedef struct DasiTime dasi_time_t;
 
 struct Dasi;
 typedef struct Dasi dasi_t;
@@ -60,16 +59,15 @@ typedef struct dasi_retrieve_t dasi_retrieve_t;
 
 /* DASI Error Codes */
 
-/* comma is C99 */
 typedef enum dasi_error_values_t
 {
-    DASI_SUCCESS             = 0, /* Operation succeded. */
-    DASI_ITERATION_COMPLETE  = 1, /* All elements have been returned */
-    DASI_ERROR               = 2, /* Operation failed. */
-    DASI_ERROR_UNKNOWN       = 3, /* Failed with an unknown error. */
-    DASI_ERROR_USER          = 4, /* Failed with an user error. */
-    DASI_ERROR_ITERATOR      = 5, /* Failed with an iterator error. */
-    DASI_ERROR_ASSERT        = 6, /* Failed with an assert() */
+    DASI_SUCCESS            = 0, /* Operation succeded. */
+    DASI_ITERATION_COMPLETE = 1, /* All elements have been returned */
+    DASI_ERROR              = 2, /* Operation failed. */
+    DASI_ERROR_UNKNOWN      = 3, /* Failed with an unknown error. */
+    DASI_ERROR_USER         = 4, /* Failed with an user error. */
+    DASI_ERROR_ITERATOR     = 5, /* Failed with an iterator error. */
+    DASI_ERROR_ASSERT       = 6  /* Failed with an assert() */
 } dasi_error_enum_t;
 
 const char* dasi_get_error_string(int err);
@@ -109,7 +107,7 @@ int dasi_list_next(dasi_list_t* list);
 
 int dasi_list_attrs(const dasi_list_t* list,
                     dasi_key_t** key,
-                    time_t* timestamp,
+                    dasi_time_t* timestamp,
                     const char** uri,
                     long* offset,
                     long* length);
@@ -126,7 +124,7 @@ int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count);
 
 int dasi_retrieve_next(dasi_retrieve_t* retrieve);
 
-int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, time_t* timestamp, long* offset, long* length);
+int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, dasi_time_t* timestamp, long* offset, long* length);
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * KEY
