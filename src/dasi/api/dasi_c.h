@@ -24,10 +24,7 @@
 #ifndef dasi_api_dasi_c_h
 #define dasi_api_dasi_c_h
 
-/* @todo - test this file against an actual C compiler, running in C mode */
-
 #include <stddef.h>
-#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,6 +35,8 @@ extern "C" {
  * -----*/
 
 typedef int dasi_bool_t;
+
+typedef struct DasiTime dasi_time_t;
 
 struct Dasi;
 typedef struct Dasi dasi_t;
@@ -108,7 +107,7 @@ int dasi_list_next(dasi_list_t* list);
 
 int dasi_list_attrs(const dasi_list_t* list,
                     dasi_key_t** key,
-                    time_t* timestamp,
+                    dasi_time_t* timestamp,
                     const char** uri,
                     long* offset,
                     long* length);
@@ -125,7 +124,7 @@ int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count);
 
 int dasi_retrieve_next(dasi_retrieve_t* retrieve);
 
-int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, time_t* timestamp, long* offset, long* length);
+int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, dasi_time_t* timestamp, long* offset, long* length);
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * KEY
