@@ -60,16 +60,15 @@ typedef struct dasi_retrieve_t dasi_retrieve_t;
 
 /* DASI Error Codes */
 
-/* comma is C99 */
 typedef enum dasi_error_values_t
 {
-    DASI_SUCCESS             = 0, /* Operation succeded. */
-    DASI_ITERATION_COMPLETE  = 1, /* All elements have been returned */
-    DASI_ERROR               = 2, /* Operation failed. */
-    DASI_ERROR_UNKNOWN       = 3, /* Failed with an unknown error. */
-    DASI_ERROR_USER          = 4, /* Failed with an user error. */
-    DASI_ERROR_ITERATOR      = 5, /* Failed with an iterator error. */
-    DASI_ERROR_ASSERT        = 6, /* Failed with an assert() */
+    DASI_SUCCESS            = 0, /* Operation succeded. */
+    DASI_ITERATION_COMPLETE = 1, /* All elements have been returned */
+    DASI_ERROR              = 2, /* Operation failed. */
+    DASI_ERROR_UNKNOWN      = 3, /* Failed with an unknown error. */
+    DASI_ERROR_USER         = 4, /* Failed with an user error. */
+    DASI_ERROR_ITERATOR     = 5, /* Failed with an iterator error. */
+    DASI_ERROR_ASSERT       = 6  /* Failed with an assert() */
 } dasi_error_enum_t;
 
 const char* dasi_get_error_string(int err);
