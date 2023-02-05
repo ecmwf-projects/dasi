@@ -37,7 +37,7 @@ def parse_version_from(path):
 setup(
     name="pydasi",
     version=parse_version_from("dasi/__init__.py"),
-    description="The Python interface of DASI (Data Access and Storage Interface), developed as part of the EuroHPC project IO-SEA.",
+    description="The Python interface to DASI (Data Access and Storage Interface), developed as part of the EuroHPC project IO-SEA.",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     author="European Centre for Medium-Range Weather Forecasts (ECMWF)",
