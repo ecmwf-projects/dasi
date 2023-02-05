@@ -9,9 +9,11 @@
 
 #include "dasi_c.h"
 #include "dasi/api/Dasi.h"
+#include "dasi/lib/dasi_version.h"
 
 #include "eckit/exception/Exceptions.h"
 #include "eckit/utils/Optional.h"
+#include "eckit/runtime/Main.h"
 
 #include <functional>
 
@@ -119,6 +121,37 @@ int tryCatch(FN&& fn) {
 }
 
 extern "C" {
+
+// -----------------------------------------------------------------------------
+//                           HELPERS
+// -----------------------------------------------------------------------------
+
+int dasi_version(const char** version) {
+    *version = dasi_version();
+    return DASI_SUCCESS;
+}
+
+int dasi_vcs_version(const char** sha1) {
+    *sha1 = dasi_git_sha1();
+    return DASI_SUCCESS;
+}
+
+int dasi_initialise_api() {
+    return tryCatch([] {
+        static bool initialised = false;
+
+        if (initialised) {
+            eckit::Log::warning()
+                << "Initialising DASI library twice" << std::endl;
+        }
+
+        if (!initialised) {
+            const char* argv[2] = {"dasi-api", 0};
+            eckit::Main::initialise(1, const_cast<char**>(argv));
+            initialised = true;
+        }
+    });
+}
 
 // -----------------------------------------------------------------------------
 //                           SESSION

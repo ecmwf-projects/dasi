@@ -73,6 +73,34 @@ typedef enum dasi_error_values_t
 
 const char* dasi_get_error_string(int err);
 
+/* -----------------------------------------------------------------------------
+ * HELPERS
+ * ------- */
+
+/**
+ * @brief Set DASI version.
+ *
+ * @param version Version string
+ * @return int Error code
+ */
+int dasi_version(const char** version);
+
+/**
+ * @brief Set DASI git sha1 version.
+ *
+ * @param sha1 SHA1 version string
+ * @return int Error code
+ */
+int dasi_vcs_version(const char** sha1);
+
+/**
+ * @brief Initialise Main() context.
+ *
+ * @note This is ONLY required when Main() is NOT initialised, such as loading
+ * the DASI as shared library in Python.
+ */
+int dasi_initialise_api();
+
 /* ---------------------------------------------------------------------------------------------------------------------
  * DASI SESSION
  * ------------ */
