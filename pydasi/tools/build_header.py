@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Copyright 2023 European Centre for Medium-Range Weather Forecasts (ECMWF)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,4 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .key import Key
+import sys
+
+from pycparser import c_generator, parse_file
+
+
+def usage():
+    sys.stderr.write("Usage:\n")
+    sys.stderr.write("\tbuild_header.py <dasi.h> <dasi_cffi.h>\n")
+
+
+if len(sys.argv) != 3:
+    usage()
+    sys.exit(-1)
+
+input_filename = sys.argv[1]
+output_filename = sys.argv[2]
+
+ast = parse_file(input_filename, use_cpp=True)
+with open(output_filename, "w") as f:
+    f.write(c_generator.CGenerator().visit(ast))

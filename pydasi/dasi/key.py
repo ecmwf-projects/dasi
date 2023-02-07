@@ -13,15 +13,32 @@
 # limitations under the License.
 
 
-class Key:
-    def __init__(self, key: str):
-        self.key = key
+from ._dasi_cffi import ffi, lib
 
-        assert self.name is not None
+
+class Key:
+    """
+    This is the Dasi::Key.
+    """
+
+    def __init__(self, pair: str = ""):
+        # Allocate an instance
+        key = ffi.new("dasi_key_t**")
+        if pair:
+            lib.dasi_new_key_from_string(key, pair.encode("utf-8"))
+        else:
+            lib.dasi_new_key(key)
+        # Set free function
+        key = ffi.gc(key[0], lib.dasi_free_key)
+
+        self._key = key
 
     @property
     def name(self):
-        return "".join("_" + c.lower() if c.isupper() else c for c in self.__class__.__name__).strip("_")
+        return "".join(
+            "_" + c.lower() if c.isupper() else c
+            for c in self.__class__.__name__
+        ).strip("_")
 
     @staticmethod
     def key_class_name(name):
@@ -32,3 +49,6 @@ class Key:
 
     def has(self, name):
         raise NotImplementedError
+
+
+key = Key()

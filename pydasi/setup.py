@@ -14,9 +14,11 @@
 
 import io
 import os
-import re
 
 from setuptools import setup
+
+with open(os.path.join(".", "VERSION")) as version_file:
+    __pydasi_version__ = version_file.read().strip()
 
 
 def read(path):
@@ -24,19 +26,9 @@ def read(path):
     return io.open(file_path, encoding="utf-8").read()
 
 
-# single-sourcing the package version using method 1 of:
-#   https://packaging.python.org/guides/single-sourcing-package-version/
-def parse_version_from(path):
-    version_file = read(path)
-    version_match = re.search(r'^__version__ = "(.*)"', version_file, re.M)
-    if version_match is None or len(version_match.groups()) > 1:
-        raise ValueError("couldn't parse version")
-    return version_match.group(1)
-
-
 setup(
     name="pydasi",
-    version=parse_version_from("dasi/__init__.py"),
+    version=__pydasi_version__,
     description="The Python interface to DASI (Data Access and Storage Interface), developed as part of the EuroHPC project IO-SEA.",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
@@ -47,13 +39,7 @@ setup(
     packages=["dasi"],
     package_data={"": ["*.h"]},
     include_package_data=True,
-    install_requires=["cffi"],
-    extras_require={},
-    tests_require=[
-        "pytest",
-        "pytest-cov",
-        "pytest-flakes",
-    ],
+    install_requires=["cffi>=1.0.0"],
     zip_safe=True,
     keywords=["dasi", "ecmwf"],
     classifiers=[
