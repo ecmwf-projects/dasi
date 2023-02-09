@@ -14,7 +14,7 @@
 
 from logging import DEBUG, getLogger
 
-from ._dasi_cffi import ffi, lib
+from ._dasi_cffi import ffi, ffi_encode, lib
 
 logger = getLogger(__name__)
 logger.setLevel(DEBUG)
@@ -25,17 +25,29 @@ class Key:
     This is the Dasi::Key.
     """
 
-    def __init__(self, pair: str = ""):
-        # Allocate an instance
-        key = ffi.new("dasi_key_t**")
-        if pair:
-            lib.dasi_new_key_from_string(key, pair.encode("utf-8"))
+    def __init__(self, pair=None):
+        logger.debug("Initialize a key. pair type: %s", type(pair))
+        if isinstance(pair, Key):
+            self = pair.copy()
+        elif isinstance(pair, ffi.CData):
+            self._cdata = pair
         else:
-            lib.dasi_new_key(key)
-        # Set free function
-        key = ffi.gc(key[0], lib.dasi_free_key)
+            self._cdata = self._new_key(pair)
+            self.insert(pair)
 
-        self._key = key
+    def __setitem__(self, keyword, value):
+        lib.dasi_key_set(self._cdata, ffi_encode(keyword), ffi_encode(value))
+
+    def _new_key(self, pair=None):
+        # instantiate a key object
+        ckey = ffi.new("dasi_key_t**")
+        if isinstance(pair, str):
+            lib.dasi_new_key_from_string(ckey, ffi_encode(pair))
+        else:
+            lib.dasi_new_key(ckey)
+        # set the free function
+        ckey = ffi.gc(ckey[0], lib.dasi_free_key)
+        return ckey
 
     @property
     def name(self):
@@ -47,6 +59,14 @@ class Key:
     @staticmethod
     def key_class_name(name):
         return "".join(part[:1].upper() + part[1:] for part in name.split("_"))
+
+    def insert(self, pair):
+        if isinstance(pair, dict):
+            for [keyword, value] in pair.items():
+                self[keyword] = value
+
+    def copy(self):
+        return Key(self._cdata)
 
     def print(self, stream):
         raise NotImplementedError
