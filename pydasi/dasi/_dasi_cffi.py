@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 from os import environ as osenv
 from os import path as ospath
 
 from cffi import FFI
 from pkg_resources import parse_version
+
+from .log import logger
 
 __file_dir__ = ospath.dirname(__file__)
 """current file path directory"""
@@ -29,12 +30,6 @@ with open(ospath.join(ospath.dirname(__file_dir__), "VERSION")) as file_:
 
 ffi = FFI()
 
-# Configure the logger
-logging.basicConfig(
-    level=logging.DEBUG,
-    datefmt="%d-%m-%Y (%H:%M:%S)",
-    format="%(asctime)s | %(name)-12s | %(levelname)-8s | %(message)s",
-)
 
 
 class DASIException(RuntimeError):
@@ -59,7 +54,7 @@ class PatchedLib:
     """
 
     def __init__(self):
-        logging.info("Loading the DASI library...")
+        logger.info("Loading the DASI library...")
         # parse the C source; types, functions, globals, etc.
         ffi.cdef(self.__read_header())
 
@@ -74,10 +69,10 @@ class PatchedLib:
         for libname in lib_names:
             try:
                 self.__lib = ffi.dlopen(libname)
-                logging.info("- loaded: " + libname)
+                logger.info("- loaded: " + libname)
                 break
             except Exception:
-                logging.debug("- cannot load: " + libname)
+                logger.debug("- cannot load: " + libname)
         else:
             raise CFFIModuleLoadFailed(
                 "The shared library 'dasi' could not be found on the system!"
@@ -96,8 +91,8 @@ class PatchedLib:
                     self.__check_error(attr, f) if callable(attr) else attr,
                 )
             except Exception as e:
-                logging.error(str(e))
-                logging.error("Error retrieving attribute", f, "from library")
+                logger.error(str(e))
+                logger.error("Error retrieving attribute", f, "from library")
 
         # Initialise and setup for python-appropriate behaviour
         self.dasi_initialise_api()  # type: ignore
@@ -119,7 +114,7 @@ class PatchedLib:
             )
             raise CFFIModuleLoadFailed(msg)
         else:
-            logging.info("Version: %s", lib_version)
+            logger.info("Version: %s", lib_version)
 
     def __read_header(self) -> str:
         with open(ospath.join(__file_dir__, "dasi_cffi.h")) as header_file:
@@ -150,5 +145,5 @@ class PatchedLib:
 try:
     lib = PatchedLib()
 except CFFIModuleLoadFailed as e:
-    logging.error(str(e))
+    logger.error(str(e))
     raise ImportError() from e

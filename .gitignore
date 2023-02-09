@@ -24,6 +24,7 @@ odc
 pmem
 examples/weather/ensemble*
 examples/weather/ens_mean*
+examples/cryoem/0000-*
 docs/_build/
 dist/
 .eggs

@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from logging import DEBUG, getLogger
 
 from ._dasi_cffi import ffi, lib
+
+logger = getLogger(__name__)
+logger.setLevel(DEBUG)
 
 
 class Key:
@@ -49,6 +53,3 @@ class Key:
 
     def has(self, name):
         raise NotImplementedError
-
-
-key = Key()
