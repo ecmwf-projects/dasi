@@ -31,6 +31,29 @@ with open(ospath.join(ospath.dirname(__file_dir__), "VERSION")) as file_:
 ffi = FFI()
 
 
+def ffi_encode(data) -> bytes:
+    """convert data to bytes type"""
+    if isinstance(data, bytes):
+        return data
+    elif isinstance(data, bytearray):
+        return bytes(ffi.from_buffer(data))
+
+    if not isinstance(data, str):
+        data = str(data)
+
+    return data.encode(encoding="utf-8", errors="surrogateescape")
+
+
+def ffi_decode(data: FFI.CData) -> str:
+    """convert data to str type"""
+    buf = ffi.string(data)
+    if isinstance(buf, str):
+        return buf
+    elif isinstance(buf, bytes):
+        return buf.decode(encoding="utf-8", errors="surrogateescape")
+
+    return str()
+
 
 class DASIException(RuntimeError):
     """Raised when dasi library throws exception"""
