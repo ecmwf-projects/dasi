@@ -106,7 +106,7 @@ class PatchedLib:
         """check the library version against pydasi version"""
         tmp_str = ffi.new("char**")
         self.dasi_version(tmp_str)  # type: ignore
-        lib_version = ffi.string(tmp_str[0]).decode("utf-8")
+        lib_version = ffi.string(tmp_str[0]).decode("utf-8")  # type: ignore
 
         if parse_version(lib_version) < parse_version(__pydasi_version__):
             msg = "The library version '{}' is older than '{}'.".format(
@@ -130,13 +130,12 @@ class PatchedLib:
         def wrapped_fn(*args, **kwargs):
             retval = fn(*args, **kwargs)
             if retval not in (
-                self.__lib.DASI_SUCCESS,
-                self.__lib.DASI_ITERATION_COMPLETE,
+                self.__lib.DASI_SUCCESS,  # type: ignore
+                self.__lib.DASI_ITERATION_COMPLETE,  # type: ignore
             ):
-                error_str = "Error in function {}: {}".format(
-                    name, self.__lib.dasi_error_string(retval)
-                )
-                raise DASIException(error_str)
+                err = self.__lib.dasi_get_error_string(retval)  # type: ignore
+                excpt_str = "Error in function '{}': {}".format(name, err)
+                raise DASIException(excpt_str)
             return retval
 
         return wrapped_fn
