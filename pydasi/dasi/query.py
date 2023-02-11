@@ -19,42 +19,44 @@ logger = getLogger(__name__)
 logger.setLevel(DEBUG)
 
 
-class Key:
+class Query:
     """
-    Container for keyword:value pairs.
+    This is the Dasi::Query.
     """
 
     def __init__(self, pair=None):
-        if isinstance(pair, Key):
+        if isinstance(pair, Query):
             self = pair.copy()
         elif isinstance(pair, ffi.CData):
-            if ffi.typeof(pair) is ffi.typeof("dasi_key_t *"):
+            if ffi.typeof(pair) is ffi.typeof("dasi_query_t *"):
                 self._cdata = pair
         else:
-            self._new_key(pair)
+            self._new_query(pair)
             self.insert(pair)
 
     def __setitem__(self, keyword, value):
-        lib.dasi_key_set(self._cdata, ffi_encode(keyword), ffi_encode(value))
+        lib.dasi_query_append(
+            self._cdata, ffi_encode(keyword), ffi_encode(value)
+        )
 
     def __getitem__(self, keyword):
         value = ffi.new("const char **")
-        lib.dasi_key_get(self._cdata, ffi_encode(keyword), value)
+        lib.dasi_query_get(self._cdata, ffi_encode(keyword), value)
         return ffi_decode(value[0])
 
     def __delitem__(self, keyword):
-        lib.dasi_key_erase(self._cdata, ffi_encode(keyword))
+        lib.dasi_query_erase(self._cdata, ffi_encode(keyword))
 
-    def _new_key(self, pair=None):
+    def _new_query(self, pair=None):
         # allocate an instance
-        ckey = ffi.new("dasi_key_t **")
+        cquery = ffi.new("dasi_query_t **")
         if isinstance(pair, str):
-            lib.dasi_new_key_from_string(ckey, ffi_encode(pair))
+            lib.dasi_new_query_from_string(cquery, ffi_encode(pair))
         else:
-            lib.dasi_new_key(ckey)
+            lib.dasi_new_query(cquery)
         # set the free function
-        ckey = ffi.gc(ckey[0], lib.dasi_free_key)
-        self._cdata = ckey
+        cquery = ffi.gc(cquery[0], lib.dasi_free_query)
+        self._cdata = cquery
 
     @property
     def name(self):
@@ -69,25 +71,29 @@ class Key:
 
     def insert(self, pair):
         if isinstance(pair, dict):
-            # @todo 'value' can be dict
             for [keyword, value] in pair.items():
                 self[keyword] = value
 
     def copy(self):
-        return Key(self._cdata)
+        return Query(self._cdata)
 
     def print(self, stream):
         raise NotImplementedError
 
     def has(self, keyword: str) -> bool:
         has = ffi.new("dasi_bool_t*", 1)
-        lib.dasi_key_has(self._cdata, ffi_encode(keyword), has)
+        lib.dasi_query_has(self._cdata, ffi_encode(keyword), has)
         return has[0] != 0
 
-    def count(self) -> int:
+    def count_keyword(self) -> int:
         count = ffi.new("long*", 0)
-        lib.dasi_key_count(self._cdata, count)
+        lib.dasi_query_keyword_count(self._cdata, count)
+        return count[0]
+
+    def count_value(self) -> int:
+        count = ffi.new("long*", 0)
+        lib.dasi_query_value_count(self._cdata, count)
         return count[0]
 
     def clear(self):
-        lib.dasi_key_clear(self._cdata)
+        lib.dasi_query_clear(self._cdata)

@@ -15,7 +15,7 @@
 import io
 import os
 
-from setuptools import setup
+from setuptools import find_packages, setup
 
 with open(os.path.join(".", "VERSION")) as version_file:
     __pydasi_version__ = version_file.read().strip()
@@ -29,17 +29,20 @@ def read(path):
 setup(
     name="pydasi",
     version=__pydasi_version__,
-    description="The Python interface to DASI (Data Access and Storage Interface), developed as part of the EuroHPC project IO-SEA.",
+    description="The Python interface to DASI "
+    "(Data Access and Storage Interface),"
+    " developed as part of the EuroHPC project IO-SEA.",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     author="European Centre for Medium-Range Weather Forecasts (ECMWF)",
     author_email="software.support@ecmwf.int",
     license="Apache License Version 2.0",
     url="https://github.com/ecmwf-projects/dasi",
-    packages=["dasi"],
+    # packages=["dasi", "dasi.tests"],
+    packages=find_packages(include=["dasi", "dasi.tests"]),
     package_data={"": ["*.h"]},
     include_package_data=True,
-    install_requires=["cffi>=1.0.0"],
+    install_requires=["cffi>=1.1.1", "pytest"],
     zip_safe=True,
     keywords=["dasi", "ecmwf"],
     classifiers=[

@@ -15,17 +15,17 @@
 from logging import DEBUG, INFO, WARNING, getLogger
 from logging.config import dictConfig
 
-_log_filename = "dasi.log"
+__log_filename__ = "dasi.log"
 
 __logging_config__ = dict(
     version=1,
     formatters={
         "default": {
             "datefmt": "%d-%m-%Y [%H:%M:%S]",
-            "format": "%(asctime)s %(name)-8s | %(levelname)-6s | %(message)s",
+            "format": "%(asctime)s %(name)-12s | %(levelname)-6s | %(message)s",
         },
         "compact": {
-            "format": "%(name)-8s | %(message)s",
+            "format": "%(name)-12s | %(message)s",
         },
     },
     handlers={
@@ -43,7 +43,7 @@ __logging_config__ = dict(
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "default",
-            "filename": _log_filename,
+            "filename": __log_filename__,
             "maxBytes": 1024,
             "backupCount": 3,
             "level": INFO,
@@ -56,7 +56,7 @@ __logging_config__ = dict(
     loggers={
         "dasi": {
             "handlers": ["console"],
-            "level": INFO,
+            "level": DEBUG,
             "propagate": False,
         },
         # "__main__": {  # if __name__ == '__main__'

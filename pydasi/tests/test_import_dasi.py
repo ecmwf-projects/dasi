@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ._dasi_cffi import DASIException, lib
-from .dasi import Dasi, Key, Query, Retrieve
-# from .key import Key
-# from .query import Query
-# from .retrieve import Retrieve
-from .utils import logger
+import pytest
 
-__all__ = ["DASIException", "lib", "logger", "Dasi", "Key", "Query", "Retrieve"]
+
+def test_import_dasi():
+    """
+    Test importing library
+    """
+
+    import dasi
+
+    with pytest.raises(ImportError) as excinfo:
+        import pydasi
+
+    assert "No module named 'pydasi'" == str(excinfo.value)

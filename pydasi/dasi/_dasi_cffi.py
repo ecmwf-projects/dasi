@@ -18,7 +18,10 @@ from os import path as ospath
 from cffi import FFI
 from pkg_resources import parse_version
 
-from .log import logger
+from .utils import DEBUG, getLogger
+
+logger = getLogger(__package__ + ".cffi")
+logger.setLevel(DEBUG)
 
 __file_dir__ = ospath.dirname(__file__)
 """current file path directory"""
@@ -118,26 +121,29 @@ class PatchedLib:
                 logger.error("Error retrieving attribute", f, "from library")
 
         # Initialise and setup for python-appropriate behaviour
-        self.dasi_initialise_api()  # type: ignore
+        self.dasi_initialise_api()
         # check the version
         self.__check_version()
+
+    def get_lib_version(self):
+        tmp = ffi.new("char**")
+        self.__lib.dasi_version(tmp)
+        return ffi_decode(tmp[0])
 
     def __insert_lib_name(self, lib_names, dir, name):
         lib_names.insert(0, ospath.join(osenv[dir], name))
 
     def __check_version(self):
         """check the library version against pydasi version"""
-        tmp_str = ffi.new("char**")
-        self.dasi_version(tmp_str)  # type: ignore
-        lib_version = ffi.string(tmp_str[0]).decode("utf-8")  # type: ignore
 
+        lib_version = self.get_lib_version()
         if parse_version(lib_version) < parse_version(__pydasi_version__):
             msg = "The library version '{}' is older than '{}'.".format(
                 lib_version, __pydasi_version__
             )
             raise CFFIModuleLoadFailed(msg)
         else:
-            logger.info("Version: %s", lib_version)
+            logger.info("- version: %s", lib_version)
 
     def __read_header(self) -> str:
         with open(ospath.join(__file_dir__, "dasi_cffi.h")) as header_file:
@@ -153,11 +159,11 @@ class PatchedLib:
         def wrapped_fn(*args, **kwargs):
             retval = fn(*args, **kwargs)
             if retval not in (
-                self.__lib.DASI_SUCCESS,  # type: ignore
-                self.__lib.DASI_ITERATION_COMPLETE,  # type: ignore
+                self.__lib.DASI_SUCCESS,
+                self.__lib.DASI_ITERATION_COMPLETE,
             ):
-                err = self.__lib.dasi_get_error_string(retval)  # type: ignore
-                excpt_str = "Error in function '{}': {}".format(name, err)
+                err = ffi_decode(self.__lib.dasi_get_error_string(retval))
+                excpt_str = "Error in function '{}':\n{}".format(name, err)
                 raise DASIException(excpt_str)
             return retval
 

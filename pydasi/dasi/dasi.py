@@ -14,8 +14,14 @@
 
 from os import fsencode
 
-from ._dasi_cffi import DASIException, ffi, lib, logger
+from ._dasi_cffi import DASIException, ffi, lib
 from .key import Key
+from .query import Query
+from .retrieve import Retrieve
+from .utils import DEBUG, getLogger
+
+logger = getLogger(__name__)
+logger.setLevel(DEBUG)
 
 
 class Dasi:
@@ -23,21 +29,13 @@ class Dasi:
     This is the Dasi::Dasi.
     """
 
-    def __init__(self, config_file_path: str):
-        if config_file_path:
-            # Allocate an instance
-            session = ffi.new("dasi_t**")
-            try:
-                lib.dasi_open(session, fsencode(config_file_path))
-            except DASIException as e:
-                logger.error("Could not create the DASI session!")
-                raise RuntimeError() from e
-            # Set free function
-            session = ffi.gc(session[0], lib.dasi_close)
+    def __init__(self, config_path: str):
+        if config_path:
+            logger.info("Config file: %s", config_path)
+            self._new_session(config_path)
         else:
-            raise DASIException("Missing config file!")
-
-        self._session = session
+            err_msg = "Could not find the config file:\n{}".format(config_path)
+            raise DASIException(err_msg)
 
     @property
     def name(self):
@@ -57,6 +55,31 @@ class Dasi:
         if not isinstance(key, Key):
             key = Key(key)
 
-        lib.dasi_archive(  # type: ignore
-            self._session, key._cdata, ffi.from_buffer(data), len(data)
+        lib.dasi_archive(
+            self._cdata, key._cdata, ffi.from_buffer(data), len(data)
         )
+
+    def _new_session(self, config):
+        # allocate an instance
+        cobj = ffi.new("dasi_t **")
+        lib.dasi_open(cobj, fsencode(config))
+        # set the free function
+        cobj = ffi.gc(cobj[0], lib.dasi_close)
+        self._cdata = cobj
+
+    def _new_retrieve(self, query: Query) -> ffi.CData:
+        # allocate an instance
+        cret = ffi.new("dasi_retrieve_t **")
+        lib.dasi_new_retrieve(self._cdata, query._cdata, cret)
+        # set the free function
+        cret = ffi.gc(cret[0], lib.dasi_free_retrieve)
+        return cret
+
+    def retrieve(self, query) -> Retrieve:
+        if not isinstance(query, Query):
+            query = Query(query)
+
+        retriev = Retrieve(self._new_retrieve(query))
+        logger.debug("- retrieve count: %d", retriev.count())
+
+        return retriev
