@@ -194,7 +194,7 @@ int dasi_flush(dasi_t* dasi) {
     });
 }
 
-int dasi_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list) {
+int dasi_new_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list) {
     return tryCatch([dasi, query, list] {
         ASSERT(dasi);
         ASSERT(query);
@@ -247,7 +247,7 @@ int dasi_list_attrs(const dasi_list_t* list,
     });
 }
 
-int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve) {
+int dasi_new_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve) {
     return tryCatch([dasi, query, retrieve] {
         ASSERT(dasi);
         ASSERT(query);
