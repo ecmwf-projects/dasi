@@ -43,6 +43,6 @@ The DASI schema uses the following keys:
 * **User** The OrcID of the user
 * **Project** The name of the project
 * **DateTime** The timestamp of the acquisition (`YYYYMMDDHHMM`)
-* **DataProcessing** The type of processing (`g1`, `g2`)
+* **Processing** The type of processing (`g1`, `g2`)
 * **Type** The type of measurement (`spa`, `tomo`, `edt`, `FIB-SEM`, `screening`)
 * **Object** The type of data (`metadata`, `images`)
