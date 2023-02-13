@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dasi import Key
+import pytest
+
+from dasi import DASIException, Key
 
 
 def test_key_typename():
@@ -77,6 +79,39 @@ def test_key_empty():
     assert value1 == "value1"
 
 
+def test_key_from_string():
+    """
+    Construct keys from string.
+    """
+
+    pairs = "key3=value3,key1=value1,key2=value2"
+    key = Key(pairs)
+
+    assert key.count() == 3
+    assert key.has("key1") is True
+    assert key.has("key2") is True
+    assert key.has("key3") is True
+    assert key.has("other") is False
+
+    assert key["key1"] == "value1"
+    assert key["key2"] == "value2"
+    assert key["key3"] == "value3"
+
+
+def test_key_invalid():
+    """
+    Assert invalid keys.
+    """
+
+    with pytest.raises(DASIException):
+        pairs = "key3=value3=value3b,key1=value1,key2=value2"
+        key = Key(pairs)
+
+    with pytest.raises(DASIException):
+        pairs = "key3=value3/value3b,key1=value1,key2=value2"
+        key = Key(pairs)
+
+
 def test_key_dictionary():
     """
     Construct a key from dictionary and assert values.
@@ -122,8 +157,27 @@ def test_key_dictionary():
     assert key.count() == 4
 
 
+def test_key_modify():
+    pair = {"key1": "value1"}
+    key = Key(pair)
+
+    assert key.count() == 1
+    assert key.has("key1") is True
+
+    # get the value of keyword 'key1'
+    value1 = key["key1"]
+    assert value1 == "value1"
+
+    key["key1"] = "value2"
+    value2 = key["key1"]
+    assert value2 == "value2"
+
+
 if __name__ == "__main__":
     test_key_typename()
     test_key_clear()
     test_key_empty()
+    test_key_from_string()
+    test_key_invalid()
     test_key_dictionary()
+    test_key_modify()
