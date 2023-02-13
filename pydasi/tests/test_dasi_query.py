@@ -120,7 +120,46 @@ def test_query_clear():
     assert query.count_value("key4") == 0
 
 
+def test_query_from_string():
+    """
+    Construct keys from string.
+    """
+
+    pairs = "key3=value3a/value3b/value3c,key1=value1,key2=value2"
+    query = Query(pairs)
+
+    assert query.count_keyword() == 3
+    assert query.has("key1") is True
+    assert query.has("key2") is True
+    assert query.has("key3") is True
+    assert query.count_value("key1") == 1
+    assert query.count_value("key2") == 1
+    assert query.count_value("key3") == 3
+
+    assert query.get_value("key1", 0) == "value1"
+    assert query.get_value("key2", 0) == "value2"
+    assert query.get_value("key3", 0) == "value3a"
+    assert query.get_value("key3", 1) == "value3b"
+    assert query.get_value("key3", 2) == "value3c"
+
+
+def test_query_invalid():
+    """
+    Assert invalid query.
+    """
+
+    with pytest.raises(DASIException):
+        pairs = "key3=value3=value3b,key1=value1,key2=value2"
+        Query(pairs)
+
+    with pytest.raises(DASIException):
+        pairs = "key3=value3/value3b,key1=value1;key2=value2"
+        Query(pairs)
+
+
 if __name__ == "__main__":
     test_query_typename()
     test_query_empty()
+    test_query_from_string()
     test_query_clear()
+    test_query_invalid()

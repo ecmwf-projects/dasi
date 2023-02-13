@@ -105,11 +105,11 @@ def test_key_invalid():
 
     with pytest.raises(DASIException):
         pairs = "key3=value3=value3b,key1=value1,key2=value2"
-        key = Key(pairs)
+        Key(pairs)
 
     with pytest.raises(DASIException):
         pairs = "key3=value3/value3b,key1=value1,key2=value2"
-        key = Key(pairs)
+        Key(pairs)
 
 
 def test_key_dictionary():
