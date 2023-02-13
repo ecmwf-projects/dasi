@@ -75,6 +75,11 @@ class Query:
     def print(self, stream):
         raise NotImplementedError
 
+    def get_value(self, keyword, number):
+        value = ffi.new("const char **")
+        lib.dasi_query_get(self._cdata, ffi_encode(keyword), number, value)
+        return ffi_decode(value[0])
+
     def has(self, keyword) -> bool:
         has = ffi.new("dasi_bool_t*", 1)
         lib.dasi_query_has(self._cdata, ffi_encode(keyword), has)

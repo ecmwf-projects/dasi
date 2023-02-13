@@ -75,6 +75,14 @@ def test_query_clear():
 
     assert query.count_keyword() == 6
 
+    assert query.get_value("key1a", 0) == "value1a"
+    assert query.get_value("key2a", 0) == "value2a"
+    assert query.get_value("key3a", 0) == "value3a"
+    assert query.get_value("key1b", 0) == "value1b"
+    assert query.get_value("key2b", 0) == "value2b"
+    assert query.get_value("key3b", 0) == "value3ba"
+    assert query.get_value("key3b", 1) == "value3bb"
+
     assert query.count_value("key1a") == 1
     assert query.count_value("key2a") == 1
     assert query.count_value("key3a") == 1
