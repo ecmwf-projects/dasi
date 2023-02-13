@@ -12,9 +12,22 @@ This exaple mimics an electron microscopy workflow, acquiring images and visuali
 
 ### 1. Setup:
 
-Set a valid path for the DASI store root in `dasi-config.yml`.
+Replace the paths in `dasi-config.yml` such that they point to your local repository:
 
-Make sure the DASI library can be loaded, updating `LD_LIBRARY_PATH` if needed.
+```yaml
+schema: PATH_TO_DASI_REPO/examples/cryoem/schema
+- path: PATH_TO_DASI_REPO/examples/cryoem
+```
+
+Make sure the DASI library can be found:
+
+**Option 1.** update `LD_LIBRARY_PATH` to point to `libdasi.so` (linux) or `libdasi.dylib` (macos).
+
+**Option 2.** pass the environment variable `DASI_DIR` via command line:
+
+```bash
+DASI_DIR="PATH_TO_DASI_INSTALLATION" python3 example.py
+```
 
 ### 2. Generate mock images:
 
@@ -29,7 +42,7 @@ available options).
 ### 3. Visualize:
 
 ```
-python3 plot.py -t 202206071435
+python3 plot.py -t 202302102043
 ```
 
 This will pick up previously generated images (set the `-t` parameter to the
