@@ -35,6 +35,7 @@ python3 plot.py -t 202206071435
 This will pick up previously generated images (set the `-t` parameter to the
 correct timestamp, see also `-h` for other options) and generate a plot.
 
+![sample plot](sample.png)
 
 ## DASI schema
 
