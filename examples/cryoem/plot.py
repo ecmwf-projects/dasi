@@ -53,12 +53,12 @@ if __name__ == "__main__":
     }
 
     #
-    # Metadata
+    # Retrieve results from query
     retrieved = dasi.retrieve(query)
     if retrieved.count() != 2:
         exit("Query could not return results!\n{}\n".format(query))
 
-    # read data by looping "Object": "metadata" and "images"
+    # read data by looping over "Object": "metadata" and "images"
     results = {}
     for r in retrieved:
         key, data = r.read()
