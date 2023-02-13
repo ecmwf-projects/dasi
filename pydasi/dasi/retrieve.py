@@ -63,7 +63,8 @@ class Retrieve:
         ckey = ffi.new("dasi_key_t **", ffi.NULL)
         lib.dasi_retrieve_attrs(self._cdata, ckey, ffi.NULL, ffi.NULL, length)
         ckey = ffi.gc(ckey[0], lib.dasi_free_key)
+        key = Key(ckey)
         logger.debug("- data length = %d", length[0])
         data = bytearray(length[0])
         lib.dasi_retrieve_read(self._cdata, ffi.from_buffer(data), length)
-        return Key(ckey), data
+        return key, data
