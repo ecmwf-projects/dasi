@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ._dasi_cffi import ffi, ffi_decode, ffi_encode, lib
+from ._dasi_cffi import ffi, ffi_decode, ffi_encode, lib, DASIException
 from .utils import DEBUG, getLogger
 
 logger = getLogger(__name__)
@@ -21,7 +21,7 @@ logger.setLevel(DEBUG)
 
 class Query:
     """
-    This is the Dasi::Query.
+    Container for the keyword:value pairs that is used for retrieving data.
     """
 
     def __init__(self, pair=None):
@@ -35,14 +35,9 @@ class Query:
             self.insert(pair)
 
     def __setitem__(self, keyword, value):
-        lib.dasi_query_append(
-            self._cdata, ffi_encode(keyword), ffi_encode(value)
-        )
-
-    def __getitem__(self, keyword):
-        value = ffi.new("const char **")
-        lib.dasi_query_get(self._cdata, ffi_encode(keyword), value)
-        return ffi_decode(value[0])
+        length = len(value)
+        buf = [ffi.from_buffer(ffi_encode(item)) for item in value]
+        lib.dasi_query_set(self._cdata, ffi_encode(keyword), buf, length)
 
     def __delitem__(self, keyword):
         lib.dasi_query_erase(self._cdata, ffi_encode(keyword))
@@ -80,7 +75,7 @@ class Query:
     def print(self, stream):
         raise NotImplementedError
 
-    def has(self, keyword: str) -> bool:
+    def has(self, keyword) -> bool:
         has = ffi.new("dasi_bool_t*", 1)
         lib.dasi_query_has(self._cdata, ffi_encode(keyword), has)
         return has[0] != 0
@@ -90,10 +85,14 @@ class Query:
         lib.dasi_query_keyword_count(self._cdata, count)
         return count[0]
 
-    def count_value(self) -> int:
-        count = ffi.new("long*", 0)
-        lib.dasi_query_value_count(self._cdata, count)
-        return count[0]
+    def count_value(self, keyword) -> int:
+        try:
+            count = ffi.new("long*", 0)
+            lib.dasi_query_value_count(self._cdata, ffi_encode(keyword), count)
+            return count[0]
+        except DASIException as e:
+            logger.warning(str(e))
+            return 0
 
     def clear(self):
         lib.dasi_query_clear(self._cdata)

@@ -35,7 +35,7 @@ ffi = FFI()
 
 
 def ffi_encode(data) -> bytes:
-    """convert data to bytes type"""
+    """convert data to bytes (c char)"""
     if isinstance(data, bytes):
         return data
     elif isinstance(data, bytearray):
@@ -48,7 +48,7 @@ def ffi_encode(data) -> bytes:
 
 
 def ffi_decode(data: FFI.CData) -> str:
-    """convert data to str type"""
+    """convert data back to str type"""
     buf = ffi.string(data)
     if isinstance(buf, str):
         return buf
@@ -163,7 +163,7 @@ class PatchedLib:
                 self.__lib.DASI_ITERATION_COMPLETE,
             ):
                 err = ffi_decode(self.__lib.dasi_get_error_string(retval))
-                excpt_str = "Error in function '{}':\n{}".format(name, err)
+                excpt_str = "Error in function '{}': {}".format(name, err)
                 raise DASIException(excpt_str)
             return retval
 

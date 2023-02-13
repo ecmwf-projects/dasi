@@ -34,37 +34,26 @@ def test_key_clear():
 
     key = Key()
 
-    count = key.count()
-    assert count == 0
+    assert key.count() == 0
 
     # add keyword:value pair
     key["key1"] = "value1"
+    assert key.count() == 1
 
-    count = key.count()
-    assert count == 1
-
-    # insert pairs from dict
+    # insert multiple pairs
     pair = {"key2": "value2", "key3": "value3"}
     key.insert(pair)
+    assert key.count() == 3
+    assert key.has("key2") is True
 
-    stat = key.has("key2")
-    assert stat is True
-
-    count = key.count()
-    assert count == 3
-
+    # delete a key
     del key["key1"]
+    assert key.count() == 2
+    assert key.has("key1") is False
 
-    stat = key.has("key1")
-    assert stat is False
-
-    count = key.count()
-    assert count == 2
-
+    # delete all pairs
     key.clear()
-
-    count = key.count()
-    assert count == 0
+    assert key.count() == 0
 
 
 def test_key_empty():
@@ -74,27 +63,18 @@ def test_key_empty():
 
     key = Key()
 
-    stat = key.has("key1")
-    assert stat is False
-
-    stat = key.has("key2")
-    assert stat is False
-
-    count = key.count()
-    assert count == 0
+    assert key.has("key1") is False
+    assert key.has("key2") is False
+    assert key.count() == 0
 
     # add keyword:value pair
     key["key1"] = "value1"
+    assert key.count() == 1
+    assert key.has("key1") is True
 
     # get the value of keyword 'key1'
     value1 = key["key1"]
     assert value1 == "value1"
-
-    stat = key.has("key1")
-    assert stat is True
-
-    count = key.count()
-    assert count == 1
 
 
 def test_key_dictionary():
@@ -106,37 +86,31 @@ def test_key_dictionary():
     pair = {"key1": "value1"}
     key = Key(pair)
 
-    stat = key.has("key1")
-    assert stat is True
+    assert key.has("key1") is True
 
     # get the value of keyword 'key1'
     value1 = key["key1"]
     assert value1 == "value1"
 
-    count = key.count()
-    assert count == 1
+    assert key.count() == 1
 
     # add keyword:value pair
     key["key2"] = "value2"
 
-    stat = key.has("key2")
-    assert stat is True
+    assert key.has("key2") is True
 
     # get the value of keyword 'key2'
     value2 = key["key2"]
     assert value2 == "value2"
 
-    count = key.count()
-    assert count == 2
+    assert key.count() == 2
 
-    # insert pairs from dict
+    # insert multiple pairs
     pair = {"key3": "value3", "key4": "value4"}
     key.insert(pair)
 
-    stat = key.has("key3")
-    assert stat is True
-    stat = key.has("key4")
-    assert stat is True
+    assert key.has("key3") is True
+    assert key.has("key4") is True
 
     # get the value of keyword 'key3'
     value3 = key["key3"]
@@ -145,8 +119,7 @@ def test_key_dictionary():
     value4 = key["key4"]
     assert value4 == "value4"
 
-    count = key.count()
-    assert count == 4
+    assert key.count() == 4
 
 
 if __name__ == "__main__":
