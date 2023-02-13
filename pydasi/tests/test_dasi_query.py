@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dasi import Query
+import pytest
+
+from dasi import DASIException, Query
 
 
 def test_query_typename():
@@ -82,6 +84,13 @@ def test_query_clear():
     assert query.get_value("key2b", 0) == "value2b"
     assert query.get_value("key3b", 0) == "value3ba"
     assert query.get_value("key3b", 1) == "value3bb"
+
+    with pytest.raises(DASIException):
+        query.get_value("key1a", -1)
+    with pytest.raises(DASIException):
+        query.get_value("key1a", 1)
+    with pytest.raises(DASIException):
+        query.get_value("key3b", 2)
 
     assert query.count_value("key1a") == 1
     assert query.count_value("key2a") == 1
