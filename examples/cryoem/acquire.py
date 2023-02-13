@@ -60,13 +60,12 @@ if __name__ == "__main__":
         "Type": args.type,
     }
 
-    metadata = microscope.get_metadata()
-    output = BytesIO()
-    for image in microscope.acquire_images():
-        output.write(image.tobytes())
-
     key["Object"] = "metadata"
+    metadata = microscope.get_metadata()
     dasi.archive(key, json.dumps(metadata).encode("utf-8"))
 
     key["Object"] = "images"
+    output = BytesIO()
+    for image in microscope.acquire_images():
+        output.write(image.tobytes())
     dasi.archive(key, output.getbuffer())

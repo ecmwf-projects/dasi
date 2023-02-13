@@ -44,24 +44,29 @@ if __name__ == "__main__":
     dasi = Dasi("dasi-config.yml")
 
     query = {
-        "User": args.user,
-        "Project": args.project,
-        "DateTime": args.timestamp,
-        "Processing": args.processing,
-        "Type": args.type,
-        "Object": "metadata",
+        "User": [args.user],
+        "Project": [args.project],
+        "DateTime": [args.timestamp],
+        "Processing": [args.processing],
+        "Type": [args.type],
+        "Object": ["metadata", "images"],
     }
 
     #
     # Metadata
-    results = dasi.retrieve(query)
-    if results.count() != 1:
+    retrieved = dasi.retrieve(query)
+    if retrieved.count() != 2:
         exit("Query could not return results!\n{}\n".format(query))
 
-    # for r in results:
-    data = results.read().decode("utf-8")
-    metadata = literal_eval(data)
+    # read data by looping "Object": "metadata" and "images"
+    results = {}
+    for r in retrieved:
+        key, data = r.read()
+        results[key["Object"]] = data
 
+    #
+    # Metadata
+    metadata = literal_eval(results["metadata"].decode("utf-8"))
     num_img = metadata["NumberOfImages"]
     img_size = tuple(metadata["ImageSize"])
     cols = 3
@@ -71,15 +76,8 @@ if __name__ == "__main__":
 
     #
     # Images
-    query["Object"] = "images"
-    results = dasi.retrieve(query)
-    if results.count() != 1:
-        exit("Query could not return results!\n{}\n".format(query))
-
-    # for r in results:
-    data = results.read()
     shape = (num_img,) + img_size
-    images = np.frombuffer(data, dtype=np.float32).reshape(shape)
+    images = np.frombuffer(results["images"], dtype=np.float32).reshape(shape)
 
     fig = plt.figure()
     for i, img in enumerate(images, start=1):

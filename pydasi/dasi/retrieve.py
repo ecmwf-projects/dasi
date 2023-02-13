@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from ._dasi_cffi import ffi, lib
+from .key import Key
 from .utils import DEBUG, getLogger
 
 logger = getLogger(__name__)
@@ -59,10 +60,10 @@ class Retrieve:
 
     def read(self):
         length = ffi.new("long *", 0)
-        lib.dasi_retrieve_attrs(
-            self._cdata, ffi.NULL, ffi.NULL, ffi.NULL, length
-        )
+        ckey = ffi.new("dasi_key_t **", ffi.NULL)
+        lib.dasi_retrieve_attrs(self._cdata, ckey, ffi.NULL, ffi.NULL, length)
+        ckey = ffi.gc(ckey[0], lib.dasi_free_key)
         logger.debug("- data length = %d", length[0])
-        buf = bytearray(length[0])
-        lib.dasi_retrieve_read(self._cdata, ffi.from_buffer(buf), length)
-        return buf
+        data = bytearray(length[0])
+        lib.dasi_retrieve_read(self._cdata, ffi.from_buffer(data), length)
+        return Key(ckey), data
