@@ -24,32 +24,28 @@ logger = getLogger(__name__)
 logger.setLevel(DEBUG)
 
 
+def _new_session(config):
+    # allocate an instance
+    cobj = ffi.new("dasi_t **")
+    lib.dasi_open(cobj, fsencode(config))
+    # set the free function
+    cobj = ffi.gc(cobj[0], lib.dasi_close)
+    return cobj
+
+
 class Dasi:
     """
-    This is the Dasi::Dasi.
+    TODO documentation
     """
 
+    # TODO: Be able to configure this by providing in a python dictionary
     def __init__(self, config_path: str):
         if config_path:
             logger.info("Config file: %s", config_path)
-            self._new_session(config_path)
+            self._cdata = _new_session(config_path)
         else:
             err_msg = "Could not find the config file:\n{}".format(config_path)
             raise DASIException(err_msg)
-
-    @property
-    def name(self):
-        return "".join(
-            "_" + c.lower() if c.isupper() else c
-            for c in self.__class__.__name__
-        ).strip("_")
-
-    @staticmethod
-    def key_class_name(name):
-        return "".join(part[:1].upper() + part[1:] for part in name.split("_"))
-
-    def print(self, stream):
-        raise NotImplementedError
 
     def archive(self, key, data):
         if not isinstance(key, Key):
@@ -58,14 +54,6 @@ class Dasi:
         lib.dasi_archive(
             self._cdata, key._cdata, ffi.from_buffer(data), len(data)
         )
-
-    def _new_session(self, config):
-        # allocate an instance
-        cobj = ffi.new("dasi_t **")
-        lib.dasi_open(cobj, fsencode(config))
-        # set the free function
-        cobj = ffi.gc(cobj[0], lib.dasi_close)
-        self._cdata = cobj
 
     def _new_retrieve(self, query: Query) -> ffi.CData:
         # allocate an instance
@@ -80,6 +68,6 @@ class Dasi:
             query = Query(query)
 
         retriev = Retrieve(self._new_retrieve(query))
-        logger.debug("- retrieve count: %d", retriev.count())
+        logger.debug("- retrieve count: %d", len(retriev))
 
         return retriev

@@ -12,11 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ._dasi_cffi import ffi, ffi_decode, ffi_encode, lib, DASIException
+from ._dasi_cffi import DASIException, ffi, ffi_decode, ffi_encode, lib
 from .utils import DEBUG, getLogger
 
 logger = getLogger(__name__)
 logger.setLevel(DEBUG)
+
+
+def _new_query(pair=None):
+    # allocate an instance
+    cquery = ffi.new("dasi_query_t **")
+    if isinstance(pair, str):
+        lib.dasi_new_query_from_string(cquery, ffi_encode(pair))
+    else:
+        lib.dasi_new_query(cquery)
+    # set the free function
+    cquery = ffi.gc(cquery[0], lib.dasi_free_query)
+    return cquery
 
 
 class Query:
@@ -24,71 +36,46 @@ class Query:
     Container for the keyword:value pairs that is used for retrieving data.
     """
 
-    def __init__(self, pair=None):
-        if isinstance(pair, Query):
-            self = pair.copy()
-        elif isinstance(pair, ffi.CData):
-            if ffi.typeof(pair) is ffi.typeof("dasi_query_t *"):
-                self._cdata = pair
+    # TODO think of simplifying
+    def __init__(self, data=None):
+        if isinstance(data, Query):
+            self._cdata = data._cdata
+        elif isinstance(data, ffi.CData):
+            if ffi.typeof(data) is ffi.typeof("dasi_query_t *"):
+                self._cdata = data
         else:
-            self._new_query(pair)
-            self.insert(pair)
+            self._cdata = _new_query(data)
+            if isinstance(data, dict):
+                for keyword, value in data.items():
+                    self[keyword] = value
 
     def __setitem__(self, keyword, value):
         length = len(value)
         buf = [ffi.from_buffer(ffi_encode(item)) for item in value]
         lib.dasi_query_set(self._cdata, ffi_encode(keyword), buf, length)
 
+    def __getitem__(self, keyword):
+        value = ffi.new("const char **")
+        lib.dasi_query_get(self._cdata, ffi_encode(keyword), value)
+        return ffi_decode(value[0])
+
     def __delitem__(self, keyword):
         lib.dasi_query_erase(self._cdata, ffi_encode(keyword))
 
-    def _new_query(self, pair=None):
-        # allocate an instance
-        cquery = ffi.new("dasi_query_t **")
-        if isinstance(pair, str):
-            lib.dasi_new_query_from_string(cquery, ffi_encode(pair))
-        else:
-            lib.dasi_new_query(cquery)
-        # set the free function
-        cquery = ffi.gc(cquery[0], lib.dasi_free_query)
-        self._cdata = cquery
-
-    @property
-    def name(self):
-        return "".join(
-            "_" + c.lower() if c.isupper() else c
-            for c in self.__class__.__name__
-        ).strip("_")
-
-    @staticmethod
-    def key_class_name(name):
-        return "".join(part[:1].upper() + part[1:] for part in name.split("_"))
-
-    def insert(self, pair):
-        if isinstance(pair, dict):
-            for [keyword, value] in pair.items():
-                self[keyword] = value
-
-    def copy(self):
-        return Query(self._cdata)
-
-    def print(self, stream):
-        raise NotImplementedError
+    def __len__(self):
+        count = ffi.new("long*", 0)
+        lib.dasi_query_keyword_count(self._cdata, count)
+        return count[0]
 
     def get_value(self, keyword, number):
         value = ffi.new("const char **")
         lib.dasi_query_get(self._cdata, ffi_encode(keyword), number, value)
         return ffi_decode(value[0])
 
-    def has(self, keyword) -> bool:
+    def has(self, keyword):
         has = ffi.new("dasi_bool_t*", 1)
         lib.dasi_query_has(self._cdata, ffi_encode(keyword), has)
         return has[0] != 0
-
-    def count_keyword(self) -> int:
-        count = ffi.new("long*", 0)
-        lib.dasi_query_keyword_count(self._cdata, count)
-        return count[0]
 
     def count_value(self, keyword) -> int:
         try:

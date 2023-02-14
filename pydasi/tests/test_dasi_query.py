@@ -38,17 +38,17 @@ def test_query_empty():
 
     assert query.has("key1") is False
     assert query.has("key2") is False
-    assert query.count_keyword() == 0
+    assert len(query) == 0
 
     query["key1"] = ["value1"]
     assert query.has("key1") is True
-    assert query.count_keyword() == 1
+    assert len(query) == 1
     assert query.count_value("key1") == 1
 
     assert query.has("key2") is False
     query["key2"] = ["value2a", "value2b"]
     assert query.has("key2") is True
-    assert query.count_keyword() == 2
+    assert len(query) == 2
     assert query.count_value("key2") == 2
 
 
@@ -75,7 +75,7 @@ def test_query_clear():
     assert query.has("key3b") is True
     assert query.has("key4") is False
 
-    assert query.count_keyword() == 6
+    assert len(query) == 6
 
     assert query.get_value("key1a", 0) == "value1a"
     assert query.get_value("key2a", 0) == "value2a"
@@ -101,16 +101,16 @@ def test_query_clear():
 
     # delete pairs
     del query["key1a"]
-    assert query.count_keyword() == 5
+    assert len(query) == 5
     del query["key2a"]
-    assert query.count_keyword() == 4
+    assert len(query) == 4
     # add more pairs
     query["key4"] = ["value4a", "value4b"]
     assert query.has("key4") is True
-    assert query.count_keyword() == 5
+    assert len(query) == 5
     # delete all pairs
     query.clear()
-    assert query.count_keyword() == 0
+    assert len(query) == 0
     assert query.count_value("key1a") == 0
     assert query.count_value("key2a") == 0
     assert query.count_value("key3a") == 0
@@ -128,7 +128,7 @@ def test_query_from_string():
     pairs = "key3=value3a/value3b/value3c,key1=value1,key2=value2"
     query = Query(pairs)
 
-    assert query.count_keyword() == 3
+    assert len(query) == 3
     assert query.has("key1") is True
     assert query.has("key2") is True
     assert query.has("key3") is True

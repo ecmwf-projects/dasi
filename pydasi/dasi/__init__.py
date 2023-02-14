@@ -13,10 +13,10 @@
 # limitations under the License.
 
 from ._dasi_cffi import DASIException, lib
-from .dasi import Dasi, Key, Query, Retrieve
-# from .key import Key
-# from .query import Query
-# from .retrieve import Retrieve
+from .dasi import Dasi
+from .key import Key
+from .query import Query
+from .retrieve import Retrieve
 from .utils import logger
 
 __all__ = ["DASIException", "lib", "logger", "Dasi", "Key", "Query", "Retrieve"]

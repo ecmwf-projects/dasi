@@ -19,20 +19,32 @@ logger = getLogger(__name__)
 logger.setLevel(DEBUG)
 
 
+def _new_key(pair=None):
+    ckey = ffi.new("dasi_key_t **")
+    if isinstance(pair, str):
+        lib.dasi_new_key_from_string(ckey, ffi_encode(pair))
+    else:
+        lib.dasi_new_key(ckey)
+    ckey = ffi.gc(ckey[0], lib.dasi_free_key)
+    return ckey
+
+
 class Key:
     """
     Container for keyword:value pairs.
     """
 
-    def __init__(self, pair=None):
-        if isinstance(pair, Key):
-            self = pair.copy()
-        elif isinstance(pair, ffi.CData):
-            if ffi.typeof(pair) is ffi.typeof("dasi_key_t *"):
-                self._cdata = pair
+    # TODO think of simplifying
+    def __init__(self, data=None):
+        if isinstance(data, Key):
+            self._cdata = data._cdata
+        elif isinstance(data, ffi.CData):
+            if ffi.typeof(data) is ffi.typeof("dasi_key_t *"):
+                self._cdata = data
         else:
-            self._new_key(pair)
-            self.insert(pair)
+            self._cdata = _new_key(data)
+            if isinstance(data, dict):
+                self.insert(data)
 
     def __setitem__(self, keyword, value):
         lib.dasi_key_set(self._cdata, ffi_encode(keyword), ffi_encode(value))
@@ -45,49 +57,22 @@ class Key:
     def __delitem__(self, keyword):
         lib.dasi_key_erase(self._cdata, ffi_encode(keyword))
 
-    def _new_key(self, pair=None):
-        # allocate an instance
-        ckey = ffi.new("dasi_key_t **")
-        if isinstance(pair, str):
-            lib.dasi_new_key_from_string(ckey, ffi_encode(pair))
-        else:
-            lib.dasi_new_key(ckey)
-        # set the free function
-        ckey = ffi.gc(ckey[0], lib.dasi_free_key)
-        self._cdata = ckey
+    def __len__(self):
+        count = ffi.new("long*", 0)
+        lib.dasi_key_count(self._cdata, count)
+        return count[0]
 
-    @property
-    def name(self):
-        return "".join(
-            "_" + c.lower() if c.isupper() else c
-            for c in self.__class__.__name__
-        ).strip("_")
-
-    @staticmethod
-    def key_class_name(name):
-        return "".join(part[:1].upper() + part[1:] for part in name.split("_"))
-
-    def insert(self, pair):
-        if isinstance(pair, dict):
-            # @todo 'value' can be dict
-            for [keyword, value] in pair.items():
-                self[keyword] = value
-
-    def copy(self):
-        return Key(self._cdata)
-
-    def print(self, stream):
-        raise NotImplementedError
+    # useful for setting multiple pairs at once
+    # e.g., {"key3": "value3", "key4": "value4"}
+    # more pythonic as opposed to parsing "key3=value3,key4=value4"
+    def insert(self, pairs: dict):
+        for keyword, value in pairs.items():
+            self[keyword] = value
 
     def has(self, keyword: str) -> bool:
         has = ffi.new("dasi_bool_t*", 1)
         lib.dasi_key_has(self._cdata, ffi_encode(keyword), has)
         return has[0] != 0
-
-    def count(self) -> int:
-        count = ffi.new("long*", 0)
-        lib.dasi_key_count(self._cdata, count)
-        return count[0]
 
     def clear(self):
         lib.dasi_key_clear(self._cdata)

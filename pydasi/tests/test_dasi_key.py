@@ -36,26 +36,26 @@ def test_key_clear():
 
     key = Key()
 
-    assert key.count() == 0
+    assert len(key) == 0
 
     # add keyword:value pair
     key["key1"] = "value1"
-    assert key.count() == 1
+    assert len(key) == 1
 
     # insert multiple pairs
     pair = {"key2": "value2", "key3": "value3"}
     key.insert(pair)
-    assert key.count() == 3
+    assert len(key) == 3
     assert key.has("key2") is True
 
     # delete a key
     del key["key1"]
-    assert key.count() == 2
+    assert len(key) == 2
     assert key.has("key1") is False
 
     # delete all pairs
     key.clear()
-    assert key.count() == 0
+    assert len(key) == 0
 
 
 def test_key_empty():
@@ -67,11 +67,11 @@ def test_key_empty():
 
     assert key.has("key1") is False
     assert key.has("key2") is False
-    assert key.count() == 0
+    assert len(key) == 0
 
     # add keyword:value pair
     key["key1"] = "value1"
-    assert key.count() == 1
+    assert len(key) == 1
     assert key.has("key1") is True
 
     # get the value of keyword 'key1'
@@ -87,7 +87,7 @@ def test_key_from_string():
     pairs = "key3=value3,key1=value1,key2=value2"
     key = Key(pairs)
 
-    assert key.count() == 3
+    assert len(key) == 3
     assert key.has("key1") is True
     assert key.has("key2") is True
     assert key.has("key3") is True
@@ -127,7 +127,7 @@ def test_key_dictionary():
     value1 = key["key1"]
     assert value1 == "value1"
 
-    assert key.count() == 1
+    assert len(key) == 1
 
     # add keyword:value pair
     key["key2"] = "value2"
@@ -138,7 +138,7 @@ def test_key_dictionary():
     value2 = key["key2"]
     assert value2 == "value2"
 
-    assert key.count() == 2
+    assert len(key) == 2
 
     # insert multiple pairs
     pair = {"key3": "value3", "key4": "value4"}
@@ -154,14 +154,14 @@ def test_key_dictionary():
     value4 = key["key4"]
     assert value4 == "value4"
 
-    assert key.count() == 4
+    assert len(key) == 4
 
 
 def test_key_modify():
     pair = {"key1": "value1"}
     key = Key(pair)
 
-    assert key.count() == 1
+    assert len(key) == 1
     assert key.has("key1") is True
 
     # get the value of keyword 'key1'

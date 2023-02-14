@@ -84,6 +84,7 @@ class PatchedLib:
         # parse the C source; types, functions, globals, etc.
         ffi.cdef(self.__read_header())
 
+        # TODO findlibs
         lib_names = []
         for dir_ in ("DASI_DIR", "dasi_DIR"):
             if osenv.get(dir_):

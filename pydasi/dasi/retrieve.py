@@ -39,25 +39,12 @@ class Retrieve:
             raise StopIteration
         return self
 
-    @property
-    def name(self):
-        return "".join(
-            "_" + c.lower() if c.isupper() else c
-            for c in self.__class__.__name__
-        ).strip("_")
-
-    @staticmethod
-    def key_class_name(name):
-        return "".join(part[:1].upper() + part[1:] for part in name.split("_"))
-
-    def print(self, stream):
-        raise NotImplementedError
-
-    def count(self) -> int:
+    def __len__(self):
         count = ffi.new("long *", 0)
         lib.dasi_retrieve_count(self._cdata, count)
         return count[0]
 
+    # https://github.com/ecmwf-projects/dasi/pull/8#discussion_r1105925767
     def read(self):
         length = ffi.new("long *", 0)
         ckey = ffi.new("dasi_key_t **", ffi.NULL)
