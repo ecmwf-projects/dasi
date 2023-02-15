@@ -38,8 +38,6 @@ def ffi_encode(data) -> bytes:
     """convert data to bytes (c char)"""
     if isinstance(data, bytes):
         return data
-    elif isinstance(data, bytearray):
-        return bytes(ffi.from_buffer(data))
 
     if not isinstance(data, str):
         data = str(data)
