@@ -360,7 +360,7 @@ CASE("Accessing data that has been archived") {
         CHECK_RETURN(dasi_query_append(query, "key3b", "value1"));
 
         dasi_retrieve_t* ret;
-        CHECK_RETURN(dasi_new_retrieve(dasi, query, &ret));
+        CHECK_RETURN(dasi_retrieve(dasi, query, &ret));
         EXPECT(ret);
         std::unique_ptr<dasi_retrieve_t> rdeleter(ret);
 
@@ -408,7 +408,7 @@ CASE("Accessing data that has been archived") {
         CHECK_RETURN(dasi_query_append(query, "key3b", "value1"));
 
         dasi_retrieve_t* ret;
-        CHECK_RETURN(dasi_new_retrieve(dasi, query, &ret));
+        CHECK_RETURN(dasi_retrieve(dasi, query, &ret));
         EXPECT(ret);
         std::unique_ptr<dasi_retrieve_t> rdeleter(ret);
 

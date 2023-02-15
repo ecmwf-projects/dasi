@@ -142,7 +142,7 @@ int dasi_list_attrs(const dasi_list_t* list,
 
 /* *** Retrieve functionality */
 
-int dasi_new_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve);
+int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve);
 
 int dasi_free_retrieve(const dasi_retrieve_t* retrieve);
 

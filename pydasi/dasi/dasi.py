@@ -58,7 +58,7 @@ class Dasi:
     def _new_retrieve(self, query: Query) -> ffi.CData:
         # allocate an instance
         cret = ffi.new("dasi_retrieve_t **")
-        lib.dasi_new_retrieve(self._cdata, query._cdata, cret)
+        lib.dasi_retrieve(self._cdata, query._cdata, cret)
         # set the free function
         cret = ffi.gc(cret[0], lib.dasi_free_retrieve)
         return cret
