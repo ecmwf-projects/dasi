@@ -32,7 +32,7 @@ int dasi_open(dasi_t **dasi, const char *filename);
 int dasi_close(const dasi_t *dasi);
 int dasi_archive(dasi_t *dasi, const dasi_key_t *key, const void *data, long length);
 int dasi_flush(dasi_t *dasi);
-int dasi_new_list(dasi_t *dasi, const dasi_query_t *query, dasi_list_t **list);
+int dasi_list(dasi_t *dasi, const dasi_query_t *query, dasi_list_t **list);
 int dasi_free_list(const dasi_list_t *list);
 int dasi_list_next(dasi_list_t *list);
 int dasi_list_attrs(const dasi_list_t *list, dasi_key_t **key, dasi_time_t *timestamp, const char **uri, long *offset, long *length);

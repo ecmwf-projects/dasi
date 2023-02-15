@@ -127,7 +127,7 @@ int dasi_flush(dasi_t* dasi);
 
 /* *** List functionality */
 
-int dasi_new_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list);
+int dasi_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list);
 
 int dasi_free_list(const dasi_list_t* list);
 

@@ -194,7 +194,7 @@ int dasi_flush(dasi_t* dasi) {
     });
 }
 
-int dasi_new_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list) {
+int dasi_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list) {
     return tryCatch([dasi, query, list] {
         ASSERT(dasi);
         ASSERT(query);

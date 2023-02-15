@@ -95,7 +95,7 @@ public:
     void check(dasi_t* dasi, const dasi_query_t* query) {
 
         dasi_list_t* list;
-        CHECK_RETURN(dasi_new_list(dasi, query, &list));
+        CHECK_RETURN(dasi_list(dasi, query, &list));
         EXPECT(list);
         std::unique_ptr<dasi_list_t> ldeleter(list);
 
