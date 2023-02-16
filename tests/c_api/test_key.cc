@@ -15,6 +15,7 @@
 #include "dasi/api/dasi_c.h"
 
 #include <memory>
+#include <cstring>
 
 #define CHECK_RETURN(x) EXPECT((x) == DASI_SUCCESS);
 
