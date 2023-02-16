@@ -101,6 +101,23 @@ def test_simple_archive(dasi_config_file):
         pytest.fail("Cannot archive!")
 
 
+def test_archive_fail(dasi_config_file):
+    """
+    Test Dasi archiving failing
+    """
+
+    dasi = Dasi(dasi_config_file)
+
+    key = {
+        "key1": "value1",
+        "key2": "123",
+        "key3": "value1",
+    }
+
+    with pytest.raises(DASIException):
+        dasi.archive(key, __simple_data_1__)
+
+
 def test_simple_retrieve(dasi_config_file):
     """
     Test Dasi retrieve
@@ -121,6 +138,7 @@ def test_simple_retrieve(dasi_config_file):
     }
 
     retrieved = dasi.retrieve(query)
+    assert len(retrieved) == 3
 
     results = {}
     for r in retrieved:
