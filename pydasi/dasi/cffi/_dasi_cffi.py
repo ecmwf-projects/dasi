@@ -12,23 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os import environ as osenv
 from os import path as ospath
 
 from cffi import FFI
+from dasi.utils import get_logger, get_version
 from pkg_resources import parse_version
 
-from .utils import DEBUG, getLogger
+from .findlib import FindLib
 
-logger = getLogger(__package__ + ".cffi")
-logger.setLevel(DEBUG)
+logger = get_logger(name=__package__)
 
 __file_dir__ = ospath.dirname(__file__)
 """current file path directory"""
-
-
-with open(ospath.join(ospath.dirname(__file_dir__), "VERSION")) as file_:
-    __pydasi_version__ = file_.read().strip()
 
 
 ffi = FFI()
@@ -78,30 +73,17 @@ class PatchedLib:
     """
 
     def __init__(self):
-        logger.info("Loading the DASI library...")
+        logger.info("Initializing the interface to DASI library...")
         # parse the C source; types, functions, globals, etc.
         ffi.cdef(self.__read_header())
 
-        # TODO findlibs
-        lib_names = []
-        for dir_ in ("DASI_DIR", "dasi_DIR"):
-            if osenv.get(dir_):
-                self.__insert_lib_name(lib_names, dir_, "lib/libdasi")
-                self.__insert_lib_name(lib_names, dir_, "lib64/libdasi")
-                self.__insert_lib_name(lib_names, dir_, "lib/libdasi.so")
-                self.__insert_lib_name(lib_names, dir_, "lib64/libdasi.so")
-
-        for libname in lib_names:
-            try:
-                self.__lib = ffi.dlopen(libname)
-                logger.info("- loaded: " + libname)
-                break
-            except Exception:
-                logger.debug("- cannot load: " + libname)
-        else:
-            raise CFFIModuleLoadFailed(
-                "The shared library 'dasi' could not be found on the system!"
-            )
+        try:
+            dasi_lib = FindLib("libdasi")
+            self.__lib = ffi.dlopen(dasi_lib.library)
+            logger.info("- loaded: " + dasi_lib.library)
+        except Exception as e:
+            logger.error(str(e))
+            raise CFFIModuleLoadFailed from e
 
         # All of the executable members of the CFFI-loaded library are
         # functions in the DASI C API. These should be wrapped with the correct
@@ -129,20 +111,18 @@ class PatchedLib:
         self.__lib.dasi_version(tmp)
         return ffi_decode(tmp[0])
 
-    def __insert_lib_name(self, lib_names, dir, name):
-        lib_names.insert(0, ospath.join(osenv[dir], name))
-
     def __check_version(self):
         """check the library version against pydasi version"""
 
         lib_version = self.get_lib_version()
-        if parse_version(lib_version) < parse_version(__pydasi_version__):
+        version = get_version()
+        if parse_version(lib_version) < parse_version(version):
             msg = "The library version '{}' is older than '{}'.".format(
-                lib_version, __pydasi_version__
+                lib_version, version
             )
             raise CFFIModuleLoadFailed(msg)
         else:
-            logger.info("- version: %s", lib_version)
+            logger.info("- library version: %s", lib_version)
 
     def __read_header(self) -> str:
         with open(ospath.join(__file_dir__, "dasi_cffi.h")) as header_file:
@@ -172,5 +152,4 @@ class PatchedLib:
 try:
     lib = PatchedLib()
 except CFFIModuleLoadFailed as e:
-    logger.error(str(e))
     raise ImportError() from e

@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ._dasi_cffi import ffi, ffi_decode, ffi_encode, lib
-from .utils import DEBUG, getLogger
+from .cffi import ffi, ffi_decode, ffi_encode, lib
+from .utils import get_logger
 
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
+logger = get_logger(name=__name__)
 
 
 def _new_key(pair=None):

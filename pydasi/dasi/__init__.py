@@ -12,11 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ._dasi_cffi import DASIException, lib
+from .cffi import DASIException, lib
 from .dasi import Dasi
 from .key import Key
 from .query import Query
 from .retrieve import Retrieve
-from .utils import logger
+from .utils import get_logger, get_version
 
-__all__ = ["DASIException", "lib", "logger", "Dasi", "Key", "Query", "Retrieve"]
+__all__ = [
+    "lib",
+    "get_logger",
+    "get_version",
+    "DASIException",
+    "Dasi",
+    "Key",
+    "Query",
+    "Retrieve",
+]

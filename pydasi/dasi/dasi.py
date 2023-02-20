@@ -14,14 +14,13 @@
 
 from os import fsencode
 
-from ._dasi_cffi import DASIException, ffi, lib
+from .cffi import DASIException, ffi, lib
 from .key import Key
 from .query import Query
 from .retrieve import Retrieve
-from .utils import DEBUG, getLogger
+from .utils import get_logger
 
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
+logger = get_logger(name=__name__)
 
 
 def _new_session(config):

@@ -17,7 +17,7 @@ import os
 
 from setuptools import find_packages, setup
 
-with open(os.path.join(".", "VERSION")) as version_file:
+with open(os.path.join("dasi", "VERSION")) as version_file:
     __pydasi_version__ = version_file.read().strip()
 
 
@@ -38,9 +38,14 @@ setup(
     author_email="software.support@ecmwf.int",
     license="Apache License Version 2.0",
     url="https://github.com/ecmwf-projects/dasi",
-    # packages=["dasi", "dasi.tests"],
-    packages=find_packages(include=["dasi", "dasi.tests"]),
-    package_data={"": ["*.h"]},
+    packages=find_packages(
+        include=["dasi", "dasi.utils", "dasi.cffi"],
+    ),
+    package_data={
+        "": ["CHANGELOG", "README.md", "LICENSE"],
+        "dasi": ["VERSION"],
+        "dasi.cffi": ["*.h", "**/lib*"],
+    },
     include_package_data=True,
     install_requires=["cffi>=1.1.1", "pytest"],
     zip_safe=True,

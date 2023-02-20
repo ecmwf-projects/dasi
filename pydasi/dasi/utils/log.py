@@ -15,8 +15,6 @@
 from logging import DEBUG, INFO, WARNING, getLogger
 from logging.config import dictConfig
 
-__log_filename__ = "dasi.log"
-
 __logging_config__ = dict(
     version=1,
     formatters={
@@ -43,7 +41,7 @@ __logging_config__ = dict(
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
             "formatter": "default",
-            "filename": __log_filename__,
+            "filename": __package__ + ".log",
             "maxBytes": 1024,
             "backupCount": 3,
             "level": INFO,
@@ -69,5 +67,8 @@ __logging_config__ = dict(
 
 dictConfig(__logging_config__)
 
-logger = getLogger(__package__)
-logger.info("Configured logging.")
+
+def get_logger(level=DEBUG, name=None):
+    logger = getLogger(name)
+    logger.setLevel(level)
+    return logger

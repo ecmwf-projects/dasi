@@ -1,5 +1,3 @@
-include CHANGELOG.md
+include CHANGELOG
 include LICENSE
 include README.md
-include VERSION
-include dasi/dasi_cffi.h

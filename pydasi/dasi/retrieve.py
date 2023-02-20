@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ._dasi_cffi import ffi, lib
+from .cffi import ffi, lib
 from .key import Key
-from .utils import DEBUG, getLogger
+from .utils import get_logger
 
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
+logger = get_logger(name=__name__)
 
 
 class Retrieve:

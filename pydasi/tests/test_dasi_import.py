@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from logging import CRITICAL, DEBUG, INFO, WARNING
+import pytest
 
-from .log import get_logger
-from .version import get_version
 
-__all__ = [
-    "CRITICAL",
-    "DEBUG",
-    "INFO",
-    "WARNING",
-    "get_logger",
-    "get_version",
-]
+def test_dasi_import():
+    """
+    Test importing library
+    """
+
+    import dasi
+
+    with pytest.raises(ImportError) as excinfo:
+        import pydasi
+
+    assert "No module named 'pydasi'" == str(excinfo.value)

@@ -12,16 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from logging import CRITICAL, DEBUG, INFO, WARNING
+from os import path as ospath
 
-from .log import get_logger
-from .version import get_version
 
-__all__ = [
-    "CRITICAL",
-    "DEBUG",
-    "INFO",
-    "WARNING",
-    "get_logger",
-    "get_version",
-]
+def get_version():
+    path = ospath.dirname(ospath.dirname(__file__))
+    with open(ospath.join(path, "VERSION")) as file_:
+        return file_.read().strip()
