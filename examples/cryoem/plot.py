@@ -55,7 +55,7 @@ if __name__ == "__main__":
     #
     # Retrieve results from query
     retrieved = dasi.retrieve(query)
-    if len(retrieved) != 2:
+    if len(retrieved) < 2:
         exit("Query could not return results!\n{}\n".format(query))
 
     # read data by looping over "Object": "metadata" and "images"

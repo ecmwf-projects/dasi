@@ -43,7 +43,7 @@ class Retrieve:
         lib.dasi_retrieve_count(self._cdata, count)
         return count[0]
 
-    # https://github.com/ecmwf-projects/dasi/pull/8#discussion_r1105925767
+    # https://github.com/ecmwf-projects/dasi/issues/9
     def read(self):
         length = ffi.new("long *", 0)
         ckey = ffi.new("dasi_key_t **", ffi.NULL)

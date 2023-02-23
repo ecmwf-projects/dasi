@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ._dasi_cffi import DASIException, ffi, ffi_decode, ffi_encode, lib
+from ._dasi_cffi import FFI, DASIException, ffi, ffi_decode, ffi_encode, lib
 
-__all__ = ["DASIException", "ffi", "lib", "ffi_decode", "ffi_encode"]
+__all__ = ["DASIException", "FFI", "ffi", "lib", "ffi_decode", "ffi_encode"]

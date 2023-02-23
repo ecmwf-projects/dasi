@@ -54,7 +54,7 @@ class Dasi:
             self._cdata, key._cdata, ffi.from_buffer(data), len(data)
         )
 
-    def _new_retrieve(self, query: Query) -> ffi.CData:
+    def _new_retrieve(self, query: Query):
         # allocate an instance
         cret = ffi.new("dasi_retrieve_t **")
         lib.dasi_retrieve(self._cdata, query._cdata, cret)
