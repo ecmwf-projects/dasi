@@ -1,0 +1,7 @@
+---
+schema: path_to_valid_schema_file
+catalogue: toc
+store: file
+spaces:
+ - roots:
+    - path: ./
