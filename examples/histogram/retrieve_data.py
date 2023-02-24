@@ -14,6 +14,7 @@
 
 import argparse
 from ast import literal_eval
+
 from dasi import Dasi
 
 
@@ -43,6 +44,7 @@ def plot_histogram(image, name: str):
     plt.ylabel("Value")
     plt.title("Histogram of {}".format(name))
     plt.savefig("./{}.png".format(name))
+    plt.close()
 
 
 if __name__ == "__main__":
@@ -56,30 +58,45 @@ if __name__ == "__main__":
         "DateTime": [args.timestamp],
         "Processing": [args.processing],
         "Type": [args.type],
-        "Object": ["metadata", "image0", "image1", "image2", "image3", "image4"],
     }
 
-    # Retrieve results from query
+    # Get the list of objects in the store (metadata and filenames)
+    objects = []
+    for item in dasi.list(query):
+        objects.append(item.key["Object"])
+    query["Object"] = objects
+
+    # Using the query, retrieve the results
     retrieved = dasi.retrieve(query)
-    print(len(retrieved))
     if len(retrieved) < 2:
         exit("Query could not return any results!\n{}\n".format(query))
 
-    # Read data by looping over "Object": "metadata" and "images"
+    # Read the data into results
     results = {}
     for r in retrieved:
-        key, data = r.read()
-        results[key["Object"]] = data
+        key, value = r.read()
+        object = key["Object"]
+        results[object] = value
 
-    # Metadata
+    # Below here is an example for working with the retrieved data
+
+    # Option 1: access data individually (e.g., result["blabla"])
     metadata = literal_eval(results["metadata"].decode("utf-8"))
-    lab = metadata["Laboratory"]
-    num_img = metadata["NumberOfImages"]
-    print("[metadata] - Laboratory: {}".format(lab))
-    print("[metadata] - # of images: {}".format(num_img))
+    lab_name = metadata["Laboratory"]
+    num_files = metadata["NumberOfFiles"]
+    print("-----------------------------")
+    print("[metadata] - Laboratory: {}".format(lab_name))
+    print("[metadata] - # of files: {}".format(num_files))
 
-    # Images
-    image0 = results["image0"]
-
-    # Work with the retrieved image
-    plot_histogram(image0, "histogram_0")
+    # Option 2: Loop over the objects and work as needed
+    # here, we work with files only
+    for object in objects:
+        print("-----------------------------")
+        print("Object: ", object)
+        data = results[object]
+        if object.endswith("tif"):  # this object is an "image" file
+            # plot the image
+            plot_histogram(data, object)
+        elif object.endswith("mdoc"):  # this object is a "mdoc" file
+            file = data.decode()
+            print(file)

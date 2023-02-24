@@ -1,5 +1,5 @@
 ---
-schema: path_to_valid_schema_file
+schema: /Users/macm/dev/DASI/examples/histogram/schema
 catalogue: toc
 store: file
 spaces:

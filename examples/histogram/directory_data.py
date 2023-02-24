@@ -15,21 +15,26 @@
 import os
 
 
-class ImageData:
-    def __init__(self, directory=None):
+class DirectoryData:
+    """
+    Store the files in a directory.
+    """
+
+    def __init__(self, path=None):
         self.__metadata = {}
-        self.__files = []
-        with os.scandir(directory) as it:
+        self.__filepaths = []
+        with os.scandir(path) as it:
             for entry in it:
-                if entry.name.endswith(".tif") and entry.is_file():
-                    self.__files.append(entry.path)
+                if entry.is_file():
+                    self.__filepaths.append(entry.path)
 
-        self.__metadata["NumberOfImages"] = len(self.__files)
+        self.__metadata["NumberOfFiles"] = len(self.__filepaths)
 
-    def get_images(self):
-        for idx, file in enumerate(self.__files):
-            with open(file, "rb") as f:
-                yield idx, f.read()
+    def get_files(self):
+        for path in self.__filepaths:
+            filename = os.path.basename(path)
+            with open(path, "rb") as f:
+                yield filename, f.read()
 
     @property
     def metadata(self):

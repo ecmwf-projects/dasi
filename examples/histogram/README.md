@@ -41,6 +41,8 @@ Archive images (in data folder) to the DASI store.
 python archive_data.py
 ```
 
+![original image](data/mic_Feb03_12.26.11.tif)
+
 ### 3. Retrieve:
 
 Retrieve images from the DASI store, and make histogram plot of the image.
@@ -49,7 +51,7 @@ Retrieve images from the DASI store, and make histogram plot of the image.
 python retrieve_data.py
 ```
 
-![histogram plot](histogram_0.png)
+![histogram plot](mic_Feb03_12.26.11.tif.png)
 
 ## DASI schema
 

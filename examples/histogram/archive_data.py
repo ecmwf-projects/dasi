@@ -17,7 +17,7 @@ import json
 
 from dasi import Dasi
 
-from image_data import ImageData
+from directory_data import DirectoryData
 
 
 def parse_cmdline_args():
@@ -39,7 +39,7 @@ def parse_cmdline_args():
 if __name__ == "__main__":
     args = parse_cmdline_args()
 
-    store = ImageData(directory="data")
+    store = DirectoryData(path="data")
 
     dasi = Dasi("dasi-config.yml")
     key = {
@@ -55,8 +55,9 @@ if __name__ == "__main__":
     store.metadata.update({"Laboratory": args.lab})
     dasi.archive(key, json.dumps(store.metadata).encode("utf-8"))
 
-    for idx, image in store.get_images():
-        key["Object"] = "image{}".format(idx)  # Object:image[0-9]
-        dasi.archive(key, image)
+    for filename, file in store.get_files():
+        print("Archiving '{}' ...".format(filename))
+        key["Object"] = filename
+        dasi.archive(key, file)
 
     print("Archiving finished!")
