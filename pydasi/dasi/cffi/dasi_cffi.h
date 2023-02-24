@@ -3,7 +3,7 @@ typedef long unsigned int size_t;
 typedef int wchar_t;
 typedef long double max_align_t;
 typedef int dasi_bool_t;
-typedef struct DasiTime dasi_time_t;
+typedef long dasi_time_t;
 struct Dasi;
 typedef struct Dasi dasi_t;
 struct Key;
@@ -34,6 +34,7 @@ int dasi_archive(dasi_t *dasi, const dasi_key_t *key, const void *data, long len
 int dasi_flush(dasi_t *dasi);
 int dasi_list(dasi_t *dasi, const dasi_query_t *query, dasi_list_t **list);
 int dasi_free_list(const dasi_list_t *list);
+int dasi_list_count(const dasi_list_t *list, long *count);
 int dasi_list_next(dasi_list_t *list);
 int dasi_list_attrs(const dasi_list_t *list, dasi_key_t **key, dasi_time_t *timestamp, const char **uri, long *offset, long *length);
 int dasi_retrieve(dasi_t *dasi, const dasi_query_t *query, dasi_retrieve_t **retrieve);

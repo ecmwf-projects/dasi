@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef dasi_api_dasi_c_h
-#define dasi_api_dasi_c_h
+#ifndef DASI_API_DASI_C_H
+#define DASI_API_DASI_C_H
 
 #include <stddef.h>
 
@@ -36,7 +36,7 @@ extern "C" {
 
 typedef int dasi_bool_t;
 
-typedef struct DasiTime dasi_time_t;
+typedef long dasi_time_t;
 
 struct Dasi;
 typedef struct Dasi dasi_t;
@@ -121,7 +121,8 @@ int dasi_close(const dasi_t* dasi);
  * @param data Pointer to the read-only data
  * @param length Length of "data" in bytes
  */
-int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data, long length);
+int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data,
+                 long length);
 
 int dasi_flush(dasi_t* dasi);
 
@@ -131,18 +132,18 @@ int dasi_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list);
 
 int dasi_free_list(const dasi_list_t* list);
 
+int dasi_list_count(const dasi_list_t* list, long* count);
+
 int dasi_list_next(dasi_list_t* list);
 
-int dasi_list_attrs(const dasi_list_t* list,
-                    dasi_key_t** key,
-                    dasi_time_t* timestamp,
-                    const char** uri,
-                    long* offset,
+int dasi_list_attrs(const dasi_list_t* list, dasi_key_t** key,
+                    dasi_time_t* timestamp, const char** uri, long* offset,
                     long* length);
 
 /* *** Retrieve functionality */
 
-int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve);
+int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query,
+                  dasi_retrieve_t** retrieve);
 
 int dasi_free_retrieve(const dasi_retrieve_t* retrieve);
 
@@ -152,7 +153,8 @@ int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count);
 
 int dasi_retrieve_next(dasi_retrieve_t* retrieve);
 
-int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, dasi_time_t* timestamp, long* offset, long* length);
+int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key,
+                        dasi_time_t* timestamp, long* offset, long* length);
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * KEY
@@ -180,11 +182,13 @@ int dasi_free_key(const dasi_key_t* key);
 int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value);
 
 /** Get the name of a numbered key */
-int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword, const char** value);
+int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword,
+                       const char** value);
 
 /**
  * Get the value of a specified keyword in a key
- * @param value The value to be returned. This will point towards an internal character buffer with a lifetime equal to that of the key
+ * @param value The value to be returned. This will point towards an internal
+ * character buffer with a lifetime equal to that of the key
  */
 int dasi_key_get(dasi_key_t* key, const char* keyword, const char** value);
 
@@ -210,15 +214,19 @@ int dasi_new_query_from_string(dasi_query_t** query, const char* str);
 
 int dasi_free_query(const dasi_query_t* query);
 
-int dasi_query_set(dasi_query_t* query, const char* keyword, const char* values[], int num);
+int dasi_query_set(dasi_query_t* query, const char* keyword,
+                   const char* values[], int num);
 
-int dasi_query_append(dasi_query_t* query, const char* keyword, const char* value);
+int dasi_query_append(dasi_query_t* query, const char* keyword,
+                      const char* value);
 
 int dasi_query_keyword_count(dasi_query_t* query, long* count);
 
-int dasi_query_value_count(dasi_query_t* query, const char* keyword, long* count);
+int dasi_query_value_count(dasi_query_t* query, const char* keyword,
+                           long* count);
 
-int dasi_query_get(dasi_query_t* query, const char* keyword, int num, const char** value);
+int dasi_query_get(dasi_query_t* query, const char* keyword, int num,
+                   const char** value);
 
 int dasi_query_has(dasi_query_t* query, const char* keyword, dasi_bool_t* has);
 
@@ -232,4 +240,4 @@ int dasi_query_clear(dasi_query_t* query);
 }
 #endif
 
-#endif /* dasi_api_dasi_c_h */
+#endif /* DASI_API_DASI_C_H */

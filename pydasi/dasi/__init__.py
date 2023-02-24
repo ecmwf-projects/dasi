@@ -15,6 +15,7 @@
 from .cffi import DASIException, lib
 from .dasi import Dasi
 from .key import Key
+from .list import List
 from .query import Query
 from .retrieve import Retrieve
 from .utils import get_logger, get_version
@@ -27,5 +28,6 @@ __all__ = [
     "Dasi",
     "Key",
     "Query",
+    "List",
     "Retrieve",
 ]

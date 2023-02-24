@@ -12,19 +12,15 @@
 #include "dasi/lib/dasi_version.h"
 
 #include "eckit/exception/Exceptions.h"
-#include "eckit/utils/Optional.h"
 #include "eckit/runtime/Main.h"
+#include "eckit/utils/Optional.h"
 
-#include <functional>
 #include <time.h>
+#include <functional>
 
 extern "C" {
 
 // ---------------------------------------------------------------------------------------------------------------------
-
-struct DasiTime {
-    time_t value;
-};
 
 struct Dasi : public dasi::Dasi {
     using dasi::Dasi::Dasi;
@@ -41,9 +37,7 @@ struct Query : public dasi::Query {
 
 struct dasi_list_t {
     dasi_list_t(dasi::ListGenerator&& gen) :
-        first(true),
-        generator(std::move(gen)),
-        iterator(generator.begin()) {}
+        first(true), generator(std::move(gen)), iterator(generator.begin()) {}
 
     bool first;
     dasi::ListGenerator generator;
@@ -53,9 +47,7 @@ struct dasi_list_t {
 
 struct dasi_retrieve_t {
     dasi_retrieve_t(dasi::RetrieveResult&& ret) :
-        first(true),
-        retrieve(std::move(ret)),
-        iterator(retrieve.begin()) {}
+        first(true), retrieve(std::move(ret)), iterator(retrieve.begin()) {}
     bool first;
     dasi::RetrieveResult retrieve;
     dasi::RetrieveResult::const_iterator iterator;
@@ -66,7 +58,7 @@ struct dasi_retrieve_t {
 // ---------------------------------------------------------------------------------------------------------------------
 //                           ERROR HANDLING
 
-} // extern "C"
+}  // extern "C"
 
 // template can't have C linkage
 
@@ -93,8 +85,7 @@ int innerWrapFn(std::function<void()> f) {
  * @return false Exception caught
  */
 template <typename FN>
-[[ nodiscard ]]
-int tryCatch(FN&& fn) {
+[[nodiscard]] int tryCatch(FN&& fn) {
     try {
         return innerWrapFn(fn);
     }
@@ -177,7 +168,8 @@ int dasi_close(const dasi_t* dasi) {
     });
 }
 
-int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data, long length) {
+int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data,
+                 long length) {
     return tryCatch([dasi, key, data, length] {
         ASSERT(dasi);
         ASSERT(key);
@@ -211,13 +203,10 @@ int dasi_free_list(const dasi_list_t* list) {
 }
 
 int dasi_list_next(dasi_list_t* list) {
-    return tryCatch(std::function<int()> {[list] {
+    return tryCatch(std::function<int()>{[list] {
         ASSERT(list);
-        if (list->first) {
-            list->first = false;
-        } else {
-            ++list->iterator;
-        }
+        if (list->first) { list->first = false; }
+        else { ++list->iterator; }
         if (list->iterator == list->generator.end()) {
             return DASI_ITERATION_COMPLETE;
         }
@@ -226,28 +215,31 @@ int dasi_list_next(dasi_list_t* list) {
     }});
 }
 
-int dasi_list_attrs(const dasi_list_t* list,
-                    dasi_key_t** key,
-                    dasi_time_t* timestamp,
-                    const char** uri,
-                    long* offset,
+int dasi_list_attrs(const dasi_list_t* list, dasi_key_t** key,
+                    dasi_time_t* timestamp, const char** uri, long* offset,
                     long* length) {
     return tryCatch([list, key, timestamp, uri, offset, length] {
         ASSERT(list);
         ASSERT(list->iterator != list->generator.end());
-        if (key) {
-            *key = new Key(list->iterator->key);
-        }
-        if (timestamp) timestamp->value = list->iterator->timestamp;
-        if (uri) {
-            *uri = list->uri_cache.c_str();
-        }
-        if (offset) *offset = list->iterator->location.offset;
-        if (length) *length = list->iterator->location.length;
+        if (key) { *key = new Key(list->iterator->key); }
+        if (timestamp) { *timestamp = list->iterator->timestamp; }
+        if (uri) { *uri = list->uri_cache.c_str(); }
+        if (offset) { *offset = list->iterator->location.offset; }
+        if (length) { *length = list->iterator->location.length; }
     });
 }
 
-int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve) {
+int dasi_list_count(const dasi_list_t* list, long* count) {
+    return tryCatch([list, count] {
+        ASSERT(list);
+        ASSERT(count);
+        throw eckit::NotImplemented("dasi_list_count is not implemented yet.",
+                                    Here());
+    });
+}
+
+int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query,
+                  dasi_retrieve_t** retrieve) {
     return tryCatch([dasi, query, retrieve] {
         ASSERT(dasi);
         ASSERT(query);
@@ -264,7 +256,7 @@ int dasi_free_retrieve(const dasi_retrieve_t* retrieve) {
 }
 
 int dasi_retrieve_read(dasi_retrieve_t* retrieve, void* data, long* length) {
-    return tryCatch(std::function<int()> {[retrieve, data, length] {
+    return tryCatch(std::function<int()>{[retrieve, data, length] {
         ASSERT(retrieve);
         ASSERT(data);
         ASSERT(length);
@@ -277,7 +269,7 @@ int dasi_retrieve_read(dasi_retrieve_t* retrieve, void* data, long* length) {
         }
 
         *length = retrieve->dh->read(data, *length);
-        if (*length == 0) return DASI_ITERATION_COMPLETE;
+        if (*length == 0) { return DASI_ITERATION_COMPLETE; }
         return DASI_SUCCESS;
     }});
 }
@@ -291,13 +283,10 @@ int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count) {
 }
 
 int dasi_retrieve_next(dasi_retrieve_t* retrieve) {
-    return tryCatch(std::function<int()> {[retrieve] {
+    return tryCatch(std::function<int()>{[retrieve] {
         ASSERT(retrieve);
-        if (retrieve->first) {
-            retrieve->first = false;
-        } else {
-            ++retrieve->iterator;
-        }
+        if (retrieve->first) { retrieve->first = false; }
+        else { ++retrieve->iterator; }
         if (retrieve->iterator == retrieve->retrieve.end()) {
             return DASI_ITERATION_COMPLETE;
         }
@@ -305,17 +294,16 @@ int dasi_retrieve_next(dasi_retrieve_t* retrieve) {
     }});
 }
 
-int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, dasi_time_t* timestamp, long* offset, long* length) {
+int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key,
+                        dasi_time_t* timestamp, long* offset, long* length) {
     return tryCatch([retrieve, key, timestamp, offset, length] {
         ASSERT(retrieve);
         /// @note what happens if retrieve is empty
         ASSERT(retrieve->iterator != retrieve->retrieve.end());
-        if (key) {
-            *key = new Key(retrieve->iterator->key);
-        }
-        if (timestamp) timestamp->value = retrieve->iterator->timestamp;
-        if (offset) *offset = retrieve->iterator->location.offset;
-        if (length) *length = retrieve->iterator->location.length;
+        if (key) { *key = new Key(retrieve->iterator->key); }
+        if (timestamp) { *timestamp = retrieve->iterator->timestamp; }
+        if (offset) { *offset = retrieve->iterator->location.offset; }
+        if (length) { *length = retrieve->iterator->location.length; }
     });
 }
 
@@ -323,15 +311,11 @@ int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, dasi_
 // KEY
 
 int dasi_new_key(dasi_key_t** key) {
-    return tryCatch([key] {
-        *key = new Key();
-    });
+    return tryCatch([key] { *key = new Key(); });
 }
 
 int dasi_new_key_from_string(dasi_key_t** key, const char* str) {
-    return tryCatch([key, str] {
-        *key = new Key(str);
-    });
+    return tryCatch([key, str] { *key = new Key(str); });
 }
 
 int dasi_free_key(const dasi_key_t* key) {
@@ -350,7 +334,8 @@ int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value) {
     });
 }
 
-int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword, const char** value) {
+int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword,
+                       const char** value) {
     return tryCatch([key, n, keyword, value] {
         ASSERT(key);
         ASSERT(n >= 0);
@@ -406,15 +391,11 @@ int dasi_key_clear(dasi_key_t* key) {
 // QUERY
 
 int dasi_new_query(dasi_query_t** query) {
-    return tryCatch([query] {
-        *query = new Query();
-    });
+    return tryCatch([query] { *query = new Query(); });
 }
 
 int dasi_new_query_from_string(dasi_query_t** query, const char* str) {
-    return tryCatch([query, str] {
-        *query = new Query(str);
-    });
+    return tryCatch([query, str] { *query = new Query(str); });
 }
 
 int dasi_free_query(const dasi_query_t* query) {
@@ -424,7 +405,8 @@ int dasi_free_query(const dasi_query_t* query) {
     });
 }
 
-int dasi_query_set(dasi_query_t* query, const char* keyword, const char* values[], int num) {
+int dasi_query_set(dasi_query_t* query, const char* keyword,
+                   const char* values[], int num) {
     return tryCatch([query, keyword, values, num] {
         ASSERT(query);
         ASSERT(keyword);
@@ -438,7 +420,8 @@ int dasi_query_set(dasi_query_t* query, const char* keyword, const char* values[
     });
 }
 
-int dasi_query_append(dasi_query_t* query, const char* keyword, const char* value) {
+int dasi_query_append(dasi_query_t* query, const char* keyword,
+                      const char* value) {
     return tryCatch([query, keyword, value] {
         ASSERT(query);
         ASSERT(keyword);
@@ -447,7 +430,8 @@ int dasi_query_append(dasi_query_t* query, const char* keyword, const char* valu
     });
 }
 
-int dasi_query_get(dasi_query_t* query, const char* keyword, int num, const char** value) {
+int dasi_query_get(dasi_query_t* query, const char* keyword, int num,
+                   const char** value) {
     return tryCatch([query, keyword, num, value] {
         ASSERT(query);
         ASSERT(keyword);
@@ -455,7 +439,7 @@ int dasi_query_get(dasi_query_t* query, const char* keyword, int num, const char
         ASSERT(num >= 0);
         const auto& values(query->get(keyword));
         /// @note different type comparison
-        ASSERT( num < values.size());
+        ASSERT(num < values.size());
         *value = values[num].c_str();
     });
 }
@@ -477,7 +461,8 @@ int dasi_query_keyword_count(dasi_query_t* query, long* count) {
     });
 }
 
-int dasi_query_value_count(dasi_query_t* query, const char* keyword, long* count) {
+int dasi_query_value_count(dasi_query_t* query, const char* keyword,
+                           long* count) {
     return tryCatch([query, keyword, count] {
         ASSERT(query);
         ASSERT(count);

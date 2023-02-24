@@ -66,6 +66,11 @@ class Query:
         lib.dasi_query_keyword_count(self._cdata, count)
         return count[0]
 
+    def append(self, keyword, value):
+        lib.dasi_query_append(
+            self._cdata, ffi_encode(keyword), ffi_encode(value)
+        )
+
     def get_value(self, keyword, number):
         value = ffi.new("const char **")
         lib.dasi_query_get(self._cdata, ffi_encode(keyword), number, value)

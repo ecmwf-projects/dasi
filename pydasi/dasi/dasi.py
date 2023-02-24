@@ -16,6 +16,7 @@ from os import fsencode
 
 from .cffi import DASIException, ffi, lib
 from .key import Key
+from .list import List
 from .query import Query
 from .retrieve import Retrieve
 from .utils import get_logger
@@ -70,3 +71,19 @@ class Dasi:
         logger.debug("- retrieve count: %d", len(retriev))
 
         return retriev
+
+    def _new_list(self, query: Query):
+        # allocate an instance
+        clist = ffi.new("dasi_list_t **")
+        lib.dasi_list(self._cdata, query._cdata, clist)
+        # set the free function
+        clist = ffi.gc(clist[0], lib.dasi_free_list)
+        return clist
+
+    def list(self, query) -> List:
+        if not isinstance(query, Query):
+            query = Query(query)
+
+        list = List(self._new_list(query))
+
+        return list
