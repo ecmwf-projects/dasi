@@ -61,6 +61,23 @@ class Key:
         lib.dasi_key_count(self._cdata, count)
         return count[0]
 
+    def __repr__(self):
+        keyword = ffi.new("const char **")
+        value = ffi.new("const char **")
+        out = ""
+        for i in range(len(self)):
+            lib.dasi_key_get_index(self._cdata, i, keyword, value)
+            out += "<{}:{}>".format(
+                ffi_decode(keyword[0]), ffi_decode(value[0])
+            )
+        return out
+
+    def __eq__(self, other):
+        return self._compare(other) == 0
+
+    def __ne__(self, other):
+        return self._compare(other) != 0
+
     # useful for setting multiple pairs at once
     # e.g., {"key3": "value3", "key4": "value4"}
     # more pythonic as opposed to parsing "key3=value3,key4=value4"
@@ -68,8 +85,13 @@ class Key:
         for keyword, value in pairs.items():
             self[keyword] = value
 
+    def _compare(self, other):
+        value = ffi.new("int *", 0)
+        lib.dasi_key_compare(self._cdata, other._cdata, value)
+        return value[0]
+
     def has(self, keyword: str) -> bool:
-        has = ffi.new("dasi_bool_t*", 1)
+        has = ffi.new("dasi_bool_t *", 1)
         lib.dasi_key_has(self._cdata, ffi_encode(keyword), has)
         return has[0] != 0
 

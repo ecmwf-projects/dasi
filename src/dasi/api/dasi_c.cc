@@ -325,6 +325,16 @@ int dasi_free_key(const dasi_key_t* key) {
     });
 }
 
+int dasi_key_compare(dasi_key_t* key, dasi_key_t* other, int* result) {
+    return tryCatch([key, other, result] {
+        ASSERT(key);
+        ASSERT(other);
+        if (*key < *other) { *result = -1; }
+        else if (*key > *other) { *result = 1; }
+        else { *result = 0; }
+    });
+}
+
 int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value) {
     return tryCatch([key, keyword, value] {
         ASSERT(key);

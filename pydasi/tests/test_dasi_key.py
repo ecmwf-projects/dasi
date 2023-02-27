@@ -173,6 +173,16 @@ def test_key_modify():
     assert value2 == "value2"
 
 
+def test_key_compare():
+    pair = {"key1": "value1"}
+    key = Key(pair)
+
+    # add another key
+    key["key2"] = "value2"
+
+    assert key == Key({"key1": "value1", "key2": "value2"})
+
+
 if __name__ == "__main__":
     test_key_typename()
     test_key_clear()

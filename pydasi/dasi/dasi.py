@@ -47,6 +47,9 @@ class Dasi:
             err_msg = "Could not find the config file:\n{}".format(config_path)
             raise DASIException(err_msg)
 
+    def flush(self):
+        lib.dasi_flush(self._cdata)
+
     def archive(self, key, data):
         if not isinstance(key, Key):
             key = Key(key)

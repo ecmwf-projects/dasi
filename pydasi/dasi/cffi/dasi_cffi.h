@@ -47,6 +47,7 @@ int dasi_new_key(dasi_key_t **key);
 int dasi_new_key_from_string(dasi_key_t **key, const char *str);
 int dasi_free_key(const dasi_key_t *key);
 int dasi_key_set(dasi_key_t *key, const char *keyword, const char *value);
+int dasi_key_compare(dasi_key_t *key, dasi_key_t *other, int *result);
 int dasi_key_get_index(dasi_key_t *key, int n, const char **keyword, const char **value);
 int dasi_key_get(dasi_key_t *key, const char *keyword, const char **value);
 int dasi_key_has(dasi_key_t *key, const char *keyword, dasi_bool_t *has);
