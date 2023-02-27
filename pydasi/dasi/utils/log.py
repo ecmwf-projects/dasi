@@ -38,14 +38,14 @@ __logging_config__ = dict(
             "formatter": "compact",
             # "level": INFO,
         },
-        "file": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "formatter": "default",
-            "filename": __package__ + ".log",
-            "maxBytes": 1024,
-            "backupCount": 3,
-            "level": INFO,
-        },
+        # "file": {
+        #     "class": "logging.handlers.RotatingFileHandler",
+        #     "formatter": "default",
+        #     "filename": __package__ + ".log",
+        #     "maxBytes": 1024,
+        #     "backupCount": 3,
+        #     "level": INFO,
+        # },
     },
     root={
         "handlers": ["console_compact"],
@@ -68,7 +68,7 @@ __logging_config__ = dict(
 dictConfig(__logging_config__)
 
 
-def get_logger(level=DEBUG, name=None):
+def get_logger(level=INFO, name=None):
     logger = getLogger(name)
     logger.setLevel(level)
     return logger
