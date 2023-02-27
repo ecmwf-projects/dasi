@@ -142,8 +142,8 @@ def test_simple_retrieve(dasi_config_file):
 
     results = {}
     for r in retrieved:
-        key, data = r.read()
-        results[key["key1"]] = data
+        object = r.key["key1"]
+        results[object] = r.data
 
     assert results["value1"] == __simple_data_1__
     assert results["value2"] == __simple_data_2__
