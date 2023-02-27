@@ -21,8 +21,8 @@ logger = get_logger(name=__name__)
 
 class List:
     """
-    Metadata fetched from the dasi session.
-    TODO more documentation
+    Read metadata from the dasi session.
+    TODO documentation
     """
 
     def __init__(self, cdata: FFI.CData):
@@ -34,7 +34,6 @@ class List:
         self.__length = 0
         if ffi.typeof(cdata) is ffi.typeof("dasi_list_t *"):
             self._cdata = cdata
-            self.__read()
 
     def __iter__(self):
         return self

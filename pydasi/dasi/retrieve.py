@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .cffi import ffi, lib
+from .cffi import FFI, ffi, lib
 from .key import Key
 from .utils import get_logger
 
@@ -21,11 +21,17 @@ logger = get_logger(name=__name__)
 
 class Retrieve:
     """
-    RetrieveResult
+    Read data from the dasi session.
+    TODO documentation
     """
 
-    def __init__(self, cdata: ffi.CData):
+    def __init__(self, cdata: FFI.CData):
         logger.debug("Initialize Retrieve...")
+        self.__key = Key()
+        self.__data = None
+        self.__timestamp = 0
+        self.__offset = 0
+        self.__length = 0
         if ffi.typeof(cdata) is ffi.typeof("dasi_retrieve_t *"):
             self._cdata = cdata
 
@@ -36,6 +42,7 @@ class Retrieve:
         stat = lib.dasi_retrieve_next(self._cdata)
         if stat == lib.DASI_ITERATION_COMPLETE:
             raise StopIteration
+        self.__read()
         return self
 
     def __len__(self):
@@ -43,14 +50,37 @@ class Retrieve:
         lib.dasi_retrieve_count(self._cdata, count)
         return count[0]
 
-    # https://github.com/ecmwf-projects/dasi/issues/9
-    def read(self):
-        length = ffi.new("long *", 0)
+    def __read(self):
+        coffset = ffi.new("long *", 0)
+        clength = ffi.new("long *", 0)
+        ctime = ffi.new("dasi_time_t *", 0)
         ckey = ffi.new("dasi_key_t **", ffi.NULL)
-        lib.dasi_retrieve_attrs(self._cdata, ckey, ffi.NULL, ffi.NULL, length)
+        lib.dasi_retrieve_attrs(self._cdata, ckey, ctime, coffset, clength)
         ckey = ffi.gc(ckey[0], lib.dasi_free_key)
-        key = Key(ckey)
-        logger.debug("- data length = %d", length[0])
-        data = bytearray(length[0])
-        lib.dasi_retrieve_read(self._cdata, ffi.from_buffer(data), length)
-        return key, data
+        data = bytearray(clength[0])
+        lib.dasi_retrieve_read(self._cdata, ffi.from_buffer(data), clength)
+        self.__key = Key(ckey)
+        self.__data = data
+        self.__timestamp = ctime[0]
+        self.__offset = coffset[0]
+        self.__length = clength[0]
+
+    @property
+    def key(self):
+        return self.__key
+
+    @property
+    def data(self):
+        return self.__data
+
+    @property
+    def timestamp(self):
+        return self.__timestamp
+
+    @property
+    def offset(self):
+        return self.__offset
+
+    @property
+    def length(self):
+        return self.__length

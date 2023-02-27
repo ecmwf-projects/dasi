@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .cffi import DASIException, ffi, ffi_decode, ffi_encode, lib
+from .cffi import FFI, DASIException, ffi, ffi_decode, ffi_encode, lib
 from .utils import get_logger
 
 logger = get_logger(name=__name__)
@@ -39,7 +39,7 @@ class Query:
     def __init__(self, data=None):
         if isinstance(data, Query):
             self._cdata = data._cdata
-        elif isinstance(data, ffi.CData):
+        elif isinstance(data, FFI.CData):
             if ffi.typeof(data) is ffi.typeof("dasi_query_t *"):
                 self._cdata = data
         else:

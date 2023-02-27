@@ -74,9 +74,8 @@ if __name__ == "__main__":
     # Read the data into results
     results = {}
     for r in retrieved:
-        key, value = r.read()
-        object = key["Object"]
-        results[object] = value
+        object = r.key["Object"]
+        results[object] = r.data
 
     # Below here is an example for working with the retrieved data
 

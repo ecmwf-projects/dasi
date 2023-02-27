@@ -61,8 +61,8 @@ if __name__ == "__main__":
     # read data by looping over "Object": "metadata" and "images"
     results = {}
     for r in retrieved:
-        key, data = r.read()
-        results[key["Object"]] = data
+        object = r.key["Object"]
+        results[object] = r.data
 
     #
     # Metadata
