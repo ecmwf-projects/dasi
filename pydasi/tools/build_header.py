@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright 2023 European Centre for Medium-Range Weather Forecasts (ECMWF)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,16 +19,24 @@ from pycparser import c_generator, parse_file
 
 def usage():
     sys.stderr.write("Usage:\n")
-    sys.stderr.write("\tbuild_header.py <dasi.h> <dasi_cffi.h>\n")
+    sys.stderr.write("\tbuild_header.py <header.h> <header_cffi.h>\n")
 
 
-if len(sys.argv) != 3:
-    usage()
-    sys.exit(-1)
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        usage()
+        sys.exit(-1)
 
-input_filename = sys.argv[1]
-output_filename = sys.argv[2]
+    input_filename = sys.argv[1]
+    output_filename = sys.argv[2]
 
-ast = parse_file(input_filename, use_cpp=True)
-with open(output_filename, "w") as f:
-    f.write(c_generator.CGenerator().visit(ast))
+    ast = parse_file(
+        input_filename,
+        use_cpp=True,
+        cpp_path="clang",
+        cpp_args="-E",
+        # cpp_args=["-E", "-Iutils/fake_libc_include"],
+    )
+    # ast.show()
+    with open(output_filename, "w") as f:
+        f.write(c_generator.CGenerator().visit(ast))
