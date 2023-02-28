@@ -55,24 +55,28 @@ Key::map_type::size_type Key::size() const {
     return values_.size();
 }
 
-const Key::value_type& Key::get(const std::string& k) const {
-    auto it = values_.find(k);
+const Key::value_type& Key::get(const std::string& keyword) const {
+    auto it = values_.find(keyword);
     if (it == values_.end()) {
-        // throw util::KeyError((util::StringBuilder() << name << " not found in KeyT").str(), Here());
+        std::ostringstream ss;
+        ss << keyword << " not found in Key";
+        throw eckit::UserError(ss.str(), Here());
     }
     return it->second;
 }
 
-const Key::value_type& Key::get(const std::string_view& k) const {
-    auto it = values_.find(k);
+const Key::value_type& Key::get(const std::string_view& keyword) const {
+    auto it = values_.find(keyword);
     if (it == values_.end()) {
-        // throw util::KeyError((util::StringBuilder() << name << " not found in KeyT").str(), Here());
+        std::ostringstream ss;
+        ss << keyword << " not found in Key";
+        throw eckit::UserError(ss.str(), Here());
     }
     return it->second;
 }
 
-const Key::value_type& Key::get(const char* k) const {
-    return get(std::string_view(k));
+const Key::value_type& Key::get(const char* keyword) const {
+    return get(std::string_view(keyword));
 }
 
 void Key::erase(const std::string& k) {

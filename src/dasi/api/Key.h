@@ -66,9 +66,9 @@ public: // methods
     /** Return the number of key:value pairs stored */
     typename map_type::size_type size() const;
 
-    const value_type& get(const std::string& k) const;
-    const value_type& get(const std::string_view& k) const;
-    const value_type& get(const char* k) const;
+    const value_type& get(const std::string& keyword) const;
+    const value_type& get(const std::string_view& keyword) const;
+    const value_type& get(const char* keyword) const;
 
     void erase(const std::string& k);
     void erase(const std::string_view& k);
