@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <map>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace dasi {

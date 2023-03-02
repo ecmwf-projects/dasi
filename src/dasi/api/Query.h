@@ -18,6 +18,7 @@
 #include <iosfwd>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 
@@ -81,5 +82,3 @@ private: // members
 //-------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-
-
