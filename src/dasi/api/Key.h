@@ -18,9 +18,9 @@ namespace dasi {
 
 class Key {
 
+public:
     using value_type = std::string;
 
-public:
     /// @note use of transparent comparator --> allow lookup with std::string_view as key
     using map_type = std::map<std::string, value_type, std::less<>>;
 
