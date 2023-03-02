@@ -22,6 +22,13 @@
 
 #include <memory>
 
+namespace eckit {
+    class Configuration;
+    namespace message {
+        class Message;
+    }
+}
+
 namespace dasi {
 
 //-------------------------------------------------------------------------------------------------
@@ -36,6 +43,8 @@ public: // methods
     /// @param dasi_config A YAML configuration, or configuration path for Dasi. Specifies where data is stored
     /// @param application_config A configuration for runtime-specific overrides within Dasi. Controls how data is written/read
     explicit Dasi(const char* dasi_config, const char* application_config=nullptr);
+    explicit Dasi(Dasi&& other);
+    explicit Dasi(const eckit::Configuration& cfg);
 
     ~Dasi();
 
@@ -46,6 +55,8 @@ public: // methods
     /// @param data A pointer to a (read-only) copy of the data
     /// @param length The length of the data to store in bytes
     void archive(const Key& key, const void* data, size_t length);
+
+    void archive(eckit::message::Message msg);
 
     /// Flushes all buffers and ensures all internal state is safe wrt. failure
     /// @note always safe to call
@@ -89,5 +100,3 @@ private: // members
 //-------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-
-

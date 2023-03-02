@@ -19,10 +19,12 @@
 #include "fdb5/api/helpers/FDBToolRequest.h"
 #include "fdb5/config/Config.h"
 #include "fdb5/rules/Schema.h"
+#include "fdb5/message/MessageDecoder.h"
 
 #include "eckit/config/YAMLConfiguration.h"
 #include "eckit/exception/Exceptions.h"
 #include "eckit/log/Log.h"
+#include "eckit/message/Message.h"
 #include "eckit/runtime/Main.h"
 #include "eckit/utils/Tokenizer.h"
 
@@ -131,18 +133,23 @@ fdb5::Config construct_config(const char* dasi_config, const char* application_c
 class DasiImpl {
 
 public: // methods
+    DasiImpl(const eckit::Configuration& cfg) : mainHelper_(), fdb_(cfg) {}
 
     DasiImpl(const char* dasi_config, const char* application_config) :
         mainHelper_(),
         fdb_(construct_config(dasi_config, application_config)) {}
+
+    void archive(const fdb5::Key& key, const void* data, size_t length) {
+        LOG_DEBUG_LIB(LibDasi) << "Schema: " << fdb_.config().schemaPath() << std::endl;
+        fdb_.archive(key, data, length);
+    }
 
     void archive(const Key& key, const void* data, size_t length) {
         fdb5::Key fdb_key;
         for (const auto& kv : key) {
             fdb_key.set(kv.first, kv.second);
         }
-        LOG_DEBUG_LIB(LibDasi) << "Schema: " << fdb_.config().schemaPath() << std::endl;
-        fdb_.archive(fdb_key, data, length);
+        this->archive(fdb_key, data, length);
     }
 
     ListGenerator list(const Query& query) {
@@ -234,6 +241,10 @@ private: // members
 
 //----------------------------------------------------------------------------------------------------------------------
 
+Dasi::Dasi(Dasi&& other) : impl_(std::move(other.impl_)) {}
+Dasi::Dasi(const eckit::Configuration& cfg) :
+    impl_(new DasiImpl(cfg)) {}
+
 Dasi::Dasi(const char* dasi_config, const char* application_config) :
     impl_(new DasiImpl(dasi_config, application_config)) {}
 
@@ -245,6 +256,11 @@ Dasi::~Dasi() {}
 void Dasi::archive(const Key& key, const void* data, size_t length) {
     ASSERT(impl_);
     impl_->archive(key, data, length);
+}
+
+void Dasi::archive(eckit::message::Message msg) {
+    fdb5::Key key = fdb5::MessageDecoder::messageToKey(msg);
+    impl_->archive(key, msg.data(), msg.length());
 }
 
 ListGenerator Dasi::list(const Query& query) {
