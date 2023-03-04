@@ -22,6 +22,7 @@
 #include "fdb5/message/MessageDecoder.h"
 
 #include "eckit/config/YAMLConfiguration.h"
+#include "eckit/config/LocalConfiguration.h"
 #include "eckit/exception/Exceptions.h"
 #include "eckit/log/Log.h"
 #include "eckit/message/Message.h"
@@ -122,6 +123,28 @@ fdb5::Config construct_config(const char* dasi_config, const char* application_c
     return retval;
 }
 
+fdb5::Config fdb5_config(const eckit::Configuration& cfg) {
+    eckit::LocalConfiguration userConfig;
+    if (cfg.has("userConfig")) {
+        userConfig = cfg.getSubConfiguration("userConfig");
+    }
+    else { userConfig.set("useSubToc", true); }
+
+    fdb5::Config fdbConfig{cfg, userConfig};
+
+    // default type is local (prevents exposing all FDB frontend-routing)
+    if (!fdbConfig.has("type")) { fdbConfig.set("type", "local"); }
+
+    if (fdbConfig.has("schema")) {
+        LOG_DEBUG_LIB(LibDasi) << "DASI Schema: " << eckit::newl;
+        LOG_DEBUG_LIB(LibDasi)
+            << fdb5::Schema{fdbConfig.getString("schema")} << eckit::newl;
+    }
+
+    LOG_DEBUG_LIB(LibDasi) << "DASI Config = " << fdbConfig << std::endl;
+
+    return fdbConfig;
+}
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -133,7 +156,8 @@ fdb5::Config construct_config(const char* dasi_config, const char* application_c
 class DasiImpl {
 
 public: // methods
-    DasiImpl(const eckit::Configuration& cfg) : mainHelper_(), fdb_(cfg) {}
+    DasiImpl(const eckit::Configuration& cfg) :
+        mainHelper_(), fdb_(fdb5_config(cfg)) {}
 
     DasiImpl(const char* dasi_config, const char* application_config) :
         mainHelper_(),
