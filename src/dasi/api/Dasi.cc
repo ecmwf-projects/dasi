@@ -132,6 +132,8 @@ fdb5::Config fdb5_config(const eckit::Configuration& cfg) {
 
     fdb5::Config fdbConfig{cfg, userConfig};
 
+    fdbConfig = fdbConfig.expandConfig();
+
     // default type is local (prevents exposing all FDB frontend-routing)
     if (!fdbConfig.has("type")) { fdbConfig.set("type", "local"); }
 
