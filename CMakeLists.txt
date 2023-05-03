@@ -16,7 +16,13 @@ ecbuild_find_package( NAME metkit VERSION 1.9 REQUIRED )
 
 ecbuild_find_package( NAME fdb5 VERSION 5.11 REQUIRED )
 
+set( dasi_INCLUDE_DIRS  ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR}/src )
+
+include_directories( ${dasi_INCLUDE_DIRS} )
+
 add_subdirectory( src )
 add_subdirectory( tests )
+
+ecbuild_install_project( NAME ${PROJECT_NAME} )
 
 ecbuild_print_summary()

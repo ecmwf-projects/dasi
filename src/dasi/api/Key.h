@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <map>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace dasi {
@@ -20,6 +21,7 @@ class Key {
 
     using value_type = std::string;
 
+public:
     /// @note use of transparent comparator --> allow lookup with std::string_view as key
     using map_type = std::map<std::string, value_type, std::less<>>;
 
@@ -27,7 +29,7 @@ public: // methods
 
     Key() = default;
     Key(std::initializer_list<std::pair<const std::string, std::string>>);
-    Key(const std::string& strKey);
+    explicit Key(const std::string& strKey);
 
     /** Is there a value corresponding to the specified key?
      * @param name The key to look up the corresponding value
@@ -65,6 +67,17 @@ public: // methods
     /** Return the number of key:value pairs stored */
     typename map_type::size_type size() const;
 
+    const value_type& get(const std::string& keyword) const;
+    const value_type& get(const std::string_view& keyword) const;
+    const value_type& get(const char* keyword) const;
+
+    void erase(const std::string& k);
+    void erase(const std::string_view& k);
+    /** Erase the key:value pair specified by its name
+     * @param k The key to be erased.
+     */
+    void erase(const char* k);
+
     /** Erase all key:value pairs stored */
     void clear();
 
@@ -88,5 +101,3 @@ private: // members
 //-------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-
-

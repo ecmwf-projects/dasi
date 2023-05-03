@@ -1,3 +1,4 @@
+!tools/
 *-local-config.cmake
 *.egg-info
 *.pyc
@@ -8,7 +9,7 @@
 .vscode
 CMakeLists.txt.user
 __pycache__
-build
+build/*
 contrib/*
 dhskit
 ecbuild
@@ -21,3 +22,10 @@ mars-server
 metkit
 odc
 pmem
+examples/weather/ensemble*
+examples/weather/ens_mean*
+examples/**/0000-*
+docs/_build/
+dist/
+.eggs
+.ipynb_checkpoints

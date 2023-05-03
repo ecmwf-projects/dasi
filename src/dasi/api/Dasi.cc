@@ -13,6 +13,7 @@
 #include "dasi/lib/LibDasi.h"
 #include "dasi/impl/ListGeneratorImpl.h"
 #include "dasi/impl/PolicyStatusGeneratorImpl.h"
+#include "dasi/impl/RetrieveResultImpl.h"
 
 #include "fdb5/api/FDB.h"
 #include "fdb5/api/helpers/FDBToolRequest.h"
@@ -74,8 +75,10 @@ fdb5::Config construct_config(const char* dasi_config, const char* application_c
     // Is the dasi_configation a raw yaml, or is it a path?
     // FIXME: TODO: This behaves badly if there is a _path_ that doesn't exist (fails on parsing)
 
+    /// @todo the logic below fails to default schema (etc/fdb/schema): add a warning
     eckit::PathName config_path(dasi_config);
     std::string yaml_config;
+    /// @todo when the yml file does not exist. Also, it causes to break cfg object
     if (config_path.exists()) {
         std::unique_ptr<eckit::DataHandle> dh(config_path.fileHandle());
         size_t sz = dh->size();
@@ -138,6 +141,7 @@ public: // methods
         for (const auto& kv : key) {
             fdb_key.set(kv.first, kv.second);
         }
+        LOG_DEBUG_LIB(LibDasi) << "Schema: " << fdb_.config().schemaPath() << std::endl;
         fdb_.archive(fdb_key, data, length);
     }
 
@@ -148,9 +152,11 @@ public: // methods
         return ListGenerator(std::make_unique<ListGeneratorImpl>(std::move(iter)));
     }
 
-    std::unique_ptr<eckit::DataHandle> retrieve(const Query& query) {
-        eckit::DataHandle* dh = fdb_.retrieve(queryToMarsRequest(query));
-        return std::unique_ptr<eckit::DataHandle>(dh);
+    /// @todo - deduplicate FDB results inside the inspect() function instead
+
+    RetrieveResult retrieve(const Query& query) {
+        auto&& iter = fdb_.inspect(queryToMarsRequest(query));
+        return RetrieveResult{std::make_unique<RetrieveResultImpl>(std::move(iter))};
     }
 
     void flush() {
@@ -174,8 +180,6 @@ public: // methods
                 if (key == "retrieve") identifiers |= fdb5::ControlIdentifier::Retrieve;
                 if (key == "archive") identifiers |= fdb5::ControlIdentifier::Archive;
                 if (key == "wipe") identifiers |= fdb5::ControlIdentifier::Wipe;
-
-                bool val = access.getBool(key);
 
                 fdb5::ControlAction newAction = access.getBool(key) ?
                         fdb5::ControlAction::Enable : fdb5::ControlAction::Disable;
@@ -248,7 +252,7 @@ ListGenerator Dasi::list(const Query& query) {
     return impl_->list(query);
 }
 
-std::unique_ptr<eckit::DataHandle> Dasi::retrieve(const Query& query) {
+RetrieveResult Dasi::retrieve(const Query& query) {
     ASSERT(impl_);
     return impl_->retrieve(query);
 }
@@ -271,4 +275,3 @@ PolicyGenerator Dasi::queryPolicy(const Query& query, const std::string& name) {
 //----------------------------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-

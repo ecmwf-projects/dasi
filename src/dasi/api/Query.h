@@ -18,6 +18,7 @@
 #include <iosfwd>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 
@@ -46,12 +47,18 @@ public: // methods
 
     void append(const std::string& k, const std::string& v);
 
+    map_type::size_type size() const;
     const value_type& get(const std::string_view& name) const;
 
     map_type::const_iterator begin() const;
     map_type::const_iterator end() const;
     map_type::const_iterator cbegin() const;
     map_type::const_iterator cend() const;
+
+    void erase(const std::string& k);
+    void erase(const std::string_view& k);
+    void erase(const char* k);
+    void clear();
 
 private: // methods
 
@@ -75,5 +82,3 @@ private: // members
 //-------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-
-

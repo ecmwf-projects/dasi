@@ -32,14 +32,10 @@ void ListGeneratorImpl::next() {
     }
 }
 
-const dasi::ListElement& ListGeneratorImpl::value() const {
-    return dasiElement_;
-}
+const ListElement& ListGeneratorImpl::value() const { return dasiElement_; }
 
-bool ListGeneratorImpl::done() const {
-    return done_;
-}
+bool ListGeneratorImpl::done() const { return done_; }
 
 //-------------------------------------------------------------------------------------------------
 
-} // namespace dasi
+}  // namespace dasi

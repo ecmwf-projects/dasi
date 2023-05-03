@@ -28,7 +28,7 @@ protected: // methods
     DASITool(int argc, char** argv);
     ~DASITool() override = default;
 
-    Dasi& dasi();
+    dasi::Dasi& dasi();
 
 public: // methods
 
@@ -54,7 +54,7 @@ protected: // members
     std::vector<eckit::option::Option*> options_;
     eckit::PathName configPath_;
 
-    eckit::Optional<Dasi> dasi_;
+    eckit::Optional<dasi::Dasi> dasi_;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -26,12 +26,12 @@ public: // methods
 
     static LibDasi& instance();
 
-private: // methods
-
-    LibDasi();
-
     std::string version() const override;
+
     std::string gitsha1(unsigned int count) const override;
+
+private:  // methods
+    LibDasi();
 };
 
 //-------------------------------------------------------------------------------------------------

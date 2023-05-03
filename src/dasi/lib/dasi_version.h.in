@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __DASI_LIB_DASI_VERSION_H
+#define __DASI_LIB_DASI_VERSION_H
 
 #define dasi_VERSION_STR "@dasi_VERSION_STR@"
 #define dasi_VERSION     "@dasi_VERSION@"
@@ -16,3 +17,5 @@ inline unsigned int dasi_version_int() {
 inline const char * dasi_version_str() {return dasi_VERSION_STR; }
 
 inline const char * dasi_git_sha1() { return "@dasi_GIT_SHA1@"; }
+
+#endif /* __DASI_LIB_DASI_VERSION_H */
