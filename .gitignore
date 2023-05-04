@@ -25,7 +25,9 @@ pmem
 examples/weather/ensemble*
 examples/weather/ens_mean*
 examples/**/0000-*
-docs/_build/
 dist/
 .eggs
 .ipynb_checkpoints
+# auto-generated Sphinx api docs
+docs/_build/
+docs/contents/generated
