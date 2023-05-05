@@ -52,7 +52,7 @@ CASE("Construct from empty request") {
     CHECK_RETURN(dasi_query_has(r, "key4", &has));
     EXPECT(!has);
 
-    const char* vals3[] = {};
+    const char* vals3[] = {""};
     CHECK_RETURN(dasi_query_set(r, "key3", vals3, 0));
     CHECK_RETURN(dasi_query_has(r, "key1", &has));
     EXPECT(has);
@@ -165,7 +165,7 @@ CASE("Modify existing query") {
     CHECK_RETURN(dasi_query_value_count(r, "key3", &count));
     EXPECT(count == 1);
 
-    const char* vals1[] = {};
+    const char* vals1[] = {""};
     const char* vals3[] = {"VALUE3a", "VALUE3b"};
     CHECK_RETURN(dasi_query_set(r, "key1", vals1, 0));
     CHECK_RETURN(dasi_query_set(r, "key3", vals3, 2));
