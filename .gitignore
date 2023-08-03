@@ -1,14 +1,9 @@
 !tools/
-*-local-config.cmake
-*.egg-info
-*.pyc
 *.txt.user
 *workspace
 .idea
 .idea/*
 .vscode
-CMakeLists.txt.user
-__pycache__
 build/*
 contrib/*
 dhskit
@@ -22,9 +17,16 @@ mars-server
 metkit
 odc
 pmem
-examples/weather/ensemble*
-examples/weather/ens_mean*
-examples/**/0000-*
+# example outputs
+examples/**/*.data
+examples/**/*.index
+examples/**/toc
+examples/**/schema
+# python stuff
+__pycache__
+*-local-config.cmake
+*.egg-info
+*.pyc
 dist/
 .eggs
 .ipynb_checkpoints
