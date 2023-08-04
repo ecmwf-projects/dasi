@@ -47,8 +47,6 @@ private:  // methods
 
     void execute(const eckit::option::CmdArgs& args) override;
 
-    //------------------------------------------------------------------------------------------------------------------
-
     std::vector<std::vector<std::string>> tokenizeRules();
 
     void scan();
@@ -59,6 +57,8 @@ private:  // members
 
     std::vector<std::vector<std::string>> rules_;
 };
+
+//----------------------------------------------------------------------------------------------------------------------
 
 void DASISchema::usage(const std::string& tool) const {
     eckit::Log::info() << std::endl
