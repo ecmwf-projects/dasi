@@ -1,7 +1,7 @@
 ---
-schema: /Users/macm/dev/DASI/examples/weather/schema
+schema: path/to/dasi/schema/file
 catalogue: toc
 store: file
 spaces:
  - roots:
-    - path: /Users/macm/dev/DASI/examples/weather
+    - path: dasi/output/directory/
