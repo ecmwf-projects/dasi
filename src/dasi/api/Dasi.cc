@@ -30,7 +30,6 @@
 
 #include <memory>
 
-
 namespace dasi {
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -212,6 +211,8 @@ public: // methods
         return PolicyGenerator(std::make_unique<PolicyStatusGeneratorImpl>(std::move(iter), std::move(policySpecifiers)));
     }
 
+    void dumpSchema(std::ostream& out) const { fdb_.config().schema().dump(out); }
+
 private: // methods
 
     metkit::mars::MarsRequest queryToMarsRequest(const Query& query) {
@@ -230,6 +231,7 @@ private: // members
 
     // The real deal, this is where most of the underlying work is done!
     fdb5::FDB fdb_;
+
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -272,6 +274,11 @@ PolicyGenerator Dasi::queryPolicy(const Query& query, const std::string& name) {
     return impl_->queryPolicy(query, name);
 }
 
-//----------------------------------------------------------------------------------------------------------------------
+void Dasi::dumpSchema(std::ostream& out) const {
+    ASSERT(impl_);
+    impl_->dumpSchema(out);
+}
 
-} // namespace dasi
+    //----------------------------------------------------------------------------------------------------------------------
+
+}  // namespace dasi

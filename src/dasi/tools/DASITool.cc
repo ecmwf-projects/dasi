@@ -13,8 +13,7 @@ namespace dasi::tools {
 
 static DASITool* instance_ = nullptr;
 
-DASITool::DASITool(int argc, char** argv) :
-    eckit::Tool(argc, argv) {
+DASITool::DASITool(int argc, char** argv): eckit::Tool(argc, argv) {
     ASSERT(instance_ == nullptr);
     instance_ = this;
     options_.push_back(new SimpleOption<std::string>("config", "DASI Configuration file (yaml)"));
@@ -26,8 +25,7 @@ static void usage(const std::string& tool) {
 }
 
 void DASITool::run() {
-    eckit::option::CmdArgs args(&dasi::tools::usage,options_,
-                                numberOfPositionalArguments(),
+    eckit::option::CmdArgs args(&dasi::tools::usage, options_, numberOfPositionalArguments(),
                                 minimumPositionalArguments());
 
     initInternal(args);
@@ -37,16 +35,14 @@ void DASITool::run() {
 }
 
 void DASITool::initInternal(const eckit::option::CmdArgs& args) {
-    configPath_ = args.getString("config", "~dasi/etc/dasi/config.yaml");
+    configPath_ = args.getString("config", "./dasi.yaml");
 }
 
 Dasi& DASITool::dasi() {
-    if (!dasi_) {
-        dasi_.emplace(configPath_.localPath());
-    }
+    if (!dasi_) { dasi_.emplace(configPath_.localPath()); }
     return dasi_.value();
 }
 
 //-------------------------------------------------------------------------------------------------
 
-} // namespace dasi::tools
+}  // namespace dasi::tools

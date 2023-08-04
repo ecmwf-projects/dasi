@@ -15,12 +15,12 @@ make -j
 
 ## Running the example
 
-Set a valid path for the DASI store root in `dasi.yml`.
+Set a valid path for the DASI store root in `dasi.yaml`.
 
 The example can be run directly from its `build` directory. First run the "forecast":
 
 ```
-bin/forecast -c ../dasi.yml
+bin/forecast -c ../dasi.yaml
 ```
 
 This will generate mock forecast data and put them into the DASI. Options can be
@@ -28,7 +28,7 @@ set to manipulate the metadata, see the output of `forecast -h` for the usage.
 Then, run the "mean" for a chosen timestep:
 
 ```
-bin/mean -c ../dasi.yml -t 1234 -s 2
+bin/mean -c ../dasi.yaml -t 1234 -s 2
 ```
 
 This will compute ensemble means for this timestep, and feed them back into the
