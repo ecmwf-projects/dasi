@@ -13,45 +13,45 @@
 #include <vector>
 
 namespace eckit::option {
-    class Option;
-    class CmdArgs;
-}
+class Option;
+class CmdArgs;
+}  // namespace eckit::option
 
 namespace dasi::tools {
 
 //-------------------------------------------------------------------------------------------------
 
-class DASITool : public eckit::Tool {
-
-protected: // methods
-
+class DASITool: public eckit::Tool {
+protected:  // methods
     DASITool(int argc, char** argv);
     ~DASITool() override = default;
 
     dasi::Dasi& dasi();
 
-public: // methods
+public:  // methods
+    virtual void usage(const std::string&) const { }
 
-    virtual void usage(const std::string& tool) const {}
-
-private: // methods
-
+private:  // methods
     void run() override;
 
-    virtual void init(const eckit::option::CmdArgs& args) {}
-    virtual void finish(const eckit::option::CmdArgs& args) {}
+    virtual void init(const eckit::option::CmdArgs&) { }
+    virtual void finish(const eckit::option::CmdArgs&) { }
     virtual void execute(const eckit::option::CmdArgs& args) = 0;
 
-    [[ nodiscard ]]
-    virtual int numberOfPositionalArguments() const { return -1; }
-    [[ nodiscard ]]
-    virtual int minimumPositionalArguments() const { return -1; }
+    [[nodiscard]]
+    virtual int numberOfPositionalArguments() const {
+        return -1;
+    }
+    [[nodiscard]]
+    virtual int minimumPositionalArguments() const {
+        return -1;
+    }
 
     void initInternal(const eckit::option::CmdArgs& args);
 
-protected: // members
-
+protected:  // members
     std::vector<eckit::option::Option*> options_;
+
     eckit::PathName configPath_;
 
     eckit::Optional<dasi::Dasi> dasi_;
@@ -59,4 +59,4 @@ protected: // members
 
 //-------------------------------------------------------------------------------------------------
 
-} // namespace dasi::tools
+}  // namespace dasi::tools
