@@ -79,6 +79,8 @@ public: // methods
     /// @returns Identified policy objects for each identified data collection, relative to the specified name
     PolicyGenerator queryPolicy(const Query& query, const std::string& name="");
 
+    void dumpSchema(std::ostream& out) const;
+
     /// @note - move should follow same api and/or an ----- ioctl-type ----- api
 
 private: // members
@@ -89,5 +91,3 @@ private: // members
 //-------------------------------------------------------------------------------------------------
 
 } // namespace dasi
-
-
