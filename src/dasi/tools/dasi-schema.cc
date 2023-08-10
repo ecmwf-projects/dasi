@@ -194,7 +194,7 @@ void DASISchema::scan() {
                 std::getline(sbuf, value, ':');
             }
             for (auto&& rule : rules_) {
-                dasi::Query query(rule[0] + "=" + value);
+                const dasi::Query query(rule[0] + "=" + value);
                 for (const auto& elem : dasi().list(query)) {
                     elem.print(eckit::Log::info(), false);
                     eckit::Log::info() << eckit::newl;
@@ -208,7 +208,7 @@ void DASISchema::scan() {
 
 void DASISchema::list(const CmdArgs& args) {
     for (size_t i = 0; i < args.count(); ++i) {
-        dasi::Query q(args(i));
+        const dasi::Query q(args(i));
         for (const auto& elem : dasi().list(q)) {
             std::filesystem::path fpath = elem.location.uri.name();
 
