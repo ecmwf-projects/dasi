@@ -26,13 +26,15 @@ An example configuration:
 
 .. code-block:: yaml
 
-    ---
-    schema: /path_to_schema_file
-    catalogue: toc
-    store: file
-    spaces:
-        - roots:
-            - path: /path_to_output_data
+   ---
+   schema: path/to/schema/file
+   catalogue: toc
+   store: file
+   spaces:
+   - handler: Default
+   roots:
+   - path: path/to/data/output1
+   - path: path/to/data/output2
 
 
 Schema
