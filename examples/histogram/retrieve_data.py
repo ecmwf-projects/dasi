@@ -50,7 +50,7 @@ def plot_histogram(image, name: str):
 if __name__ == "__main__":
     args = parse_cmdline_args()
 
-    dasi = Dasi("dasi-config.yml")
+    dasi = Dasi("dasi.yaml")
 
     query = {
         "User": [args.user],

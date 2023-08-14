@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     store = DirectoryData(path="data")
 
-    dasi = Dasi("dasi-config.yml")
+    dasi = Dasi("dasi.yaml")
     key = {
         "User": args.user,
         "Project": args.project,
