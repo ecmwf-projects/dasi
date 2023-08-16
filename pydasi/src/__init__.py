@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os import path as ospath
+from dasi import Dasi, Key, Query, List, Retrieve
+from utils import version
 
+__all__ = ["Dasi", "Key", "Query", "List", "Retrieve"]
 
-def get_version():
-    path = ospath.dirname(ospath.dirname(__file__))
-    with open(ospath.join(path, "VERSION")) as file_:
-        return file_.read().strip()
+__version__ = version.__version__

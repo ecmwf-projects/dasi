@@ -15,17 +15,17 @@
 
 from os import fsencode
 
-from .cffi import DASIException, ffi, lib
-from .key import Key
-from .list import List
-from .query import Query
-from .retrieve import Retrieve
-from .utils import get_logger
+from backend import DASIException, ffi, lib, FFI
+from key import Key
+from list import List
+from query import Query
+from retrieve import Retrieve
+from utils import get_logger
 
 logger = get_logger(name=__name__)
 
 
-def _new_session(config):
+def _new_session(config: str):
     # allocate an instance
     cobj = ffi.new("dasi_t **")
     lib.dasi_open(cobj, fsencode(config))
@@ -44,7 +44,7 @@ class Dasi:
         from dasi import Dasi
 
         # Create new DASI session
-        dasi = Dasi("config.yml")
+        dasi = Dasi("config.yaml")
     """
 
     # TODO: Be able to configure this by providing in a python dictionary
@@ -54,6 +54,9 @@ class Dasi:
 
         :param str config_path: Path to the YAML configuration file.
         """
+
+        self._cdata: FFI.CType = FFI.NULL
+
         if config_path:
             logger.info("Config file: %s", config_path)
             self._cdata = _new_session(config_path)

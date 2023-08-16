@@ -23,6 +23,6 @@ def test_dasi_import():
     import dasi
 
     with pytest.raises(ImportError) as excinfo:
-        import pydasi
+        import dasi
 
     assert "No module named 'pydasi'" == str(excinfo.value)

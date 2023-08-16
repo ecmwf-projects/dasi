@@ -68,7 +68,7 @@ __logging_config__ = dict(
 dictConfig(__logging_config__)
 
 
-def get_logger(level=INFO, name=None):
+def get_logger(level: int = INFO, name: str = ""):
     logger = getLogger(name)
     logger.setLevel(level)
     return logger

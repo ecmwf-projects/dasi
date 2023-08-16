@@ -14,11 +14,14 @@
 
 from os import path as ospath
 
+from .findlib import FindLib
+
+from utils.log import get_logger
+from utils.version import __version__
+
 from cffi import FFI
-from dasi.utils import get_logger, get_version
 from pkg_resources import parse_version
 
-from .findlib import FindLib
 
 logger = get_logger(name=__package__)
 
@@ -45,10 +48,14 @@ def ffi_decode(data: FFI.CData) -> str:
     buf = ffi.string(data)
     if isinstance(buf, str):
         return buf
-    elif isinstance(buf, bytes):
+    else:
         return buf.decode(encoding="utf-8", errors="surrogateescape")
 
-    return str()
+
+def read_lib_version(lib) -> str:
+    tmp = ffi.new("char**")
+    lib.dasi_version(tmp)
+    return ffi_decode(tmp[0])
 
 
 class DASIException(RuntimeError):
@@ -73,14 +80,16 @@ class PatchedLib:
     """
 
     def __init__(self):
-        logger.info("Initializing the interface to DASI library...")
+        logger.info("Initializing the interface to DASI C library...")
+
         # parse the C source; types, functions, globals, etc.
-        ffi.cdef(self.__read_header())
+        ffi.cdef(open(ospath.join(__file_dir__, "dasi_cffi.h")).read())
+        # ffi.cdef(self.__read_header())
 
         try:
-            dasi_lib = FindLib("libdasi")
-            self.__lib = ffi.dlopen(dasi_lib.library)
-            logger.info("- loaded: " + dasi_lib.library)
+            libdasi = FindLib("libdasi")
+            self.__lib = ffi.dlopen(libdasi.path)
+            logger.info("- loaded: " + libdasi.path)
         except Exception as e:
             logger.error(str(e))
             raise CFFIModuleLoadFailed from e
@@ -102,34 +111,19 @@ class PatchedLib:
                 logger.error("Error retrieving attribute", f, "from library")
 
         # Initialise and setup for python-appropriate behaviour
-        self.dasi_initialise_api()
+        self.__lib.dasi_initialise_api()
+
         # check the version
-        self.__check_version()
-
-    def get_lib_version(self):
-        tmp = ffi.new("char**")
-        self.__lib.dasi_version(tmp)
-        return ffi_decode(tmp[0])
-
-    def __check_version(self):
-        """check the library version against pydasi version"""
-
-        lib_version = self.get_lib_version()
-        version = get_version()
-        if parse_version(lib_version) < parse_version(version):
+        lib_version = read_lib_version(self.__lib)
+        if parse_version(lib_version) < parse_version(__version__):
             msg = "The library version '{}' is older than '{}'.".format(
-                lib_version, version
+                lib_version, __version__
             )
             raise CFFIModuleLoadFailed(msg)
         else:
-            logger.info("- library version: %s", lib_version)
+            logger.info("- version: %s", lib_version)
 
-    def __read_header(self) -> str:
-        with open(ospath.join(__file_dir__, "dasi_cffi.h")) as header_file:
-            retval = header_file.read()
-        return retval
-
-    def __check_error(self, fn, name):
+    def __check_error(self, fn, name: str):
         """
         If calls into the DASI library return errors, ensure that they get
         detected and reported by throwing an appropriate python exception.

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .cffi import FFI, ffi, ffi_decode, lib
-from .key import Key
-from .utils import get_logger
+from backend import FFI, ffi, ffi_decode, lib
+from key import Key
+from utils import get_logger
 
 logger = get_logger(name=__name__)
 
