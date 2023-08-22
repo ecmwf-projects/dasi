@@ -12,6 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ._dasi_cffi import FFI, DASIException, ffi, ffi_decode, ffi_encode, lib
+from .dasi import Dasi
+from .key import Key
+from .query import Query
+from .list import List
+from .retrieve import Retrieve
+from .backend import DASIException
+from .utils.config import Config
+from .utils.version import __version__
 
-__all__ = ["DASIException", "FFI", "ffi", "lib", "ffi_decode", "ffi_encode"]
+
+__all__ = [
+    "Dasi",
+    "Key",
+    "Query",
+    "List",
+    "Retrieve",
+    "DASIException",
+    "Config",
+]

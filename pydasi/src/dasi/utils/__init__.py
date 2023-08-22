@@ -12,14 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from logging import CRITICAL, DEBUG, INFO, WARNING
 
-from .log import get_logger
+from . import log, version
 
-__all__ = [
-    "CRITICAL",
-    "DEBUG",
-    "INFO",
-    "WARNING",
-    "get_logger",
-]
+
+__all__ = ["log", "version"]
+
+
+log.init_logging()

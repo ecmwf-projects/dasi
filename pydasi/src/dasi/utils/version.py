@@ -12,9 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dasi import Dasi, Key, Query, List, Retrieve
-from utils import version
 
-__all__ = ["Dasi", "Key", "Query", "List", "Retrieve"]
+try:
+    from importlib import metadata
 
-__version__ = version.__version__
+    __version__ = metadata.version("pydasi")
+except Exception:
+    __version__ = "unknown"
+
+
+def is_newer(ver_a: str) -> bool:
+    from distutils.version import StrictVersion
+
+    return StrictVersion(ver_a) >= StrictVersion(__version__)

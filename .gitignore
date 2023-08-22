@@ -22,6 +22,8 @@ examples/**/*.data
 examples/**/*.index
 examples/**/toc
 examples/**/schema
+*.so
+*.dylib
 # python stuff
 __pycache__
 *-local-config.cmake

@@ -34,10 +34,13 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
 ]
 requires-python = ">=3.6"
-dependencies = ["cffi>=1.1.1", "importlib-metadata; python_version<'3.8'"]
+dependencies = [
+  "cffi>=1.1.1",
+  "pyyaml>=5.3.1",
+  "importlib-metadata; python_version<'3.8'",
+]
 
 [project.optional-dependencies]
-tools = ["pycparser"]
 tests = ["pytest"]
 
 [project.urls]
@@ -57,8 +60,6 @@ where = ["src"] # list of folders that contain the packages (["."] by default)
 # ] # package names should match these glob patterns (["*"] by default)
 # exclude = [
 #   "tests",
-#   "tools",
-#   "backend",
 # ] # exclude packages matching these glob patterns (empty by default)
 # namespaces = false # to disable scanning PEP 420 namespaces (true by default)
 
@@ -92,17 +93,13 @@ profile = "black"
 line_length = 79
 multi_line_output = 3
 include_trailing_comma = true
+src_paths = ["src"]
 virtual_env = ".venv"
 
 [tool.pyright]
-include = ["src", "tools", "tests"]
-exclude = [
-  "**/node_modules",
-  "**/__pycache__",
-  "src/experimental",
-  "src/typestubs",
-]
-# ignore = ["src/oldstuff"]
+include = ["dasi", "tools", "tests"]
+exclude = ["**/node_modules", "**/__pycache__", "experimental", "typestubs"]
+# ignore = ["dasi/legacy"]
 defineConstant = { DEBUG = true }
 venvPath = ".venv"
 

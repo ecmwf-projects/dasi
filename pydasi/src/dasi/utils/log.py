@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from logging import DEBUG, INFO, WARNING, getLogger
-from logging.config import dictConfig
+from logging import DEBUG, INFO, NOTSET, WARNING, CRITICAL, getLogger
 
 __logging_config__ = dict(
     version=1,
@@ -29,46 +28,50 @@ __logging_config__ = dict(
     handlers={
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "default",
-            "stream": "ext://sys.stdout",
-            # "level": INFO,
-        },
-        "console_compact": {
-            "class": "logging.StreamHandler",
             "formatter": "compact",
-            # "level": INFO,
+            "stream": "ext://sys.stdout",
+            "level": INFO,
         },
-        # "file": {
-        #     "class": "logging.handlers.RotatingFileHandler",
-        #     "formatter": "default",
-        #     "filename": __package__ + ".log",
-        #     "maxBytes": 1024,
-        #     "backupCount": 3,
-        #     "level": INFO,
-        # },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "default",
+            "filename": "dasi.log",
+            "maxBytes": 1024,
+            "backupCount": 0,
+            "level": DEBUG,
+        },
     },
     root={
-        "handlers": ["console_compact"],
-        "level": WARNING,
+        "handlers": ["console"],
+        "level": NOTSET,
     },
     loggers={
-        "dasi": {
-            "handlers": ["console"],
+        "dasi.dasi": {
             "level": DEBUG,
-            "propagate": False,
+            "propagate": True,
         },
-        # "__main__": {  # if __name__ == '__main__'
-        #     "handlers": ["console"],
-        #     "level": DEBUG,
-        #     "propagate": False,
-        # },
     },
 )
 
-dictConfig(__logging_config__)
+
+def init_logging() -> None:
+    from logging.config import dictConfig
+
+    if _check_debug_arg():
+        __logging_config__["root"]["handlers"].append("file")  # type: ignore
+
+    dictConfig(__logging_config__)
 
 
-def get_logger(level: int = INFO, name: str = ""):
-    logger = getLogger(name)
-    logger.setLevel(level)
-    return logger
+def _check_debug_arg() -> bool:
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="debug outputs to log file.",
+    )
+    args, _ = parser.parse_known_args()
+
+    return args.debug

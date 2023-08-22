@@ -12,28 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from backend import FFI, ffi, lib
-from key import Key
-from utils import get_logger
+from dasi.backend import FFI, ffi, lib, new_retrieve
 
-logger = get_logger(name=__name__)
+from dasi.key import Key
 
 
 class Retrieve:
-    """
-    Read data from the dasi session.
-    TODO documentation
-    """
+    def __init__(self, dasi: FFI.CData, query: FFI.CData):
+        from dasi.utils import log
 
-    def __init__(self, cdata: FFI.CData):
-        logger.debug("Initialize Retrieve...")
+        self._log = log.getLogger(__name__)
+
+        self._log.debug("Initialize Retrieve...")
+
         self.__key = Key()
-        self.__data = None
-        self.__timestamp = 0
-        self.__offset = 0
-        self.__length = 0
-        if ffi.typeof(cdata) is ffi.typeof("dasi_retrieve_t *"):
-            self._cdata = cdata
+        self.__data: bytearray
+        self.__timestamp: int = 0
+        self.__offset: int = 0
+        self.__length: int = 0
+
+        self._cdata = new_retrieve(dasi, query)
+
+        self._log.debug("- retrieve count: %d", len(self))
 
     def __iter__(self):
         return self
@@ -45,7 +45,7 @@ class Retrieve:
         self.__read()
         return self
 
-    def __len__(self):
+    def __len__(self) -> int:
         count = ffi.new("long *", 0)
         lib.dasi_retrieve_count(self._cdata, count)
         return count[0]
@@ -59,6 +59,7 @@ class Retrieve:
         ckey = ffi.gc(ckey[0], lib.dasi_free_key)
         data = bytearray(clength[0])
         lib.dasi_retrieve_read(self._cdata, ffi.from_buffer(data), clength)
+
         self.__key = Key(ckey)
         self.__data = data
         self.__timestamp = ctime[0]

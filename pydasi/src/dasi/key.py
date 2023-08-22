@@ -12,38 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from backend import FFI, ffi, ffi_decode, ffi_encode, lib
-from utils import get_logger
-
-logger = get_logger(name=__name__)
-
-
-def _new_key(pair=None):
-    ckey = ffi.new("dasi_key_t **")
-    if isinstance(pair, str):
-        lib.dasi_new_key_from_string(ckey, ffi_encode(pair))
-    else:
-        lib.dasi_new_key(ckey)
-    ckey = ffi.gc(ckey[0], lib.dasi_free_key)
-    return ckey
+from dasi.backend import *
 
 
 class Key:
     """
-    Container for keyword:value pairs.
+    Container for keyword:value.
     """
 
-    # TODO think of simplifying
-    def __init__(self, data=None):
-        if isinstance(data, Key):
-            self._cdata = data._cdata
-        elif isinstance(data, FFI.CData):
-            if ffi.typeof(data) is ffi.typeof("dasi_key_t *"):
-                self._cdata = data
+    def __init__(self, key=None):
+        from dasi.utils import log
+
+        log.getLogger(__name__).debug("init key: %s", key)
+
+        if isinstance(key, Key):
+            self._cdata = key._cdata
+        elif isinstance(key, FFI.CData):
+            check_type(key, "dasi_key_t *")
+            self._cdata = key
         else:
-            self._cdata = _new_key(data)
-            if isinstance(data, dict):
-                self.insert(data)
+            self._cdata = new_key(key)
+            if isinstance(key, dict):
+                self.insert(key)
+
+    @property
+    def cdata(self):
+        return self._cdata
 
     def __setitem__(self, keyword, value):
         lib.dasi_key_set(self._cdata, ffi_encode(keyword), ffi_encode(value))
@@ -56,12 +50,12 @@ class Key:
     def __delitem__(self, keyword):
         lib.dasi_key_erase(self._cdata, ffi_encode(keyword))
 
-    def __len__(self):
+    def __len__(self) -> int:
         count = ffi.new("long*", 0)
         lib.dasi_key_count(self._cdata, count)
         return count[0]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         keyword = ffi.new("const char **")
         value = ffi.new("const char **")
         out = ""
@@ -72,23 +66,22 @@ class Key:
             )
         return out
 
-    def __eq__(self, other):
+    def __ne__(self, other) -> bool:
+        return not self == other
+
+    def __eq__(self, other) -> bool:
         return self._compare(other) == 0
 
-    def __ne__(self, other):
-        return self._compare(other) != 0
+    def _compare(self, other) -> int:
+        if isinstance(other, Key):
+            value = ffi.new("int *", 0)
+            lib.dasi_key_compare(self._cdata, other._cdata, value)
+            return value[0]
+        return -1
 
-    # useful for setting multiple pairs at once
-    # e.g., {"key3": "value3", "key4": "value4"}
-    # more pythonic as opposed to parsing "key3=value3,key4=value4"
-    def insert(self, pairs: dict):
-        for keyword, value in pairs.items():
+    def insert(self, keys: dict):
+        for keyword, value in keys.items():
             self[keyword] = value
-
-    def _compare(self, other):
-        value = ffi.new("int *", 0)
-        lib.dasi_key_compare(self._cdata, other._cdata, value)
-        return value[0]
 
     def has(self, keyword: str) -> bool:
         has = ffi.new("dasi_bool_t *", 1)
