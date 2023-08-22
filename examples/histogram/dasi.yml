@@ -4,4 +4,4 @@ catalogue: toc
 store: file
 spaces:
  - roots:
-    - path: ./
+    - path: ./root1
