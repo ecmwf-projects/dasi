@@ -22,6 +22,6 @@ except Exception:
 
 
 def is_newer(ver_a: str) -> bool:
-    from distutils.version import StrictVersion
+    from packaging.version import Version
 
-    return StrictVersion(ver_a) >= StrictVersion(__version__)
+    return Version(ver_a) >= Version(__version__)
