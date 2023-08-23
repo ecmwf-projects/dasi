@@ -25,26 +25,18 @@ class List:
 
         self._log.debug("Initialize List...")
 
-        # self.__key: FFI.CData
-        # self.__uri: FFI.CData
-        # self.__time: FFI.CData
-        # # self.__offset: FFI.CData
-        # self.__length: FFI.CData
-        # # self.__uri = ""
-        # # self.__time: int = 0
-        # self.__offset: int = 0
-        # # self.__length: int = 0
-
+        self.__key = Key()
+        self.__uri = ffi.new("const char **", ffi.NULL)
+        self.__time = ffi.new("dasi_time_t *", 0)
+        self.__offset = ffi.new("long *", 0)
+        self.__length = ffi.new("long *", 0)
         self._cdata = new_list(dasi, query)
-
-        self._log.debug("- list count: %s", len(self))
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        stat = lib.dasi_list_next(self._cdata)
-        if stat == lib.DASI_ITERATION_COMPLETE:
+        if lib.dasi_list_next(self._cdata) == lib.DASI_ITERATION_COMPLETE:
             raise StopIteration
         self.__read()
         return self
@@ -54,26 +46,24 @@ class List:
         return 0
 
     def __read(self):
-        coffset = ffi.new("long *", 0)
-        clength = ffi.new("long *", 0)
-        ctime = ffi.new("dasi_time_t *", 0)
-        curi = ffi.new("const char **", ffi.NULL)
         ckey = ffi.new("dasi_key_t **", ffi.NULL)
-        lib.dasi_list_attrs(self._cdata, ckey, ctime, curi, coffset, clength)
-        ckey = ffi.gc(ckey[0], lib.dasi_free_key)
-
-        self.__key: FFI.CData = ckey
-        self.__time: FFI.CData = ctime
-        self.__uri: FFI.CData = curi
-        self.__offset: FFI.CData = coffset
-        self.__length: FFI.CData = clength
-
-    @property
-    def key(self):
-        return Key(self.__key)
+        lib.dasi_list_attrs(
+            self._cdata,
+            ckey,
+            self.__time,
+            self.__uri,
+            self.__offset,
+            self.__length,
+        )
+        ckey: FFI.CData = ffi.gc(ckey[0], lib.dasi_free_key)
+        self.__key = Key(ckey)
 
     @property
-    def uri(self):
+    def key(self) -> Key:
+        return self.__key
+
+    @property
+    def uri(self) -> str:
         return ffi_decode(self.__uri[0])
 
     @property
@@ -81,9 +71,9 @@ class List:
         return self.__time[0]
 
     @property
-    def offset(self):
+    def offset(self) -> int:
         return self.__offset[0]
 
     @property
-    def length(self):
+    def length(self) -> int:
         return self.__length[0]

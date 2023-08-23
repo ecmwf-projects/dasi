@@ -123,6 +123,28 @@ def test_simple_retrieve(dasi_cfg: str):
     assert results["value3"] == __simple_data_3__
 
 
+def test_empty_retrieve(dasi_cfg: str):
+    """
+    Test Dasi retrieve
+    """
+
+    dasi = Dasi(dasi_cfg)
+
+    query = {
+        "key2": ["1234"],
+        "key3": ["value1"],
+        "key1a": ["value1"],
+        "key2a": ["value1"],
+        "key3a": ["321"],
+        "key1b": ["value1"],
+        "key2b": ["value1"],
+        "key3b": ["value1"],
+    }
+
+    retrieved = dasi.retrieve(query)
+
+    assert len(retrieved) == 0
+
 if __name__ == "__main__":
     retcode = pytest.main()
     print("Return Code: ", retcode)

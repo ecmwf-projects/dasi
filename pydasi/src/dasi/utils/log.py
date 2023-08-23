@@ -62,6 +62,12 @@ def init_logging() -> None:
 
     dictConfig(__logging_config__)
 
+    name = "=   DASI: Data Access and Storage Interface   ="
+    horizontal = "==============================================="
+    getLogger().info(horizontal)
+    getLogger().info(name)
+    getLogger().info(horizontal)
+
 
 def _check_debug_arg() -> bool:
     from argparse import ArgumentParser
