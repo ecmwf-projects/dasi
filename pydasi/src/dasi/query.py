@@ -12,41 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .cffi import FFI, DASIException, ffi, ffi_decode, ffi_encode, lib
-from .utils import get_logger
-
-logger = get_logger(name=__name__)
-
-
-def _new_query(pair=None):
-    # allocate an instance
-    cquery = ffi.new("dasi_query_t **")
-    if isinstance(pair, str):
-        lib.dasi_new_query_from_string(cquery, ffi_encode(pair))
-    else:
-        lib.dasi_new_query(cquery)
-    # set the free function
-    cquery = ffi.gc(cquery[0], lib.dasi_free_query)
-    return cquery
+from dasi.backend import *
 
 
 class Query:
     """
-    Container for the keyword:value pairs that is used for retrieving data.
+    Container for the keyword:value for retrieving data.
     """
 
-    # TODO think of simplifying
-    def __init__(self, data=None):
-        if isinstance(data, Query):
-            self._cdata = data._cdata
-        elif isinstance(data, FFI.CData):
-            if ffi.typeof(data) is ffi.typeof("dasi_query_t *"):
-                self._cdata = data
+    def __init__(self, query=None):
+        from dasi.utils import log
+
+        self._log = log.getLogger(__name__)
+
+        self._log.debug("init query: %s", query)
+
+        if isinstance(query, Query):
+            self._cdata = query._cdata
+        elif isinstance(query, FFI.CData):
+            check_type(query, "dasi_query_t *")
+            self._cdata = query
         else:
-            self._cdata = _new_query(data)
-            if isinstance(data, dict):
-                for keyword, value in data.items():
-                    self[keyword] = value
+            self._cdata = new_query(query)
+            if isinstance(query, dict):
+                self.insert(query)
+
+    @property
+    def cdata(self):
+        return self._cdata
 
     def __setitem__(self, keyword, value):
         length = len(value)
@@ -61,22 +54,26 @@ class Query:
     def __delitem__(self, keyword):
         lib.dasi_query_erase(self._cdata, ffi_encode(keyword))
 
-    def __len__(self):
+    def __len__(self) -> int:
         count = ffi.new("long*", 0)
         lib.dasi_query_keyword_count(self._cdata, count)
         return count[0]
+
+    def insert(self, query: dict):
+        for keyword, value in query.items():
+            self[keyword] = value
 
     def append(self, keyword, value):
         lib.dasi_query_append(
             self._cdata, ffi_encode(keyword), ffi_encode(value)
         )
 
-    def get_value(self, keyword, number):
+    def get_value(self, keyword, number) -> str:
         value = ffi.new("const char **")
         lib.dasi_query_get(self._cdata, ffi_encode(keyword), number, value)
         return ffi_decode(value[0])
 
-    def has(self, keyword):
+    def has(self, keyword) -> bool:
         has = ffi.new("dasi_bool_t*", 1)
         lib.dasi_query_has(self._cdata, ffi_encode(keyword), has)
         return has[0] != 0
@@ -87,7 +84,7 @@ class Query:
             lib.dasi_query_value_count(self._cdata, ffi_encode(keyword), count)
             return count[0]
         except DASIException as e:
-            logger.warning(str(e))
+            self._log.warning(e.error)
             return 0
 
     def clear(self):

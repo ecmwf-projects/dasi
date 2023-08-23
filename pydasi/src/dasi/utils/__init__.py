@@ -12,17 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
+
+from . import log, version
 
 
-def test_dasi_import():
-    """
-    Test importing library
-    """
+__all__ = ["log", "version"]
 
-    import dasi
 
-    with pytest.raises(ImportError) as excinfo:
-        import pydasi
-
-    assert "No module named 'pydasi'" == str(excinfo.value)
+log.init_logging()

@@ -13,24 +13,22 @@
 # limitations under the License.
 
 from os import path as ospath
-
 from cffi import FFI
-from dasi.utils import get_logger, get_version
-from pkg_resources import parse_version
 
-from .findlib import FindLib
-
-logger = get_logger(name=__package__)
-
-__file_dir__ = ospath.dirname(__file__)
-"""current file path directory"""
+from dasi.utils import log, version
+from dasi.backend.find_lib import FindLib
 
 
 ffi = FFI()
 
+__file_dir__ = ospath.dirname(__file__)
+"""current file directory path"""
+
+__source_file__ = ospath.join(__file_dir__, "include", "dasi_cffi.h")
+"""source file directory path"""
+
 
 def ffi_encode(data) -> bytes:
-    """convert data to bytes (c char)"""
     if isinstance(data, bytes):
         return data
 
@@ -41,20 +39,72 @@ def ffi_encode(data) -> bytes:
 
 
 def ffi_decode(data: FFI.CData) -> str:
-    """convert data back to str type"""
     buf = ffi.string(data)
     if isinstance(buf, str):
         return buf
-    elif isinstance(buf, bytes):
+    else:
         return buf.decode(encoding="utf-8", errors="surrogateescape")
 
-    return str()
+
+def read_lib_version(lib) -> str:
+    tmp = ffi.new("char**")
+    lib.dasi_version(tmp)
+    return ffi_decode(tmp[0])
+
+
+def new_dasi(config: str) -> FFI.CData:
+    cobj = ffi.new("dasi_t **")
+    lib.dasi_open(cobj, ffi_encode(config))
+    return ffi.gc(cobj[0], lib.dasi_close)
+
+
+def new_key(key=None) -> FFI.CData:
+    ckey = ffi.new("dasi_key_t **")
+    if isinstance(key, str) and key.strip() != "":
+        lib.dasi_new_key_from_string(ckey, ffi_encode(key))
+    else:
+        lib.dasi_new_key(ckey)
+    return ffi.gc(ckey[0], lib.dasi_free_key)
+
+
+def new_query(query=None) -> FFI.CData:
+    cquery = ffi.new("dasi_query_t **")
+    if isinstance(query, str):
+        lib.dasi_new_query_from_string(cquery, ffi_encode(query))
+    else:
+        lib.dasi_new_query(cquery)
+    return ffi.gc(cquery[0], lib.dasi_free_query)
+
+
+def new_list(cdasi: FFI.CData, cquery: FFI.CData) -> FFI.CData:
+    check_type(cdasi, "dasi_t *")
+    check_type(cquery, "dasi_query_t *")
+    # allocate an instance
+    clist = ffi.new("dasi_list_t **")
+    lib.dasi_list(cdasi, cquery, clist)
+    return ffi.gc(clist[0], lib.dasi_free_list)
+
+
+def new_retrieve(cdasi: FFI.CData, cquery: FFI.CData) -> FFI.CData:
+    check_type(cdasi, "dasi_t *")
+    check_type(cquery, "dasi_query_t *")
+    cret = ffi.new("dasi_retrieve_t **")
+    lib.dasi_retrieve(cdasi, cquery, cret)
+    return ffi.gc(cret[0], lib.dasi_free_retrieve)
+
+
+def check_type(cobj: FFI.CData, name: str):
+    cname = ffi.typeof(cobj).cname
+    if cname != name:
+        raise DASIException("Type error!", "object: " + cname + " != " + name)
 
 
 class DASIException(RuntimeError):
     """Raised when dasi library throws exception"""
 
-    pass
+    def __init__(self, message: str, error: str = ""):
+        super().__init__(message)
+        self.error = error
 
 
 class CFFIModuleLoadFailed(ImportError):
@@ -73,16 +123,19 @@ class PatchedLib:
     """
 
     def __init__(self):
-        logger.info("Initializing the interface to DASI library...")
+        self._log = log.getLogger(__package__)
+
+        self._log.info("Initializing the interface to DASI C library...")
+
         # parse the C source; types, functions, globals, etc.
-        ffi.cdef(self.__read_header())
+        with open(__source_file__) as sf:
+            ffi.cdef(sf.read())
 
         try:
-            dasi_lib = FindLib("libdasi")
-            self.__lib = ffi.dlopen(dasi_lib.library)
-            logger.info("- loaded: " + dasi_lib.library)
+            libdasi = FindLib("dasi", __file_dir__).path
+            self.__lib = ffi.dlopen(libdasi)
         except Exception as e:
-            logger.error(str(e))
+            self._log.error(str(e))
             raise CFFIModuleLoadFailed from e
 
         # All of the executable members of the CFFI-loaded library are
@@ -98,38 +151,22 @@ class PatchedLib:
                     self.__check_error(attr, f) if callable(attr) else attr,
                 )
             except Exception as e:
-                logger.error(str(e))
-                logger.error("Error retrieving attribute", f, "from library")
+                self._log.error(str(e))
+                self._log.error("Cannot set attribute ", f, " from library")
 
         # Initialise and setup for python-appropriate behaviour
-        self.dasi_initialise_api()
+        self.__lib.dasi_initialise_api()
+
         # check the version
-        self.__check_version()
-
-    def get_lib_version(self):
-        tmp = ffi.new("char**")
-        self.__lib.dasi_version(tmp)
-        return ffi_decode(tmp[0])
-
-    def __check_version(self):
-        """check the library version against pydasi version"""
-
-        lib_version = self.get_lib_version()
-        version = get_version()
-        if parse_version(lib_version) < parse_version(version):
-            msg = "The library version '{}' is older than '{}'.".format(
-                lib_version, version
-            )
-            raise CFFIModuleLoadFailed(msg)
+        version_ = read_lib_version(self.__lib)
+        if version.is_newer(version_):
+            self._log.info("- version: %s", version_)
         else:
-            logger.info("- library version: %s", lib_version)
+            msg = "The library version [{}] is old.".format(version_)
+            self._log.error(msg)
+            raise CFFIModuleLoadFailed(msg)
 
-    def __read_header(self) -> str:
-        with open(ospath.join(__file_dir__, "dasi_cffi.h")) as header_file:
-            retval = header_file.read()
-        return retval
-
-    def __check_error(self, fn, name):
+    def __check_error(self, fn, name: str):
         """
         If calls into the DASI library return errors, ensure that they get
         detected and reported by throwing an appropriate python exception.
@@ -142,8 +179,8 @@ class PatchedLib:
                 self.__lib.DASI_ITERATION_COMPLETE,
             ):
                 err = ffi_decode(self.__lib.dasi_get_error_string(retval))
-                excpt_str = "Error in function '{}': {}".format(name, err)
-                raise DASIException(excpt_str)
+                msg = "Error in function '{}': {}".format(name, err)
+                raise DASIException(msg, err)
             return retval
 
         return wrapped_fn

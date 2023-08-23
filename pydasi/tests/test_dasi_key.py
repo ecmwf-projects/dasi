@@ -14,7 +14,8 @@
 
 import pytest
 
-from dasi import DASIException, Key
+from dasi import Key
+from dasi.backend import DASIException, check_type
 
 
 def test_key_typename():
@@ -22,11 +23,9 @@ def test_key_typename():
     Construct a key and assert its type name.
     """
 
-    from cffi import FFI
-
     key = Key()
 
-    assert FFI().typeof(key._cdata).cname == "dasi_key_t *"
+    check_type(key.cdata, "dasi_key_t *")
 
 
 def test_key_clear():

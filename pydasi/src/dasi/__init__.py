@@ -12,10 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os import path as ospath
+from .dasi import Dasi
+from .key import Key
+from .query import Query
+from .list import List
+from .retrieve import Retrieve
+from .backend import DASIException
+from .utils.config import Config
+from .utils.version import __version__
 
 
-def get_version():
-    path = ospath.dirname(ospath.dirname(__file__))
-    with open(ospath.join(path, "VERSION")) as file_:
-        return file_.read().strip()
+__all__ = [
+    "Dasi",
+    "Key",
+    "Query",
+    "List",
+    "Retrieve",
+    "DASIException",
+    "Config",
+]

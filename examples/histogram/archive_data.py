@@ -12,52 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
-import json
+from helper import DirectoryStore, cmdline_args
 
 from dasi import Dasi
 
-from directory_data import DirectoryData
-
-
-def parse_cmdline_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-u", "--user", default="0000-0001-2345-9876")
-    parser.add_argument("-l", "--lab", default="CEITEC")
-    parser.add_argument("-p", "--project", default="80s")
-    parser.add_argument("-t", "--timestamp", default="202302102043")
-    parser.add_argument("-P", "--processing", choices=["g1", "g2"], default="g1")
-    parser.add_argument(
-        "-T",
-        "--type",
-        default="spa",
-        choices=["spa", "tomo", "edt", "FIB-SEM", "screening"],
-    )
-    return parser.parse_args()
-
 
 if __name__ == "__main__":
-    args = parse_cmdline_args()
-
-    store = DirectoryData(path="data")
-
-    dasi = Dasi("dasi.yaml")
+    args = cmdline_args()
     key = {
-        "User": args.user,
-        "Project": args.project,
-        "DateTime": args.timestamp,
-        "Processing": args.processing,
-        "Type": args.type,
+        "UserID": args.UserID,
+        "Institute": args.Institute,
+        "Project": args.Project,
+        "Type": args.Type,
+        "Directory": args.Directory,
     }
+    key["Date"] = "01-01-2023"
 
-    key["Object"] = "metadata"
-    store.metadata.update(key)
-    store.metadata.update({"Laboratory": args.lab})
-    dasi.archive(key, json.dumps(store.metadata).encode("utf-8"))
+    dir = DirectoryStore(args.Directory)
 
-    for filename, file in store.get_files():
-        print("Archiving '{}' ...".format(filename))
-        key["Object"] = filename
-        dasi.archive(key, file)
+    session = Dasi("./dasi.yml")
 
-    print("Archiving finished!")
+    for name, data in dir.get_files():
+        print("Archiving '%s' ..." % name)
+        key["Name"] = name
+        session.archive(key, data)
+
+    print("Finished!")

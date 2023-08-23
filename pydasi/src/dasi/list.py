@@ -12,28 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .cffi import FFI, ffi, ffi_decode, lib
-from .key import Key
-from .utils import get_logger
+from dasi.backend import FFI, ffi, lib, ffi_decode, new_list
 
-logger = get_logger(name=__name__)
+from dasi.key import Key
 
 
 class List:
-    """
-    Read metadata from the dasi session.
-    TODO documentation
-    """
+    def __init__(self, dasi: FFI.CData, query: FFI.CData):
+        from dasi.utils import log
 
-    def __init__(self, cdata: FFI.CData):
-        logger.debug("Initialize List...")
-        self.__key = Key()
-        self.__timestamp = 0
-        self.__uri = ""
-        self.__offset = 0
-        self.__length = 0
-        if ffi.typeof(cdata) is ffi.typeof("dasi_list_t *"):
-            self._cdata = cdata
+        self._log = log.getLogger(__name__)
+
+        self._log.debug("Initialize List...")
+
+        # self.__key: FFI.CData
+        # self.__uri: FFI.CData
+        # self.__time: FFI.CData
+        # # self.__offset: FFI.CData
+        # self.__length: FFI.CData
+        # # self.__uri = ""
+        # # self.__time: int = 0
+        # self.__offset: int = 0
+        # # self.__length: int = 0
+
+        self._cdata = new_list(dasi, query)
+
+        self._log.debug("- list count: %s", len(self))
 
     def __iter__(self):
         return self
@@ -45,6 +49,10 @@ class List:
         self.__read()
         return self
 
+    def __len__(self) -> int:
+        self._log.debug("not implemented in Dasi C lib!")
+        return 0
+
     def __read(self):
         coffset = ffi.new("long *", 0)
         clength = ffi.new("long *", 0)
@@ -53,28 +61,29 @@ class List:
         ckey = ffi.new("dasi_key_t **", ffi.NULL)
         lib.dasi_list_attrs(self._cdata, ckey, ctime, curi, coffset, clength)
         ckey = ffi.gc(ckey[0], lib.dasi_free_key)
-        self.__key = Key(ckey)
-        self.__timestamp = ctime[0]
-        self.__uri = ffi_decode(curi[0])
-        self.__offset = coffset[0]
-        self.__length = clength[0]
+
+        self.__key: FFI.CData = ckey
+        self.__time: FFI.CData = ctime
+        self.__uri: FFI.CData = curi
+        self.__offset: FFI.CData = coffset
+        self.__length: FFI.CData = clength
 
     @property
     def key(self):
-        return self.__key
-
-    @property
-    def timestamp(self):
-        return self.__timestamp
+        return Key(self.__key)
 
     @property
     def uri(self):
-        return self.__uri
+        return ffi_decode(self.__uri[0])
+
+    @property
+    def timestamp(self) -> int:
+        return self.__time[0]
 
     @property
     def offset(self):
-        return self.__offset
+        return self.__offset[0]
 
     @property
     def length(self):
-        return self.__length
+        return self.__length[0]

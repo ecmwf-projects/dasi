@@ -12,16 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from logging import CRITICAL, DEBUG, INFO, WARNING
-
-from .log import get_logger
-from .version import get_version
+from ._dasi_cffi import (
+    FFI,
+    DASIException,
+    ffi,
+    lib,
+    ffi_encode,
+    ffi_decode,
+    new_dasi,
+    new_key,
+    new_query,
+    new_list,
+    new_retrieve,
+    check_type,
+)
 
 __all__ = [
-    "CRITICAL",
-    "DEBUG",
-    "INFO",
-    "WARNING",
-    "get_logger",
-    "get_version",
+    "FFI",
+    "DASIException",
+    "ffi",
+    "ffi_encode",
+    "ffi_decode",
+    "lib",
+    "new_dasi",
+    "new_key",
+    "new_query",
+    "new_list",
+    "new_retrieve",
+    "check_type",
 ]

@@ -35,7 +35,7 @@ void DASITool::run() {
 }
 
 void DASITool::initInternal(const eckit::option::CmdArgs& args) {
-    configPath_ = args.getString("config", "./dasi.yaml");
+    configPath_ = args.getString("config", "./dasi.yml");
 }
 
 Dasi& DASITool::dasi() {

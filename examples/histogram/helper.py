@@ -15,14 +15,43 @@
 import os
 
 
-class DirectoryData:
+def cmdline_args():
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser()
+    parser.add_argument("-u", "--UserID", default="0001-2345-6789")
+    parser.add_argument("-i", "--Institute", default="ECMWF")
+    parser.add_argument("-p", "--Project", default="IOSEA")
+    parser.add_argument("-t", "--Type", default="demo")
+    parser.add_argument("-d", "--Directory", default="data")
+    args, _ = parser.parse_known_args()
+    return args
+
+
+def plot_histogram(image: bytearray, name: str):
+    from matplotlib import pyplot as plt
+
+    plot_name = "./%s.png" % name
+
+    print("plot: %s" % plot_name)
+
+    plt.hist(x=image, density=True, bins=40)
+    plt.xlabel("Data")
+    plt.ylabel("Value")
+    plt.title("Histogram of {}".format(name))
+    plt.savefig(plot_name)
+    plt.close()
+
+
+class DirectoryStore:
     """
-    Store the files in a directory.
+    Stores the files in a directory.
     """
 
-    def __init__(self, path=None):
+    def __init__(self, path: str):
         self.__metadata = {}
-        self.__filepaths = []
+        self.__filepaths: list[str] = []
+
         with os.scandir(path) as it:
             for entry in it:
                 if entry.is_file():

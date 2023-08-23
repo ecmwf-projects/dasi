@@ -67,45 +67,25 @@ key3a: Integer;
 
 """
 
-__dasi_config__ = """---
-schema: {schema_file}
-catalogue: toc
-store: file
-spaces:
-  - roots:
-    - path: {root_path}
-
-"""
-
-
-def dasi_schema_file(dasi_config_dir):
-    file_ = dasi_config_dir / "schema"
-    file_.write_text(__dasi_schema__)
-    return file_
-
 
 @pytest.fixture(scope="session")
-def dasi_config_dir(tmp_path_factory):
-    return tmp_path_factory.mktemp("config")
+def dasi_cfg(tmp_path_factory: pytest.TempPathFactory) -> str:
+    from dasi import Config
+
+    path = tmp_path_factory.getbasetemp()
+
+    schema_ = path / "schema"
+    schema_.write_text(__dasi_schema__)
+
+    return Config().default(schema_, path).dump
 
 
-@pytest.fixture(scope="session")
-def dasi_config_file(tmp_path_factory, dasi_config_dir):
-    schema = dasi_schema_file(dasi_config_dir)
-    dasi_config = __dasi_config__.format(
-        schema_file=schema, root_path=tmp_path_factory.getbasetemp()
-    )
-    file_ = dasi_config_dir / "dasi_config.yml"
-    file_.write_text(dasi_config)
-    return file_
-
-
-def test_simple_list(dasi_config_file):
+def test_simple_list(dasi_cfg: str):
     """
     Test Dasi list
     """
 
-    dasi = Dasi(dasi_config_file)
+    dasi = Dasi(dasi_cfg)
 
     try:
         dasi.archive(__list_0__, __simple_data_0__)
