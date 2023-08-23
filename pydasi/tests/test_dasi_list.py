@@ -80,6 +80,29 @@ def dasi_cfg(tmp_path_factory: pytest.TempPathFactory) -> str:
     return Config().default(schema_, path).dump
 
 
+def test_empty_list(dasi_cfg: str):
+    """
+    Test empty list
+    """
+
+    dasi = Dasi(dasi_cfg)
+
+    query = {
+        "key2": ["123"],
+        "key3": ["value1"],
+        "key1a": ["value1"],
+        "key2a": ["value1"],
+        "key3a": ["321"],
+        "key1b": ["value1"],
+        "key2b": ["value1"],
+        "key3b": ["value1"],
+    }
+
+    dlist = dasi.list(query)
+
+    assert len(dlist) == 0
+
+
 def test_simple_list(dasi_cfg: str):
     """
     Test Dasi list
@@ -92,7 +115,7 @@ def test_simple_list(dasi_cfg: str):
         dasi.archive(__list_1__, __simple_data_1__)
         dasi.archive(__list_2__, __simple_data_2__)
     except DASIException:
-        pytest.fail("Cannot archive!")
+        pytest.fail("Archive failed!")
 
     dasi.flush()
 

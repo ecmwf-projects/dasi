@@ -26,21 +26,17 @@ class Retrieve:
         self._log.debug("Initialize Retrieve...")
 
         self.__key = Key()
-        self.__data: bytearray
-        self.__timestamp: int = 0
-        self.__offset: int = 0
-        self.__length: int = 0
-
+        self.__data = bytearray()
+        self.__time = ffi.new("dasi_time_t *", 0)
+        self.__offset = ffi.new("long *", 0)
+        self.__length = ffi.new("long *", 0)
         self._cdata = new_retrieve(dasi, query)
-
-        self._log.debug("- retrieve count: %d", len(self))
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        stat = lib.dasi_retrieve_next(self._cdata)
-        if stat == lib.DASI_ITERATION_COMPLETE:
+        if lib.dasi_retrieve_next(self._cdata) == lib.DASI_ITERATION_COMPLETE:
             raise StopIteration
         self.__read()
         return self
@@ -51,37 +47,34 @@ class Retrieve:
         return count[0]
 
     def __read(self):
-        coffset = ffi.new("long *", 0)
-        clength = ffi.new("long *", 0)
-        ctime = ffi.new("dasi_time_t *", 0)
         ckey = ffi.new("dasi_key_t **", ffi.NULL)
-        lib.dasi_retrieve_attrs(self._cdata, ckey, ctime, coffset, clength)
-        ckey = ffi.gc(ckey[0], lib.dasi_free_key)
-        data = bytearray(clength[0])
-        lib.dasi_retrieve_read(self._cdata, ffi.from_buffer(data), clength)
-
+        lib.dasi_retrieve_attrs(
+            self._cdata, ckey, self.__time, self.__offset, self.__length
+        )
+        ckey: FFI.CData = ffi.gc(ckey[0], lib.dasi_free_key)
         self.__key = Key(ckey)
-        self.__data = data
-        self.__timestamp = ctime[0]
-        self.__offset = coffset[0]
-        self.__length = clength[0]
+
+        self.__data = bytearray(self.length)
+        lib.dasi_retrieve_read(
+            self._cdata, ffi.from_buffer(self.__data), self.__length
+        )
 
     @property
-    def key(self):
+    def key(self) -> Key:
         return self.__key
 
     @property
-    def data(self):
+    def data(self) -> bytearray:
         return self.__data
 
     @property
-    def timestamp(self):
-        return self.__timestamp
+    def timestamp(self) -> int:
+        return self.__time[0]
 
     @property
-    def offset(self):
-        return self.__offset
+    def offset(self) -> int:
+        return self.__offset[0]
 
     @property
-    def length(self):
-        return self.__length
+    def length(self) -> int:
+        return self.__length[0]
