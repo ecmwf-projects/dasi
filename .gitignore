@@ -1,6 +1,37 @@
-contrib/*
+!tools/
+*.txt.user
+*workspace
+.idea
 .idea/*
-build
-*.egg-info
+.vscode
+build/*
+contrib/*
+dhskit
+ecbuild
+eccodes
+eckit
+fdb5
+mars-adsm
+mars-hpss
+mars-server
+metkit
+odc
+pmem
+# example outputs
+examples/**/*.data
+examples/**/*.index
+examples/**/toc
+examples/**/schema
+*.so
+*.dylib
+# python stuff
 __pycache__
+*-local-config.cmake
+*.egg-info
 *.pyc
+dist/
+.eggs
+.ipynb_checkpoints
+# auto-generated Sphinx api docs
+docs/_build/
+docs/contents/generated

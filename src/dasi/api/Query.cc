@@ -1,17 +1,29 @@
 
-#include "dasi/api/Query.h"
+#include "Query.h"
 
-#include "dasi/util/ContainerIostream.h"
-#include "dasi/util/Exceptions.h"
-#include "dasi/util/StringBuilder.h"
+#include "eckit/types/Types.h"
+#include "eckit/utils/StringTools.h"
+#include "eckit/exception/Exceptions.h"
 
-namespace dasi::api {
+using namespace eckit;
 
-//----------------------------------------------------------------------------------------------------------------------
+
+namespace dasi {
+
+//-------------------------------------------------------------------------------------------------
 
 Query::Query(std::initializer_list<std::pair<const std::string, std::vector<std::string>>> l) :
-    values_(l) {}
+        values_(l) {}
 
+Query::Query(const std::string& strKey) {
+    // TODO: Introduce a more robust parser
+    for (const std::string& bit : StringTools::split(",", strKey)) {
+        auto kvs = StringTools::split("=", bit);
+        if (kvs.size() != 2) throw UserError("Invalid key supplied", Here());
+        auto vals = StringTools::split("/", kvs[1]);
+        values_.emplace(std::move(kvs[0]), std::move(vals));
+    }
+}
 
 void Query::print(std::ostream& s) const {
     s << values_;
@@ -38,15 +50,59 @@ void Query::append(const std::string& k, const std::string& v) {
     values_[k].push_back(v);
 }
 
-
 auto Query::get(const std::string_view& name) const -> const value_type& {
-    using util::StringBuilder;
-    using util::KeyError;
     auto it = values_.find(name);
-    if (it == values_.end()) throw KeyError((StringBuilder() << name << " not found in Query").str(), Here());
+    if (it == values_.end()) {
+        std::ostringstream ss;
+        ss << name << " not found in Query";
+        throw eckit::UserError(ss.str(), Here());
+    }
     return it->second;
 }
 
-//----------------------------------------------------------------------------------------------------------------------
+Query::map_type::size_type Query::size() const {
+    return values_.size();
+}
+
+Query::map_type::const_iterator Query::begin() const {
+    return cbegin();
+}
+
+Query::map_type::const_iterator Query::end() const {
+    return cend();
+}
+
+Query::map_type::const_iterator Query::cbegin() const {
+    return values_.cbegin();
+}
+
+Query::map_type::const_iterator Query::cend() const {
+    return values_.cend();
+}
+
+void Query::erase(const std::string& k) {
+    auto it = values_.find(k);
+    if (it != values_.end()) {
+        values_.erase(it);
+    }
+}
+
+void Query::erase(const std::string_view& k) {
+    auto it = values_.find(k);
+    if (it != values_.end()) {
+        values_.erase(it);
+    }
+}
+
+void Query::erase(const char* k) {
+    erase(std::string_view(k));
+}
+
+void Query::clear() {
+    values_.clear();
+}
+
+//-------------------------------------------------------------------------------------------------
 
 }
+

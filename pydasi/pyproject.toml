@@ -1,0 +1,112 @@
+[build-system]
+requires = ["setuptools >= 45.0", "wheel", "cffi>=1.1.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pydasi"
+description = "The Python interface to DASI (Data Access and Storage Interface), developed as part of the EuroHPC project IO-SEA."
+authors = [
+  { name = "European Centre for Medium-Range Weather Forecasts (ECMWF)", email = "software.support@ecmwf.int" },
+]
+keywords = ["dasi", "ecmwf"]
+#dynamic = ["version", "readme"]
+version = "0.2.1"
+readme = { content-type = "text/markdown", file = "README.md" }
+license = { text = "Apache License Version 2.0" }
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Natural Language :: English",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Operating System :: MacOS",
+  "Operating System :: Unix",
+  "Operating System :: POSIX",
+  "Operating System :: POSIX :: Linux",
+]
+requires-python = ">=3.6"
+dependencies = [
+  "cffi>=1.1.1",
+  "pyyaml>=5.3.1",
+  "packaging>=22.0",
+  "importlib-metadata; python_version<'3.8'",
+]
+
+[project.optional-dependencies]
+tests = ["pytest"]
+
+[project.urls]
+Source = "https://github.com/ecmwf-projects/dasi"
+Documentation = "https://pydasi.readthedocs.io/"
+Changelog = "https://github.com/ecmwf-projects/dasi/blob/master/CHANGELOG"
+
+#[tool.setuptools]
+#packages = ["dasi", "dasi.utils", "dasi.cffi"]
+
+[tool.setuptools.packages.find]
+where = ["src"] # list of folders that contain the packages (["."] by default)
+# include = [
+#   "dasi",
+#   # "library",
+#   "utils",
+# ] # package names should match these glob patterns (["*"] by default)
+# exclude = [
+#   "tests",
+# ] # exclude packages matching these glob patterns (empty by default)
+# namespaces = false # to disable scanning PEP 420 namespaces (true by default)
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--capture=no"]
+xfail_strict = true
+testpaths = "tests"
+filterwarnings = ["once::Warning"]
+
+# Black formatting
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+      .eggs
+    | .git
+    | .hg
+    | .mypy_cache
+    | .tox
+    | .venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+'''
+# isort
+[tool.isort]
+profile = "black"
+line_length = 79
+multi_line_output = 3
+include_trailing_comma = true
+src_paths = ["src"]
+virtual_env = ".venv"
+
+[tool.pyright]
+include = ["dasi", "tools", "tests"]
+exclude = ["**/node_modules", "**/__pycache__", "experimental", "typestubs"]
+# ignore = ["dasi/legacy"]
+defineConstant = { DEBUG = true }
+venvPath = ".venv"
+
+reportMissingImports = true
+# reportMissingTypeStubs = false
+
+pythonVersion = "3.9"
+
+executionEnvironments = [{ root = "src" }]

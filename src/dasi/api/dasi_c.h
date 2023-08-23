@@ -1,155 +1,245 @@
+/*
+ * (C) Copyright 2023- ECMWF.
+ *
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http: //www.apache.org/licenses/LICENSE-2.0.
+ * In applying this licence, ECMWF does not waive the privileges and immunities
+ * granted to it by virtue of its status as an intergovernmental organisation
+ * nor does it submit to any jurisdiction.
+ */
 
-#pragma once
+/**
+ * @file DASI C API Conventions
+ *
+ * - #define and Enum constants should be all CAPS.
+ * - Function, variable, typedef, struct, enum tag names should be lower case.
+ *   Separate the words by underscore "_" for clarity. Typedefs end with "_t".
+ * - Functions that are PUBLIC should start with "dasi_".
+ * - Each object is represented as a pointer to an opaque structure.
+ * - If the function creates a new object, it has to be released using the
+ *   appropriate "<obj>_delete" call.
+ *
+ */
+
+#ifndef DASI_API_DASI_C_H
+#define DASI_API_DASI_C_H
+
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stddef.h>
+/* ---------------------------------------------------------------------------------------------------------------------
+ * TYPES
+ * -----*/
 
-/** DASI C API
+typedef int dasi_bool_t;
+
+typedef long dasi_time_t;
+
+struct Dasi;
+typedef struct Dasi dasi_t;
+
+struct Key;
+typedef struct Key dasi_key_t;
+
+struct Query;
+typedef struct Query dasi_query_t;
+
+struct dasi_list_t;
+typedef struct dasi_list_t dasi_list_t;
+
+struct dasi_retrieve_t;
+typedef struct dasi_retrieve_t dasi_retrieve_t;
+
+/* ---------------------------------------------------------------------------------------------------------------------
+ * ERROR HANDLING
+ * -------------- */
+
+/* DASI Error Codes */
+
+typedef enum dasi_error_values_t
+{
+    DASI_SUCCESS            = 0, /* Operation succeded. */
+    DASI_ITERATION_COMPLETE = 1, /* All elements have been returned */
+    DASI_ERROR              = 2, /* Operation failed. */
+    DASI_ERROR_UNKNOWN      = 3, /* Failed with an unknown error. */
+    DASI_ERROR_USER         = 4, /* Failed with an user error. */
+    DASI_ERROR_ITERATOR     = 5, /* Failed with an iterator error. */
+    DASI_ERROR_ASSERT       = 6  /* Failed with an assert() */
+} dasi_error_enum_t;
+
+const char* dasi_get_error_string(int err);
+
+/* -----------------------------------------------------------------------------
+ * HELPERS
+ * ------- */
+
+/**
+ * @brief Set DASI version.
  *
- * Conventions:
- *
- * - Every function in the API returns a `dasi_error` value (see below).
- * - Every 'object' is represented as a pointer to an opaque structure.
- * - If a function returns a value, it is stored into the pointer passed as the
- *   last argument of said function.
- * - If the function creates a new object, it has to be released using the
- *   appropriate `<obj>_destroy` call.
- *
+ * @param version Version string
+ * @return int Error code
  */
+int dasi_version(const char** version);
 
-//----------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Set DASI git sha1 version.
+ *
+ * @param sha1 SHA1 version string
+ * @return int Error code
+ */
+int dasi_vcs_version(const char** sha1);
 
-/// Error codes
+/**
+ * @brief Initialise Main() context.
+ *
+ * @note This is ONLY required when Main() is NOT initialised, such as loading
+ * the DASI as shared library in Python.
+ */
+int dasi_initialise_api();
 
-enum dasi_error {
-    DASI_SUCCESS = 0,
-    DASI_ERROR = 1,
-    DASI_UNEXPECTED = 2,
-    DASI_NOT_FOUND = 3,
-    DASI_ITERATOR_END = 4
-};
-typedef enum dasi_error dasi_error;
+/* ---------------------------------------------------------------------------------------------------------------------
+ * DASI SESSION
+ * ------------ */
 
-//----------------------------------------------------------------------------------------------------------------------
+/** Create a new session object using the given configuration file. */
+int dasi_open(dasi_t** dasi, const char* filename);
 
-/// Types
+/** Release the session and delete the object. */
+int dasi_close(const dasi_t* dasi);
 
-struct dasi_session_t;
-typedef struct dasi_session_t dasi_session_t;
+/**
+ * @brief Writes data to the object store.
+ *
+ * @note Data is not guaranteed accessible nor persisted (wrt. failure),
+ * until dasi_flush() is called.
+ *
+ * @param dasi Dasi session
+ * @param key Metadata description of the data to store and index
+ * @param data Pointer to the read-only data
+ * @param length Length of "data" in bytes
+ */
+int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data,
+                 long length);
 
-struct dasi_key_t;
-typedef struct dasi_key_t dasi_key_t;
+int dasi_flush(dasi_t* dasi);
 
-struct dasi_query_t;
-typedef struct dasi_query_t dasi_query_t;
+/* *** List functionality */
 
-struct dasi_retrieve_result_t;
-typedef struct dasi_retrieve_result_t dasi_retrieve_result_t;
+int dasi_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list);
 
-struct dasi_retrieve_iterator_t;
-typedef struct dasi_retrieve_iterator_t dasi_retrieve_iterator_t;
+int dasi_free_list(const dasi_list_t* list);
 
-struct dasi_read_handle_t;
-typedef struct dasi_read_handle_t dasi_read_handle_t;
+int dasi_list_count(const dasi_list_t* list, long* count);
 
-//----------------------------------------------------------------------------------------------------------------------
+int dasi_list_next(dasi_list_t* list);
 
-/// Session
+int dasi_list_attrs(const dasi_list_t* list, dasi_key_t** key,
+                    dasi_time_t* timestamp, const char** uri, long* offset,
+                    long* length);
 
-/// Open a session using the given configuration file. Returns a new session object.
-dasi_error dasi_open(const char *filename, dasi_session_t **session);
-/// Open a session using the given configuration string. Returns a new session object.
-dasi_error dasi_open_str(const char *config, dasi_session_t **session);
-/// Close the session and release the object.
-dasi_error dasi_close(dasi_session_t *session);
+/* *** Retrieve functionality */
 
-/// Store an object.
-dasi_error dasi_put(dasi_session_t *session, dasi_key_t *key, const void *data, size_t len);
+int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query,
+                  dasi_retrieve_t** retrieve);
 
-/// Make a query to retrieve objects. Returns a new result object.
-dasi_error dasi_get(dasi_session_t *session, dasi_query_t *query, dasi_retrieve_result_t **result);
+int dasi_free_retrieve(const dasi_retrieve_t* retrieve);
 
-//----------------------------------------------------------------------------------------------------------------------
+int dasi_retrieve_read(dasi_retrieve_t* retrieve, void* data, long* length);
 
-/// Key
+int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count);
 
-/// Create a new empty key object.
-dasi_error dasi_key_new(dasi_key_t **key);
-/// Create a new key object by copying an existing one. Returns a new key object.
-dasi_error dasi_key_copy(const dasi_key_t *from, dasi_key_t **to);
-/// Release a key object.
-dasi_error dasi_key_destroy(dasi_key_t *key);
+int dasi_retrieve_next(dasi_retrieve_t* retrieve);
 
-/// Set a keyword-value pair.
-dasi_error dasi_key_set(dasi_key_t *key, const char *keyword, const char *value);
-/// Delete the given keyword and its value.
-dasi_error dasi_key_del(dasi_key_t *key, const char *keyword);
-/// Get the value of a keyword. Returns a pointer to an internal buffer,
-/// valid until the next call to `dasi_key_del` on this keyword or
-/// `dasi_key_destroy` on the key.
-dasi_error dasi_key_get(dasi_key_t *key, const char *keyword, const char **value);
+int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key,
+                        dasi_time_t* timestamp, long* offset, long* length);
 
-/// Compare the given keys according to lexicographical order (like `strcmp`).
-dasi_error dasi_key_cmp(dasi_key_t *lhs, dasi_key_t *rhs, int *result);
+/* ---------------------------------------------------------------------------------------------------------------------
+ * KEY
+ * --- */
 
-//----------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Construct a new Dasi key object
+ * @param Key instance. Returned value must be freed using dasi_free_key
+ * @return Return code (#dasi_error_values_t)
+ */
+int dasi_new_key(dasi_key_t** key);
 
-/// Query
+/**
+ * Construct a Dasi key from a string
+ */
+int dasi_new_key_from_string(dasi_key_t** key, const char* str);
 
-/// Create a new empty query object.
-dasi_error dasi_query_new(dasi_query_t **query);
-/// Release a query object.
-dasi_error dasi_query_destroy(dasi_query_t *query);
+/** Release the key and delete the object. */
+int dasi_free_key(const dasi_key_t* key);
 
-/// Set all values for a keyword at once. The keyword is added if it does not exist.
-dasi_error dasi_query_set(dasi_query_t *query, const char *keyword, const char *values[], size_t num);
-/// Append one value to the set for the given keyword. The keyword is added if it does not exist.
-dasi_error dasi_query_append(dasi_query_t *query, const char *keyword, const char *value);
+/**
+ * Set the value of the specified keyword.
+ * @note The keyword is added if it's missing.
+ */
+int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value);
 
-//----------------------------------------------------------------------------------------------------------------------
+int dasi_key_compare(dasi_key_t* key, dasi_key_t* other, int* result);
 
-/// Retrieve result
+/** Get the name of a numbered key */
+int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword,
+                       const char** value);
 
-/// Release a result object.
-dasi_error dasi_retrieve_result_destroy(dasi_retrieve_result_t *result);
+/**
+ * Get the value of a specified keyword in a key
+ * @param value The value to be returned. This will point towards an internal
+ * character buffer with a lifetime equal to that of the key
+ */
+int dasi_key_get(dasi_key_t* key, const char* keyword, const char** value);
 
-/// Start iterating over the result. Returns a new iterator object.
-dasi_error dasi_retrieve_result_iterate(dasi_retrieve_result_t *result, dasi_retrieve_iterator_t **iterator);
-/// Read the result as a single stream. Returns a new handle object.
-dasi_error dasi_retrieve_result_get_handle(dasi_retrieve_result_t *result, dasi_read_handle_t **handle);
+/** Does the key have a specified keyword */
+int dasi_key_has(dasi_key_t* key, const char* keyword, dasi_bool_t* has);
 
-//----------------------------------------------------------------------------------------------------------------------
+/** How many keys have been set */
+int dasi_key_count(dasi_key_t* key, long* count);
 
-/// Retrieve result iterator
+/** Erase the keyword:value pair specified by its keyword. */
+int dasi_key_erase(dasi_key_t* key, const char* keyword);
 
-/// Release an iterator object.
-dasi_error dasi_retrieve_iterator_destroy(dasi_retrieve_iterator_t *iterator);
+/** Erase all elements in the key */
+int dasi_key_clear(dasi_key_t* key);
 
-/// Advance to the next item. Error code is `DASI_ITERATOR_END` if there is none.
-dasi_error dasi_retrieve_iterator_next(dasi_retrieve_iterator_t *iterator);
-/// Get the key associated with the current item. Returns a new key object.
-dasi_error dasi_retrieve_iterator_get_key(dasi_retrieve_iterator_t *iterator, dasi_key_t **key);
-/// Get the data handle associated to the current item. Returns a new handle object.
-dasi_error dasi_retrieve_iterator_get_handle(dasi_retrieve_iterator_t *iterator, dasi_read_handle_t **handle);
+/* ---------------------------------------------------------------------------------------------------------------------
+ * QUERY
+ * ----- */
 
-//----------------------------------------------------------------------------------------------------------------------
+int dasi_new_query(dasi_query_t** query);
 
-/// Read handle
+int dasi_new_query_from_string(dasi_query_t** query, const char* str);
 
-/// Release a handle object.
-dasi_error dasi_read_handle_destroy(dasi_read_handle_t *handle);
+int dasi_free_query(const dasi_query_t* query);
 
-/// Open the underlying data stream. MUST be called before reading.
-dasi_error dasi_read_handle_open(dasi_read_handle_t *handle);
-/// Close the underlying data stream. MUST be called before releasing.
-dasi_error dasi_read_handle_close(dasi_read_handle_t *handle);
-/// Reads `size` bytes into the given buffer. Returns the number of bytes
-/// actually read. End of stream has been reached if `*len < size`.
-dasi_error dasi_read_handle_read(dasi_read_handle_t *handle, void *buffer, size_t size, size_t *len);
+int dasi_query_set(dasi_query_t* query, const char* keyword,
+                   const char* values[], int num);
+
+int dasi_query_append(dasi_query_t* query, const char* keyword,
+                      const char* value);
+
+int dasi_query_keyword_count(dasi_query_t* query, long* count);
+
+int dasi_query_value_count(dasi_query_t* query, const char* keyword,
+                           long* count);
+
+int dasi_query_get(dasi_query_t* query, const char* keyword, int num,
+                   const char** value);
+
+int dasi_query_has(dasi_query_t* query, const char* keyword, dasi_bool_t* has);
+
+int dasi_query_erase(dasi_query_t* query, const char* keyword);
+
+int dasi_query_clear(dasi_query_t* query);
+
+/* -------------------------------------------------------------------------------------------------------------------*/
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* DASI_API_DASI_C_H */

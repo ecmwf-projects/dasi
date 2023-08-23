@@ -1,8 +1,0 @@
-add_subdirectory( api )
-add_subdirectory( core )
-add_subdirectory( shelf )
-add_subdirectory( tools )
-add_subdirectory( util )
-if(dasi_HAVE_PYTHON)
-    add_subdirectory( python-dasi )
-endif()

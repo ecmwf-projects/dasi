@@ -1,92 +1,52 @@
 
+configure_file( lib/dasi_version.h.in lib/dasi_version.h )
+
 ecbuild_add_library(
     TARGET dasi
     TYPE SHARED
     INSTALL_HEADERS LISTED
-    DEPENDS yaml-cpp
-    PRIVATE_LIBS
-        "${YAML_CPP_LIBRARIES}"
-    PRIVATE_INCLUDES
-        "${YAML_CPP_INCLUDE_DIR}"
+    HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/dasi
+
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-    LINKER_LANGUAGE CXX
+
     SOURCES
         api/Dasi.cc
         api/Dasi.h
-        api/dasi_c.cc
-        api/dasi_c.h
+        api/Key.cc
         api/Key.h
         api/Query.cc
         api/Query.h
-        api/Query.cc
-        api/Query.h
-        api/Config.h
-        api/Config.cc
-        api/SplitKey.h
-        api/ReadHandle.h
-        api/RetrieveResult.cc
-        api/RetrieveResult.h
-        api/ObjectLocation.cc
-        api/ObjectLocation.h
+        api/dasi_c.h
+        api/dasi_c.cc
 
-        core/Archiver.cc
-        core/Archiver.h
-        core/AggregatedReadHandle.cc
-        core/AggregatedReadHandle.h
-        core/Catalogue.cc
-        core/Catalogue.h
-        core/DB.cc
-        core/DB.h
-        core/FileReadHandle.cc
-        core/FileReadHandle.h
-        core/HandleFactory.cc
-        core/HandleFactory.h
-        core/KeyT.h
-        core/OrderedReferenceKey.h
-        core/Retriever.cc
-        core/Retriever.h
-        core/Schema.cc
-        core/Schema.h
-        core/SchemaKeyIterator.h
-        core/SplitKeyT.h
-        core/SplitReferenceKey.h
+        api/detail/Generators.h
+        api/detail/ListDetail.cc
+        api/detail/ListDetail.h
+        api/detail/PolicyDetail.cc
+        api/detail/PolicyDetail.h
+        api/detail/RetrieveDetail.cc
+        api/detail/RetrieveDetail.h
 
-        shelf/ShelfCatalogue.cc
-        shelf/ShelfCatalogue.h
+        impl/ListGeneratorImpl.cc
+        impl/ListGeneratorImpl.h
+        impl/PolicyStatusGeneratorImpl.cc
+        impl/PolicyStatusGeneratorImpl.h
+        impl/RetrieveResultImpl.cc
+        impl/RetrieveResultImpl.h
 
-        util/AutoCloser.h
-        util/Buffer.cc
-        util/Buffer.h
-        util/CartesianProduct.h
-        util/Colour.cc
-        util/Colour.h
-        util/ContainerIostream.h
-        util/Exceptions.cc
-        util/Exceptions.h
-        util/IndentStream.h
-        util/LRUMap.h
-        util/OrderedMap.h
-        util/ReverseAdapter.h
-        util/StringBuilder.h
-        util/Test.h
+        lib/LibDasi.cc
+        lib/LibDasi.h
+
+        tools/DASITool.cc
+        tools/DASITool.h
+
+    PUBLIC_LIBS
+        eckit
+
+    PRIVATE_LIBS
+        fdb5
 )
 
-ecbuild_add_executable(
-    TARGET main
-    SOURCES main.cc
-    LIBS dasi
-)
-
-ecbuild_add_executable(
-    TARGET dasi-put
-    SOURCES tools/dasi_put.cc
-    LIBS dasi
-)
-
-ecbuild_add_executable(
-    TARGET dasi-get
-    SOURCES tools/dasi_get.cc
-    LIBS dasi
-)
+add_subdirectory( tools )
