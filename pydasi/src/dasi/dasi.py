@@ -44,7 +44,7 @@ class Dasi:
 
         self._log = log.getLogger(__name__)
 
-        self._log.debug("Dasi init; config: %s", config)
+        self._log.debug("Dasi init...")
 
         self._cdata = new_dasi(config)
 

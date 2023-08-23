@@ -14,65 +14,90 @@
 
 import yaml
 
-# from pathlib import Path, PosixPath
+from pathlib import Path
+from typing import Any, TypeVar
 
-__default__ = """---
-schema: ./schema
+
+PathLike = TypeVar("PathLike", str, Path)
+
+__template__ = """
+schema: {schema_}
 catalogue: toc
 store: file
 spaces:
 - handler: Default
   roots:
-  - path: ./root1
+  - path: {path_}
 """
+
+__default_config__ = __template__.format(schema_="./schema", path_="./root1")
 
 __default_path__ = "./dasi.yml"
 
-# def dasi_schema_file(dasi_config_dir):
-#     file_ = dasi_config_dir / "schema"
-#     file_.write_text(__dasi_schema__)
-#     return file_
 
-
-class Config:
-    def __init__(self, path: str = __default_path__) -> None:
-        from os import path as ospath
+class Config(object):
+    def __init__(self) -> None:
         from dasi.utils import log
 
         self._log = log.getLogger(__name__)
+        self._log.debug("Config init...")
 
-        self._log.debug("init config: %s", path)
-
-        self._path = path
-
-        if ospath.exists(self._path):
-            with open(self._path, "r") as file:
-                self._cfg = yaml.safe_load(file)
-
-        if self._cfg is None:
-            self._log.warning("Using default config!")
-            self._cfg = yaml.safe_load(__default__)
-            self.dump()
-
-        self._log.debug("- config: %s", yaml.dump(self._cfg))
-
-    def __enter__(self):
-        return self._cfg
-
-    def __exit__(self, *args):
-        self.dump()
+        self._yaml = yaml.safe_load("schema:\nspaces:\n- handler: Default")
 
     @property
-    def path(self):
-        return self._path
+    def yaml(self):
+        return self._yaml
 
-    def dump(self):
-        self._log.debug("dump config")
-        with open(self._path, "w+") as f:
-            yaml.dump(self._cfg, f)
+    @property
+    def dump(self) -> str:
+        return yaml.dump(self._yaml)
 
-    def schema(self, path: str):
-        self._cfg["schema"] = path
+    def __repr__(self) -> str:
+        return self.dump
 
-    def root(self, path: str):
-        self._cfg["spaces"]["handler"]["roots"].add("path", path)
+    def __str__(self) -> str:
+        return "config:\n%s" % self.dump
+
+    def load(self, config: str = __default_config__):
+        from dasi import DASIException
+
+        self._yaml = yaml.safe_load(config)
+
+        if self._yaml is None:
+            raise DASIException("Failed to load config!")
+
+        return self
+
+    def load_file(self, path: PathLike = __default_path__):
+        import os
+
+        self._log.debug("- load config: %s", path)
+
+        cfg_ = ""
+
+        if os.path.exists(path):
+            with open(path, "r") as file:
+                cfg_ = file.read()
+
+        return self.load(cfg_)
+
+    def dump_file(self, path: PathLike = __default_path__):
+        self._log.debug("- dump config: %s", path)
+
+        with open(path, "w") as f:
+            yaml.dump(self._yaml, f)
+
+    def default(
+        self,
+        schema: PathLike = "./schema",
+        path: PathLike = "./root1",
+    ):
+        return self.load(__template__.format(schema_=schema, path_=path))
+
+    def schema(self, value: PathLike):
+        self._yaml["schema"] = value if isinstance(value, str) else str(value)
+        return self
+
+    def roots(self, value: list[dict[str, Any]]):
+        self._yaml["spaces"][0]["roots"] = value
+        return self
