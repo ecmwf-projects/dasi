@@ -31,13 +31,15 @@ def cmdline_args():
 def plot_histogram(image: bytearray, name: str):
     from matplotlib import pyplot as plt
 
-    print("- plot: {}".format(name))
+    plot_name = "./%s.png" % name
+
+    print("plot: %s" % plot_name)
 
     plt.hist(x=image, density=True, bins=40)
     plt.xlabel("Data")
     plt.ylabel("Value")
     plt.title("Histogram of {}".format(name))
-    plt.savefig("./{}.png".format(name))
+    plt.savefig(plot_name)
     plt.close()
 
 

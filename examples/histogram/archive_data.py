@@ -30,10 +30,10 @@ if __name__ == "__main__":
 
     dir = DirectoryStore(args.Directory)
 
-    session = Dasi("dasi.yml")
+    session = Dasi("./dasi.yml")
 
     for name, data in dir.get_files():
-        print("Archiving '%s' ...", name)
+        print("Archiving '%s' ..." % name)
         key["Name"] = name
         session.archive(key, data)
 

@@ -30,7 +30,7 @@ if __name__ == "__main__":
         "Date": ["01-01-2023"],
     }
 
-    session = Dasi("dasi.yml")
+    session = Dasi("./dasi.yml")
 
     # 1- Query the file names
     names = []
@@ -52,9 +52,10 @@ if __name__ == "__main__":
 
     # 4- Work with the files
     for name, data in files.items():
-        print("-----------------------------")
-        print("Name: ", name)
+        print("--- [%s] ---" % name)
         if name.endswith("mdoc"):  # mdoc file
-            print("Content: ", data.decode())
-        # elif name.endswith("tif"):  # image file
-        #     plot_histogram(data, name)
+            print("Content: %s" % data.decode())
+        elif name.endswith("tif"):  # image file
+            plot_histogram(data, name)
+
+    print("Finished!")
