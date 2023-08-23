@@ -10,7 +10,7 @@ authors = [
 ]
 keywords = ["dasi", "ecmwf"]
 #dynamic = ["version", "readme"]
-version = "0.2.0"
+version = "0.2.1"
 readme = { content-type = "text/markdown", file = "README.md" }
 license = { text = "Apache License Version 2.0" }
 classifiers = [
