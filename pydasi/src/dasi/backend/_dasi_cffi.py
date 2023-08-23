@@ -53,21 +53,14 @@ def read_lib_version(lib) -> str:
 
 
 def new_dasi(config: str) -> FFI.CData:
-    from os import fsencode, path
-
-    if not path.exists(config):
-        raise DASIException("Config error!", "File not found: " + config)
-
-    # allocate an instance
     cobj = ffi.new("dasi_t **")
-    lib.dasi_open(cobj, fsencode(config))
-    # set the free function
+    lib.dasi_open(cobj, ffi_encode(config))
     return ffi.gc(cobj[0], lib.dasi_close)
 
 
 def new_key(key=None) -> FFI.CData:
     ckey = ffi.new("dasi_key_t **")
-    if isinstance(key, str):
+    if isinstance(key, str) and key.strip() != "":
         lib.dasi_new_key_from_string(ckey, ffi_encode(key))
     else:
         lib.dasi_new_key(ckey)
@@ -80,7 +73,6 @@ def new_query(query=None) -> FFI.CData:
         lib.dasi_new_query_from_string(cquery, ffi_encode(query))
     else:
         lib.dasi_new_query(cquery)
-    # set the free function
     return ffi.gc(cquery[0], lib.dasi_free_query)
 
 
@@ -90,17 +82,14 @@ def new_list(cdasi: FFI.CData, cquery: FFI.CData) -> FFI.CData:
     # allocate an instance
     clist = ffi.new("dasi_list_t **")
     lib.dasi_list(cdasi, cquery, clist)
-    # set the free function
     return ffi.gc(clist[0], lib.dasi_free_list)
 
 
 def new_retrieve(cdasi: FFI.CData, cquery: FFI.CData) -> FFI.CData:
     check_type(cdasi, "dasi_t *")
     check_type(cquery, "dasi_query_t *")
-    # allocate an instance
     cret = ffi.new("dasi_retrieve_t **")
     lib.dasi_retrieve(cdasi, cquery, cret)
-    # set the free function
     return ffi.gc(cret[0], lib.dasi_free_retrieve)
 
 
