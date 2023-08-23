@@ -14,7 +14,8 @@
 
 import pytest
 
-from dasi import DASIException, Query
+from dasi import Query
+from dasi.backend import DASIException, check_type
 
 
 def test_query_typename():
@@ -22,11 +23,9 @@ def test_query_typename():
     Construct a query and assert its type name.
     """
 
-    from cffi import FFI
-
     query = Query()
 
-    assert FFI().typeof(query._cdata).cname == "dasi_query_t *"
+    check_type(query.cdata, "dasi_query_t *")
 
 
 def test_query_empty():

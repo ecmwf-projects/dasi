@@ -31,53 +31,26 @@ key3a: Integer;
 
 """
 
-__dasi_config__ = """---
-schema: {schema_file}
-catalogue: toc
-store: file
-spaces:
-  - roots:
-    - path: {root_path}
-
-"""
-
-
-def dasi_schema_file(dasi_config_dir):
-    file_ = dasi_config_dir / "schema"
-    file_.write_text(__dasi_schema__)
-    return file_
-
 
 @pytest.fixture(scope="session")
-def dasi_config_dir(tmp_path_factory):
-    return tmp_path_factory.mktemp("config")
+def dasi_cfg(tmp_path_factory: pytest.TempPathFactory) -> str:
+    from dasi import Config
+
+    tmp_path = tmp_path_factory.getbasetemp()
+
+    schema_path = tmp_path / "schema"
+    with open(schema_path, "w") as f:
+        f.write(__dasi_schema__)
+
+    return Config().default(schema_path, tmp_path).dump
 
 
-@pytest.fixture(scope="session")
-def dasi_config_file(tmp_path_factory, dasi_config_dir):
-    schema = dasi_schema_file(dasi_config_dir)
-    dasi_config = __dasi_config__.format(
-        schema_file=schema, root_path=tmp_path_factory.getbasetemp()
-    )
-    file_ = dasi_config_dir / "dasi_config.yml"
-    file_.write_text(dasi_config)
-    return file_
-
-
-def test_create_schema_file(dasi_config_dir):
-    """
-    Test create a simple schema file
-    """
-
-    assert dasi_schema_file(dasi_config_dir).read_text() == __dasi_schema__
-
-
-def test_simple_archive(dasi_config_file):
+def test_simple_archive(dasi_cfg: str):
     """
     Test Dasi archiving
     """
 
-    dasi = Dasi(dasi_config_file)
+    dasi = Dasi(dasi_cfg)
 
     key = {
         "key2": "123",
@@ -101,12 +74,12 @@ def test_simple_archive(dasi_config_file):
         pytest.fail("Cannot archive!")
 
 
-def test_archive_fail(dasi_config_file):
+def test_archive_fail(dasi_cfg: str):
     """
     Test Dasi archiving failing
     """
 
-    dasi = Dasi(dasi_config_file)
+    dasi = Dasi(dasi_cfg)
 
     key = {
         "key1": "value1",
@@ -118,12 +91,12 @@ def test_archive_fail(dasi_config_file):
         dasi.archive(key, __simple_data_1__)
 
 
-def test_simple_retrieve(dasi_config_file):
+def test_simple_retrieve(dasi_cfg: str):
     """
     Test Dasi retrieve
     """
 
-    dasi = Dasi(dasi_config_file)
+    dasi = Dasi(dasi_cfg)
 
     query = {
         "key1": ["value1", "value2", "value3"],
