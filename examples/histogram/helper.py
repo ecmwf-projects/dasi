@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
 
 def cmdline_args():
     from argparse import ArgumentParser
@@ -49,6 +47,8 @@ class DirectoryStore:
     """
 
     def __init__(self, path: str):
+        import os
+
         self.__metadata = {}
         self.__filepaths: list[str] = []
 
@@ -59,11 +59,13 @@ class DirectoryStore:
 
         self.__metadata["NumberOfFiles"] = len(self.__filepaths)
 
-    def get_files(self):
+    def files(self):
+        from os import path as ospath
+
         for path in self.__filepaths:
-            filename = os.path.basename(path)
-            with open(path, "rb") as f:
-                yield filename, f.read()
+            if ospath.exists(path):
+                with open(path, "rb") as f:
+                    yield ospath.basename(path), f.read()
 
     @property
     def metadata(self):

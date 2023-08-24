@@ -18,6 +18,37 @@ from helper import cmdline_args, plot_histogram
 from dasi import Dasi
 
 
+def query_names(session: Dasi, query):
+    """Query the filenames"""
+
+    names: list[str] = []
+    for item in session.list(query):
+        file = item.key["Name"]
+        names.append(file)
+
+    return names
+
+
+def retrieve_files(session: Dasi, query):
+    """Retrieve the data"""
+
+    retrieved = session.retrieve(query)
+
+    if len(retrieved) < 1:
+        exit("No results from retrieve!\nQuery={}\n".format(query))
+    else:
+        print("Retrived %d files." % len(retrieved))
+
+    # Map the (file) names to data
+    files: dict[str, bytearray] = {}
+
+    for item in retrieved:
+        name = item.key["Name"]
+        files[name] = item.data
+
+    return files
+
+
 if __name__ == "__main__":
     args = cmdline_args()
 
@@ -32,25 +63,11 @@ if __name__ == "__main__":
 
     session = Dasi("./dasi.yml")
 
-    # 1- Query the file names
-    names = []
-    for item in session.list(query):
-        names.append(item.key["Name"])
+    query["Name"] = query_names(session, query)
 
-    query["Name"] = names
+    files = retrieve_files(session, query)
 
-    # 2- Retrieve the data
-    retrieved = session.retrieve(query)
-    if len(retrieved) < 2:
-        exit("Query could not return any results!\n{}\n".format(query))
-
-    # 3- Map the file name and data
-    files: dict[str, bytearray] = {}
-    for r in retrieved:
-        name = r.key["Name"]
-        files[name] = r.data
-
-    # 4- Work with the files
+    # Work with the files
     for name, data in files.items():
         print("--- [%s] ---" % name)
         if name.endswith("mdoc"):  # mdoc file
