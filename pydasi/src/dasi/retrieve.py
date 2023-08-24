@@ -32,6 +32,11 @@ class Retrieve:
         self.__length = ffi.new("long *", 0)
         self._cdata = new_retrieve(dasi, query)
 
+    def __str__(self) -> str:
+        return "{}, time: {}, offset: {}, length: {}".format(
+            self.key, self.timestamp, self.offset, self.length
+        )
+
     def __iter__(self):
         return self
 

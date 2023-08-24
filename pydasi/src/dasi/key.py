@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dasi.backend import *
+from dasi.backend import FFI, ffi, lib, ffi_decode, ffi_encode, new_key, check_type
 
 
 class Key:
@@ -55,15 +55,16 @@ class Key:
         lib.dasi_key_count(self._cdata, count)
         return count[0]
 
+    def __str__(self) -> str:
+        return "Key: {}".format(repr(self))
+
     def __repr__(self) -> str:
         keyword = ffi.new("const char **")
         value = ffi.new("const char **")
         out = ""
         for i in range(len(self)):
             lib.dasi_key_get_index(self._cdata, i, keyword, value)
-            out += "<{}:{}>".format(
-                ffi_decode(keyword[0]), ffi_decode(value[0])
-            )
+            out += "<{}:{}>".format(ffi_decode(keyword[0]), ffi_decode(value[0]))
         return out
 
     def __ne__(self, other) -> bool:
