@@ -37,7 +37,7 @@ def retrieve_files(session: Dasi, query):
     if len(retrieved) < 1:
         exit("No results from retrieve!\nQuery={}\n".format(query))
     else:
-        print("Retrived %d files." % len(retrieved))
+        print("Retrieved %d files." % len(retrieved))
 
     # Map the (file) names to data
     files: dict[str, bytearray] = {}
