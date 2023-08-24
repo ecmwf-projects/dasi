@@ -12,7 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dasi.backend import *
+from dasi.backend import (
+    FFI,
+    DASIException,
+    ffi,
+    lib,
+    ffi_encode,
+    ffi_decode,
+    check_type,
+    new_query,
+)
 
 
 class Query:

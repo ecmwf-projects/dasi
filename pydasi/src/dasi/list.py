@@ -32,6 +32,11 @@ class List:
         self.__length = ffi.new("long *", 0)
         self._cdata = new_list(dasi, query)
 
+    def __str__(self) -> str:
+        return "{}, uri: {}, time: {}, offset: {}, length: {}".format(
+            self.key, self.uri, self.timestamp, self.offset, self.length
+        )
+
     def __iter__(self):
         return self
 
@@ -64,7 +69,8 @@ class List:
 
     @property
     def uri(self) -> str:
-        return ffi_decode(self.__uri[0])
+        val: FFI.CData = self.__uri[0]
+        return ffi_decode(val) if val != ffi.NULL else "unknown"
 
     @property
     def timestamp(self) -> int:
