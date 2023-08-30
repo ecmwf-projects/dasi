@@ -11,6 +11,7 @@
 #include "Dasi.h"
 
 #include "dasi/lib/LibDasi.h"
+#include "dasi/impl/PurgeGeneratorImpl.h"
 #include "dasi/impl/ListGeneratorImpl.h"
 #include "dasi/impl/PolicyStatusGeneratorImpl.h"
 #include "dasi/impl/RetrieveResultImpl.h"
@@ -123,25 +124,21 @@ fdb5::Config construct_config(const char* dasi_config, const char* application_c
 
 //----------------------------------------------------------------------------------------------------------------------
 
-/// @note We use an internal implementation for two reasons:
-///       (i) It ensures that the interface is kept as clean as possible
-///      (ii) It ensures that no FDB headers are exposed through DASI
-
 class DasiImpl {
 
 public: // methods
-
-    DasiImpl(const char* dasi_config, const char* application_config) :
-        mainHelper_(),
-        fdb_(construct_config(dasi_config, application_config)) {}
+    DasiImpl(const char* dasi_config, const char* application_config):
+        mainHelper_(), fdb_(construct_config(dasi_config, application_config)) { }
 
     void archive(const Key& key, const void* data, size_t length) {
         fdb5::Key fdb_key;
-        for (const auto& kv : key) {
-            fdb_key.set(kv.first, kv.second);
-        }
-        LOG_DEBUG_LIB(LibDasi) << "Schema: " << fdb_.config().schemaPath() << std::endl;
+        for (const auto& kv : key) { fdb_key.set(kv.first, kv.second); }
         fdb_.archive(fdb_key, data, length);
+    }
+
+    PurgeGenerator purge(const Query& query, bool doit, bool porcelain) {
+        auto&& iter = fdb_.purge(fdb5::FDBToolRequest(queryToMarsRequest(query)), doit, porcelain);
+        return PurgeGenerator(std::make_unique<PurgeGeneratorImpl>(std::move(iter)));
     }
 
     ListGenerator list(const Query& query) {
@@ -242,11 +239,16 @@ Dasi::Dasi(const char* dasi_config, const char* application_config) :
 
 // Destructor must be implemented in .cc, not as default in header, as DasiImpl
 // is only forward declared, whereas it is available in this translation unit
-Dasi::~Dasi() {}
+Dasi::~Dasi() = default;
 
 void Dasi::archive(const Key& key, const void* data, size_t length) {
     ASSERT(impl_);
     impl_->archive(key, data, length);
+}
+
+PurgeGenerator Dasi::purge(const Query& query, bool doit, bool porcelain) {
+    ASSERT(impl_);
+    return impl_->purge(query, doit, porcelain);
 }
 
 ListGenerator Dasi::list(const Query& query) {

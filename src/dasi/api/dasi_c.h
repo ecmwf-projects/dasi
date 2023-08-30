@@ -47,6 +47,9 @@ typedef struct Key dasi_key_t;
 struct Query;
 typedef struct Query dasi_query_t;
 
+struct dasi_purge_t;
+typedef struct dasi_purge_t dasi_purge_t;
+
 struct dasi_list_t;
 typedef struct dasi_list_t dasi_list_t;
 
@@ -105,7 +108,7 @@ int dasi_initialise_api();
  * ------------ */
 
 /** Create a new session object using the given configuration file. */
-int dasi_open(dasi_t** dasi, const char* filename);
+int dasi_open(dasi_t** dasi, const char* config);
 
 /** Release the session and delete the object. */
 int dasi_close(const dasi_t* dasi);
@@ -126,7 +129,7 @@ int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data,
 
 int dasi_flush(dasi_t* dasi);
 
-/* *** List functionality */
+/* List functionality */
 
 int dasi_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list);
 
@@ -140,7 +143,7 @@ int dasi_list_attrs(const dasi_list_t* list, dasi_key_t** key,
                     dasi_time_t* timestamp, const char** uri, long* offset,
                     long* length);
 
-/* *** Retrieve functionality */
+/* Retrieve functionality */
 
 int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query,
                   dasi_retrieve_t** retrieve);
@@ -155,6 +158,16 @@ int dasi_retrieve_next(dasi_retrieve_t* retrieve);
 
 int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key,
                         dasi_time_t* timestamp, long* offset, long* length);
+
+/* Delete functionality */
+
+int dasi_purge(dasi_t* dasi, const dasi_query_t* query, const dasi_bool_t* doit, dasi_purge_t** purge);
+
+int dasi_free_purge(const dasi_purge_t* purge);
+
+int dasi_purge_next(dasi_purge_t* purge);
+
+int dasi_purge_attrs(const dasi_purge_t* purge, const char** value);
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * KEY

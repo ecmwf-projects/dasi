@@ -8,8 +8,8 @@
  * does it submit to any jurisdiction.
  */
 
-
 /// @author Simon Smart
+/// @author Metin Cakircali
 /// @date   Sep 2022
 
 #pragma once
@@ -17,6 +17,7 @@
 #include "dasi/api/Key.h"
 #include "dasi/api/Query.h"
 #include "dasi/api/detail/ListDetail.h"
+#include "dasi/api/detail/PurgeDetail.h"
 #include "dasi/api/detail/PolicyDetail.h"
 #include "dasi/api/detail/RetrieveDetail.h"
 
@@ -46,6 +47,19 @@ public: // methods
     /// @param data A pointer to a (read-only) copy of the data
     /// @param length The length of the data to store in bytes
     void archive(const Key& key, const void* data, size_t length);
+
+    /// Purge does several things:
+    /// 1. Enumerates all data internally, noting every field that is not accessible because it is masked by newer
+    /// fields
+    /// 2. Determines which indexes no longer have any accessible fields in them. With --doit, these indexes are then
+    /// masked out by putting a masking entry into Dasi so that they will not be visited.
+    /// 3. If all of the data in a data file, and/or all of the indexes in an index file are no longer accessible (and
+    /// are masked out appropriately) then these files will be removed from Dasi.
+    ///
+    /// @param query A description of the span of data to purge (only 1st level rule applies)
+    /// @param doit Delete the files (data and indexes)
+    /// @param porcelain List only the deleted files (short output)
+    PurgeGenerator purge(const Query& query, bool doit, bool porcelain);
 
     /// Flushes all buffers and ensures all internal state is safe wrt. failure
     /// @note always safe to call
