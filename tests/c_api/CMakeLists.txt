@@ -1,6 +1,7 @@
 
 list( APPEND _dasi_tests
     simple_archive
+    wipe
     purge
     key
     query

@@ -20,10 +20,12 @@
 
 namespace dasi::testing {
 
+const auto tempPath = eckit::LocalPathName::cwd() + "/tmp.DASI.c";
+
 //----------------------------------------------------------------------------------------------------------------------
 
 CASE("testing dasi archive") {
-    TempDirectory tempDir(eckit::LocalPathName::cwd() + "/tmp.DASI.c", false);
+    TempDirectory tempDir(tempPath, false);
 
     simpleWrite(tempDir, "simple_schema", SIMPLE_SCHEMA);
 
@@ -74,7 +76,7 @@ CASE("testing dasi archive") {
 }
 
 CASE("testing dasi purge") {
-    TempDirectory tempDir(eckit::LocalPathName::cwd() + "/tmp.DASI.c");
+    TempDirectory tempDir(tempPath);
 
     const auto cfg = simpleConfig(tempDir, "simple_schema");
 

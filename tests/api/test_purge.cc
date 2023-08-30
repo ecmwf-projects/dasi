@@ -22,14 +22,14 @@
 
 namespace dasi::testing {
 
+const auto tempPath = eckit::LocalPathName::cwd() + "/tmp.DASI.wipe";
+
 //----------------------------------------------------------------------------------------------------------------------
 
 CASE("testing dasi archive") {
-    TempDirectory tempDir(eckit::LocalPathName::cwd() + "/tmp.DASI", false);
+    TempDirectory tempDir(tempPath, false);
 
-    simpleWrite(tempDir, "simple_schema", SIMPLE_SCHEMA);
-
-    dasi::Query query {{"key1", {"value1"}}, {"key2", {"value2"}}, {"key3", {"value3"}}};
+    tempDir.write("simple_schema", SIMPLE_SCHEMA);
 
     const auto cfg = simpleConfig(tempDir, "simple_schema");
 
@@ -48,6 +48,8 @@ CASE("testing dasi archive") {
 
     LOG_D("--- [LIST] ---");
 
+    dasi::Query query {{"key1", {"value1"}}, {"key2", {"value2"}}, {"key3", {"value3"}}};
+
     size_t count = 0;
     for (auto&& item : dasi.list(query)) { count++; }
     EXPECT(count == 4);
@@ -56,7 +58,7 @@ CASE("testing dasi archive") {
 }
 
 CASE("testing dasi purge") {
-    TempDirectory tempDir(eckit::LocalPathName::cwd() + "/tmp.DASI");
+    TempDirectory tempDir(tempPath);
 
     LOG_D("--- [PURGE] ---");
 
