@@ -22,7 +22,7 @@
 
 namespace dasi::testing {
 
-const auto tempPath = eckit::LocalPathName::cwd() + "/tmp.DASI.wipe";
+const auto tempPath = eckit::LocalPathName::cwd() + "/tmp.DASI.purge";
 
 //----------------------------------------------------------------------------------------------------------------------
 
