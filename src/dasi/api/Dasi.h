@@ -52,7 +52,7 @@ public: // methods
     /// Removes the data from Dasi up to 2nd-level rules.
     /// @note The data removal of 3rd-level rule is not possible.
     ///
-    /// @param query A description of the span of data to purge (only 1st level rule applies)
+    /// @param query A description of the span of data to wipe (up-to 2nd-level rule)
     /// @param doit Delete the files (data and indexes)
     /// @param porcelain List only the deleted files (short output)
     /// @param all Wipe all (unowned) contents of an unclean database (unsafe)
