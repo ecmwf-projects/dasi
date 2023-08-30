@@ -247,6 +247,7 @@ void Dasi::archive(const Key& key, const void* data, size_t length) {
 }
 
 PurgeGenerator Dasi::purge(const Query& query, bool doit, bool porcelain) {
+PurgeGenerator Dasi::purge(const Query& query, const bool doit, const bool porcelain) {
     ASSERT(impl_);
     return impl_->purge(query, doit, porcelain);
 }

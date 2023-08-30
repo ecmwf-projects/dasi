@@ -160,6 +160,7 @@ int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key,
                         dasi_time_t* timestamp, long* offset, long* length);
 
 /* Delete functionality */
+/* Purge functionality */
 
 int dasi_purge(dasi_t* dasi, const dasi_query_t* query, const dasi_bool_t* doit, dasi_purge_t** purge);
 
