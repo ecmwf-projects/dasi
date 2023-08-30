@@ -25,12 +25,14 @@ ecbuild_add_library(
         api/detail/ListDetail.cc
         api/detail/ListDetail.h
         api/detail/PurgeDetail.h
+        api/detail/WipeDetail.h
         api/detail/PolicyDetail.cc
         api/detail/PolicyDetail.h
         api/detail/RetrieveDetail.cc
         api/detail/RetrieveDetail.h
 
         impl/PurgeGeneratorImpl.h
+        impl/WipeGeneratorImpl.h
         impl/ListGeneratorImpl.cc
         impl/ListGeneratorImpl.h
         impl/PolicyStatusGeneratorImpl.cc

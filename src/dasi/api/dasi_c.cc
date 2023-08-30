@@ -35,6 +35,15 @@ struct Query : public dasi::Query {
     using dasi::Query::Query;
 };
 
+struct dasi_wipe_t {
+    dasi_wipe_t(dasi::WipeGenerator&& gen): first(true), generator(std::move(gen)), iterator(generator.begin()) { }
+
+    bool                                first;
+    dasi::WipeGenerator                 generator;
+    dasi::WipeGenerator::const_iterator iterator;
+    std::string                         value;
+};
+
 struct dasi_purge_t {
     dasi_purge_t(dasi::PurgeGenerator&& gen): first(true), generator(std::move(gen)), iterator(generator.begin()) { }
 
@@ -185,6 +194,46 @@ int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data,
         ASSERT(data);
         ASSERT(length >= 0);
         dasi->archive(*key, data, length);
+    });
+}
+
+int dasi_wipe(dasi_t* dasi, const dasi_query_t* query, const dasi_bool_t* doit, const dasi_bool_t* all,
+              dasi_wipe_t** wipe) {
+    return tryCatch([dasi, query, doit, all, wipe] {
+        ASSERT(dasi);
+        ASSERT(query);
+        ASSERT(doit);
+        ASSERT(all);
+        ASSERT(wipe);
+        *wipe = new dasi_wipe_t(dasi->wipe(*query, *doit, true, *all));
+    });
+}
+
+int dasi_free_wipe(const dasi_wipe_t* wipe) {
+    return tryCatch([wipe] {
+        ASSERT(wipe);
+        delete wipe;
+    });
+}
+
+int dasi_wipe_next(dasi_wipe_t* wipe) {
+    return tryCatch(std::function<int()> {[wipe] {
+        ASSERT(wipe);
+        if (wipe->first) {
+            wipe->first = false;
+        } else {
+            ++wipe->iterator;
+        }
+        if (wipe->iterator == wipe->generator.end()) { return DASI_ITERATION_COMPLETE; }
+        return DASI_SUCCESS;
+    }});
+}
+
+int dasi_wipe_attrs(const dasi_wipe_t* wipe, const char** value) {
+    return tryCatch([wipe, value] {
+        ASSERT(wipe);
+        ASSERT(wipe->iterator != wipe->generator.end());
+        if (value) { *value = wipe->iterator->c_str(); }
     });
 }
 

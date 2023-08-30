@@ -47,6 +47,9 @@ typedef struct Key dasi_key_t;
 struct Query;
 typedef struct Query dasi_query_t;
 
+struct dasi_wipe_t;
+typedef struct dasi_wipe_t dasi_wipe_t;
+
 struct dasi_purge_t;
 typedef struct dasi_purge_t dasi_purge_t;
 
@@ -159,7 +162,17 @@ int dasi_retrieve_next(dasi_retrieve_t* retrieve);
 int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key,
                         dasi_time_t* timestamp, long* offset, long* length);
 
-/* Delete functionality */
+/* Wipe functionality */
+
+int dasi_wipe(dasi_t* dasi, const dasi_query_t* query, const dasi_bool_t* doit, const dasi_bool_t* all,
+              dasi_wipe_t** wipe);
+
+int dasi_free_wipe(const dasi_wipe_t* wipe);
+
+int dasi_wipe_next(dasi_wipe_t* wipe);
+
+int dasi_wipe_attrs(const dasi_wipe_t* wipe, const char** value);
+
 /* Purge functionality */
 
 int dasi_purge(dasi_t* dasi, const dasi_query_t* query, const dasi_bool_t* doit, dasi_purge_t** purge);

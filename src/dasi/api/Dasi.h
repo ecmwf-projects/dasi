@@ -18,6 +18,7 @@
 #include "dasi/api/Query.h"
 #include "dasi/api/detail/ListDetail.h"
 #include "dasi/api/detail/PurgeDetail.h"
+#include "dasi/api/detail/WipeDetail.h"
 #include "dasi/api/detail/PolicyDetail.h"
 #include "dasi/api/detail/RetrieveDetail.h"
 
@@ -47,6 +48,13 @@ public: // methods
     /// @param data A pointer to a (read-only) copy of the data
     /// @param length The length of the data to store in bytes
     void archive(const Key& key, const void* data, size_t length);
+
+    ///
+    /// @param query A description of the span of data to purge (only 1st level rule applies)
+    /// @param doit Delete the files (data and indexes)
+    /// @param porcelain List only the deleted files (short output)
+    /// @param all Wipe all (unowned) contents of an unclean database (unsafe)
+    WipeGenerator wipe(const Query& query, bool doit, bool porcelain, bool all);
 
     /// Purge does several things:
     /// 1. Enumerates all data internally, noting every field that is not accessible because it is masked by newer

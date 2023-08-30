@@ -11,6 +11,7 @@
 #include "Dasi.h"
 
 #include "dasi/lib/LibDasi.h"
+#include "dasi/impl/WipeGeneratorImpl.h"
 #include "dasi/impl/PurgeGeneratorImpl.h"
 #include "dasi/impl/ListGeneratorImpl.h"
 #include "dasi/impl/PolicyStatusGeneratorImpl.h"
@@ -136,7 +137,12 @@ public: // methods
         fdb_.archive(fdb_key, data, length);
     }
 
-    PurgeGenerator purge(const Query& query, bool doit, bool porcelain) {
+    WipeGenerator wipe(const Query& query, const bool doit, const bool porcelain, const bool all) {
+        auto&& iter = fdb_.wipe(fdb5::FDBToolRequest(queryToMarsRequest(query)), doit, porcelain, all);
+        return WipeGenerator(std::make_unique<WipeGeneratorImpl>(std::move(iter)));
+    }
+
+    PurgeGenerator purge(const Query& query, const bool doit, const bool porcelain) {
         auto&& iter = fdb_.purge(fdb5::FDBToolRequest(queryToMarsRequest(query)), doit, porcelain);
         return PurgeGenerator(std::make_unique<PurgeGeneratorImpl>(std::move(iter)));
     }
@@ -246,7 +252,11 @@ void Dasi::archive(const Key& key, const void* data, size_t length) {
     impl_->archive(key, data, length);
 }
 
-PurgeGenerator Dasi::purge(const Query& query, bool doit, bool porcelain) {
+WipeGenerator Dasi::wipe(const Query& query, const bool doit, const bool porcelain, const bool all) {
+    ASSERT(impl_);
+    return impl_->wipe(query, doit, porcelain, all);
+}
+
 PurgeGenerator Dasi::purge(const Query& query, const bool doit, const bool porcelain) {
     ASSERT(impl_);
     return impl_->purge(query, doit, porcelain);
