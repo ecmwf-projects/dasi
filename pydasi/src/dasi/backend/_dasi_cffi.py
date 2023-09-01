@@ -178,7 +178,7 @@ class PatchedLib:
                 self.__lib.DASI_SUCCESS,
                 self.__lib.DASI_ITERATION_COMPLETE,
             ):
-                err = ffi_decode(self.__lib.dasi_get_error_string(retval))
+                err = ffi_decode(self.__lib.dasi_get_error_string())
                 msg = "Error in function '{}': {}".format(name, err)
                 raise DASIException(msg, err)
             return retval

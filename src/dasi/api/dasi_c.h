@@ -83,10 +83,10 @@ typedef enum dasi_error_values_t {
     DASI_ERROR_ASSERT       = 6  /* Failed with an assert() */
 } dasi_error_enum_t;
 
-const char* dasi_get_error_string(int err);
 /** Returns pointer to a globally allocated string.
  * DO NOT modify/free the returned pointer.
  */
+const char* dasi_get_error_string(void);
 
 /* -----------------------------------------------------------------------------
  * HELPERS
@@ -112,7 +112,7 @@ int dasi_vcs_version(const char** sha1);
  * the DASI as shared library in Python.
  * @return dasi error code, see dasi_error_enum_t.
  */
-int dasi_initialise_api();
+int dasi_initialise_api(void);
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * DASI SESSION

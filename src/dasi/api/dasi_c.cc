@@ -82,7 +82,7 @@ struct dasi_retrieve_t {
 
 static thread_local std::string g_current_error_string;
 
-const char* dasi_get_error_string(int) {
+const char* dasi_get_error_string() {
     return g_current_error_string.c_str();
 }
 
@@ -150,7 +150,7 @@ int dasi_vcs_version(const char** sha1) {
     return DASI_SUCCESS;
 }
 
-int dasi_initialise_api() {
+int dasi_initialise_api(void) {
     return tryCatch([] {
         static bool initialised = false;
 
