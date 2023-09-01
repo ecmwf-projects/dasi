@@ -33,7 +33,7 @@ CASE("testing dasi archive") {
 
     const auto cfg = simpleConfig(tempDir, "simple_schema");
 
-    LOG_D("--- [ARCHIVE] ---");
+    LOG_I("--- [ARCHIVE] ---");
 
     dasi::Dasi dasi(cfg.c_str());
 
@@ -46,21 +46,24 @@ CASE("testing dasi archive") {
 
     dasi.flush();
 
-    LOG_D("--- [LIST] ---");
+    LOG_I("--- [LIST] ---");
 
     dasi::Query query {{"key1", {"value1"}}, {"key2", {"value2"}}, {"key3", {"value3"}}};
 
     size_t count = 0;
-    for (auto&& item : dasi.list(query)) { count++; }
+    for (auto&& item : dasi.list(query)) {
+        LOG_D("LIST: " << item);
+        count++;
+    }
     EXPECT(count == 4);
 
-    LOG_D("--- [LIST COUNT: " << count << "] ---");
+    LOG_I("--- [LIST COUNT: " << count << "] ---");
 }
 
 CASE("testing dasi purge") {
     TempDirectory tempDir(tempPath);
 
-    LOG_D("--- [PURGE] ---");
+    LOG_I("--- [PURGE] ---");
 
     const auto cfg = simpleConfig(tempDir, "simple_schema");
 
@@ -76,7 +79,7 @@ CASE("testing dasi purge") {
         count++;
     }
 
-    LOG_D("--- [PURGED: " << count << "] ---");
+    LOG_I("--- [PURGED: " << count << "] ---");
 }
 
 }  // namespace dasi::testing

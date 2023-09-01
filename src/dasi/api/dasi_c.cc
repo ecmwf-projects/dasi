@@ -229,7 +229,7 @@ int dasi_wipe_next(dasi_wipe_t* wipe) {
     }});
 }
 
-int dasi_wipe_attrs(const dasi_wipe_t* wipe, const char** value) {
+int dasi_wipe_get_value(const dasi_wipe_t* wipe, const char** value) {
     return tryCatch([wipe, value] {
         ASSERT(wipe);
         ASSERT(wipe->iterator != wipe->generator.end());
@@ -267,7 +267,7 @@ int dasi_purge_next(dasi_purge_t* purge) {
     }});
 }
 
-int dasi_purge_attrs(const dasi_purge_t* purge, const char** value) {
+int dasi_purge_get_value(const dasi_purge_t* purge, const char** value) {
     return tryCatch([purge, value] {
         ASSERT(purge);
         ASSERT(purge->iterator != purge->generator.end());

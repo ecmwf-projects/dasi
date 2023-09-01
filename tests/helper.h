@@ -114,6 +114,14 @@ public:
 
     void write(const char* filename, const char* data) { simpleWrite(*this, filename, data); }
 
+    auto countFilesRecursive() const {
+        auto isRegularFile = [](const fs::path& p) {
+            if (fs::is_regular_file(p)) { return true; }
+            return false;
+        };
+        return std::count_if(fs::recursive_directory_iterator(*this), {}, isRegularFile);
+    }
+
     ~TempDirectory() {
         if (remove_) { fs::remove_all(*this); }
     }

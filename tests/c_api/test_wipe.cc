@@ -29,12 +29,10 @@ CASE("testing dasi: 1- archive") {
 
     tempDir.write("simple_schema", SIMPLE_SCHEMA);
 
-    const auto cfg = simpleConfig(tempDir, "simple_schema");
-
     LOG_I("--- [ARCHIVE] ---");
 
     dasi_t* dasi;
-    CHECK_RETURN(dasi_open(&dasi, cfg.c_str()));
+    CHECK_RETURN(dasi_open(&dasi, simpleConfig(tempDir, "simple_schema").c_str()));
     EXPECT(dasi);
 
     const auto keys = KeySet({"value3b1", "value3b2", "value3b3", "value3b4"});
@@ -85,20 +83,20 @@ CASE("testing dasi: 1- archive") {
 
     count += keys2.lookup(list);
 
-    CHECK_RETURN(dasi_free_list(list));
-
     EXPECT(count == 8);
 
     LOG_I("--- [COUNT: " << count << "] ---");
 
     CHECK_RETURN(dasi_free_query(query));
-
+    CHECK_RETURN(dasi_free_list(list));
     CHECK_RETURN(dasi_close(dasi));
 }
 
 CASE("testing dasi: 2- wipe") {
     SECTION("wipe some") {
         TempDirectory tempDir(tempPath, false);  // <== keeps the directory
+
+        const auto fileCount = tempDir.countFilesRecursive();
 
         const auto cfg = simpleConfig(tempDir, "simple_schema");
 
@@ -121,22 +119,29 @@ CASE("testing dasi: 2- wipe") {
         CHECK_RETURN(dasi_wipe(dasi, query, &doit, &all, &wipe));
         EXPECT(wipe);
 
-        int    rc;
-        size_t count = 0;
+        int rc;
         while ((rc = dasi_wipe_next(wipe)) == DASI_SUCCESS) {
             const char* out;
-            CHECK_RETURN(dasi_wipe_attrs(wipe, &out));
-            count++;
+            CHECK_RETURN(dasi_wipe_get_value(wipe, &out));
+            LOG_D("WIPE: " << out);
         }
-        EXPECT(count == 3);
         EXPECT(rc == DASI_ITERATION_COMPLETE);
 
-        CHECK_RETURN(dasi_free_query(query));
-        CHECK_RETURN(dasi_free_wipe(wipe));
+        dasi_list_t* list;
+        CHECK_RETURN(dasi_list(dasi, query, &list));
+        EXPECT(list);
 
-        CHECK_RETURN(dasi_close(dasi));
+        const auto count = KeySet({"value3b1", "value3b2", "value3b3", "value3b4"}).lookup(list);
+        EXPECT(count == 0);
 
         LOG_I("--- [WIPED: " << count << "] ---");
+
+        EXPECT(tempDir.countFilesRecursive() == fileCount - 2);
+
+        CHECK_RETURN(dasi_free_list(list));
+        CHECK_RETURN(dasi_free_query(query));
+        CHECK_RETURN(dasi_free_wipe(wipe));
+        CHECK_RETURN(dasi_close(dasi));
     }
 
     SECTION("wipe all") {
@@ -162,22 +167,35 @@ CASE("testing dasi: 2- wipe") {
         CHECK_RETURN(dasi_wipe(dasi, query, &doit, &all, &wipe));
         EXPECT(wipe);
 
-        int    rc;
-        size_t count = 0;
+        int rc;
         while ((rc = dasi_wipe_next(wipe)) == DASI_SUCCESS) {
             const char* out;
-            CHECK_RETURN(dasi_wipe_attrs(wipe, &out));
-            count++;
+            CHECK_RETURN(dasi_wipe_get_value(wipe, &out));
+            LOG_D("WIPE: " << out);
         }
-        EXPECT(count == 8);  // ??? lock files
         EXPECT(rc == DASI_ITERATION_COMPLETE);
 
-        CHECK_RETURN(dasi_free_query(query));
-        CHECK_RETURN(dasi_free_wipe(wipe));
+        dasi_list_t* list;
+        CHECK_RETURN(dasi_list(dasi, query, &list));
+        EXPECT(list);
 
-        CHECK_RETURN(dasi_close(dasi));
+        KeySet keys2;
+        auto   keys = KeySet({"value3b1", "value3b2", "value3b3", "value3b4"});
+        for (Key key : keys) {
+            key.set("key3a", "value3a2");
+            keys2.insert(key);
+        }
+        const auto count = keys.lookup(list) + keys2.lookup(list);
+        EXPECT(count == 0);
 
         LOG_I("--- [WIPED: " << count << "] ---");
+
+        EXPECT(tempDir.countFilesRecursive() == 1);  // schema left
+
+        CHECK_RETURN(dasi_free_list(list));
+        CHECK_RETURN(dasi_free_query(query));
+        CHECK_RETURN(dasi_free_wipe(wipe));
+        CHECK_RETURN(dasi_close(dasi));
     }
 }
 

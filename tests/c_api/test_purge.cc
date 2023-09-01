@@ -27,14 +27,12 @@ const auto tempPath = eckit::LocalPathName::cwd() + "/tmp.DASI.c";
 CASE("testing dasi archive") {
     TempDirectory tempDir(tempPath, false);
 
-    simpleWrite(tempDir, "simple_schema", SIMPLE_SCHEMA);
+    tempDir.write("simple_schema", SIMPLE_SCHEMA);
 
-    const auto cfg = simpleConfig(tempDir, "simple_schema");
-
-    LOG_D("--- [ARCHIVE] ---");
+    LOG_I("--- [ARCHIVE] ---");
 
     dasi_t* dasi;
-    CHECK_RETURN(dasi_open(&dasi, cfg.c_str()));
+    CHECK_RETURN(dasi_open(&dasi, simpleConfig(tempDir, "simple_schema").c_str()));
     EXPECT(dasi);
 
     const auto keys = KeySet({"value3b1", "value3b2", "value3b3", "value3b4"});
@@ -53,7 +51,7 @@ CASE("testing dasi archive") {
 
     CHECK_RETURN(dasi_flush(dasi));
 
-    LOG_D("--- [LIST] ---");
+    LOG_I("--- [LIST] ---");
 
     dasi_query_t* query;
     CHECK_RETURN(dasi_new_query(&query));
@@ -67,11 +65,13 @@ CASE("testing dasi archive") {
     CHECK_RETURN(dasi_list(dasi, query, &list));
     EXPECT(list);
 
-    EXPECT(keys.lookup(list) == keys.size());
+    const auto count = keys.lookup(list);
+    EXPECT(count == 4);
+
+    LOG_I("--- [COUNT: " << count << "] ---");
 
     CHECK_RETURN(dasi_free_query(query));
     CHECK_RETURN(dasi_free_list(list));
-
     CHECK_RETURN(dasi_close(dasi));
 }
 
@@ -80,7 +80,7 @@ CASE("testing dasi purge") {
 
     const auto cfg = simpleConfig(tempDir, "simple_schema");
 
-    LOG_D("--- [PURGE] ---");
+    LOG_I("--- [PURGE] ---");
 
     dasi_t* dasi;
     CHECK_RETURN(dasi_open(&dasi, cfg.c_str()));
@@ -100,27 +100,21 @@ CASE("testing dasi purge") {
     EXPECT(purge);
 
     size_t count = 0;
-
-    int rc;
-
+    int    rc;
     while ((rc = dasi_purge_next(purge)) == DASI_SUCCESS) {
         const char* out;
-
-        CHECK_RETURN(dasi_purge_attrs(purge, &out));
-
+        CHECK_RETURN(dasi_purge_get_value(purge, &out));
         LOG_D("PURGED: " << out);
-
         count++;
     }
-
     EXPECT(rc == DASI_ITERATION_COMPLETE);
+    EXPECT(count == 2);
+
+    LOG_I("--- [COUNT: " << count << "] ---");
 
     CHECK_RETURN(dasi_free_query(query));
     CHECK_RETURN(dasi_free_purge(purge));
-
     CHECK_RETURN(dasi_close(dasi));
-
-    LOG_D("--- [PURGED: " << count << "] ---");
 }
 
 }  // namespace dasi::testing

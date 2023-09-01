@@ -67,15 +67,27 @@ CASE("testing dasi: 2- wipe") {
     SECTION("wipe some") {
         TempDirectory tempDir(tempPath, false);  // <== keeps the directory
 
+        const auto fileCount = tempDir.countFilesRecursive();
+
         dasi::Dasi dasi(simpleConfig(tempDir, "simple_schema").c_str());
 
         dasi::Query query {{"key1", {"value1"}}, {"key2", {"value2"}}, {"key3", {"value3"}}, {"key3a", {"value3a2"}}};
 
         size_t count = 0;
-        for (auto&& item : dasi.wipe(query, true, true, false)) { count++; }
-        EXPECT(count == 3);  // out: index + data + toc = 3
+        for (auto&& item : dasi.wipe(query, true, true, false)) {
+            LOG_D("WIPE: " << item);
+            count++;
+        }
 
         LOG_I("--- [WIPED: " << count << "] ---");
+
+        count = 0;
+        for (auto&& item : dasi.list(query)) { count++; }
+        EXPECT(count == 0);
+
+        LOG_I("--- [LIST: " << count << "] ---");
+
+        EXPECT(tempDir.countFilesRecursive() == fileCount - 2);
     }
 
     SECTION("wipe all") {
@@ -86,10 +98,20 @@ CASE("testing dasi: 2- wipe") {
         dasi::Query query = {{"key1", {"value1"}}, {"key2", {"value2"}}, {"key3", {"value3"}}};
 
         size_t count = 0;
-        for (auto&& item : dasi.wipe(query, true, true, false)) { count++; }
-        EXPECT(count == 8);  // ??? lock files
+        for (auto&& item : dasi.wipe(query, true, true, false)) {
+            LOG_D("WIPE: " << item);
+            count++;
+        }
 
         LOG_I("--- [WIPED: " << count << "] ---");
+
+        count = 0;
+        for (auto&& item : dasi.list(query)) { count++; }
+        EXPECT(count == 0);
+
+        LOG_I("--- [LIST: " << count << "] ---");
+
+        EXPECT(tempDir.countFilesRecursive() == 1);
     }
 }
 
