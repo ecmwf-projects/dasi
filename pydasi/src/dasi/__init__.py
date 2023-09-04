@@ -15,6 +15,7 @@
 from .dasi import Dasi
 from .key import Key
 from .query import Query
+from .wipe import Wipe
 from .list import List
 from .retrieve import Retrieve
 from .backend import DASIException
@@ -26,6 +27,7 @@ __all__ = [
     "Dasi",
     "Key",
     "Query",
+    "Wipe",
     "List",
     "Retrieve",
     "DASIException",

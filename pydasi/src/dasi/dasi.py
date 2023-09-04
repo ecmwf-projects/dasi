@@ -16,7 +16,7 @@
 from dasi.backend import ffi, lib, new_dasi
 
 from dasi.key import Key
-from dasi.query import Query
+from dasi.wipe import Wipe
 from dasi.list import List
 from dasi.retrieve import Retrieve
 
@@ -58,9 +58,21 @@ class Dasi:
 
         self._log.debug("Archiving...")
 
-        lib.dasi_archive(
-            self._cdata, Key(key).cdata, ffi.from_buffer(data), len(data)
-        )
+        dbuffer = ffi.from_buffer(data)
+
+        lib.dasi_archive(self._cdata, Key(key).cdata, dbuffer, len(data))
+
+    def wipe(self, query, doit: bool = False, all: bool = False) -> Wipe:
+        """Wipe data from dasi
+
+        :param query: A description of the span of metadata to wipe
+        :return: An iterable wipe output.
+        :rtype: Wipe
+        """
+
+        self._log.debug("Wiping...")
+
+        return Wipe(self._cdata, query, doit, all)
 
     def list(self, query) -> List:
         """List data present and retrievable from the archive
@@ -72,7 +84,7 @@ class Dasi:
 
         self._log.debug("Listing...")
 
-        return List(self._cdata, Query(query).cdata)
+        return List(self._cdata, query)
 
     def retrieve(self, query) -> Retrieve:
         """Retrieve data objects from the archive
@@ -84,7 +96,7 @@ class Dasi:
 
         self._log.debug("Retrieving...")
 
-        return Retrieve(self._cdata, Query(query).cdata)
+        return Retrieve(self._cdata, query)
 
     def flush(self):
         """
