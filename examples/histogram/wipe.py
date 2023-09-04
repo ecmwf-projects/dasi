@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from helper import cmdline_args, plot_histogram
+from helper import cmdline_args
 
 from dasi import Dasi
 
@@ -26,27 +26,18 @@ if __name__ == "__main__":
         "Institute": [args.Institute],
         "Project": [args.Project],
         "Type": [args.Type],
-        "Directory": [args.Directory],
-        "Date": ["01-01-2023"],
     }
 
     session = Dasi("./dasi.yml")
 
     # Setup query
-    query["Type"] = ["tif", "mdoc"]
-
+    query["Type"] = ["tif"]
     query["Name"] = []
     for item in session.list(query):
         query["Name"].append(item.key["Name"])
 
-    # Retrieve data
-    for item in session.retrieve(query):
-        name = item.key["Name"]
-        ext = item.key["Type"]
-        print("--- [%s] ---" % name)
-        if ext == "mdoc":  # mdoc file
-            print("Content: %s" % item.data.decode())
-        elif ext == "tif":  # image file
-            plot_histogram(item.data, name)
+    # Wipe data
+    for item in session.wipe(query, True):
+        print("wiped: ", item.value)
 
     print("Finished!")
