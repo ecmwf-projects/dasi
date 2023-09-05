@@ -31,15 +31,16 @@ where, the simple schema is:
 
 .. code-block:: yaml
 
-   [ User, Project [ DateTime
-      [ Type ]]]
+   [ User, Project
+      [ Date
+         [ Type ]]]
 
 
 Reference:
 
 .. autoclass:: dasi.Key
 
-.. autofunction:: dasi.Dasi.archive
+.. .. autofunction:: dasi.Dasi.archive
 
 .. The ``kind`` parameter should be either ``"meat"``, ``"fish"``,
 .. or ``"veggies"``. Otherwise, :py:func:`dasi.archive`
