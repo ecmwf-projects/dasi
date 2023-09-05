@@ -20,10 +20,6 @@ Dependencies
 * `metkit`_
 * `fdb`_
 
-**Optional**
-
-* Fortran compiler
-* `Doxygen`_
 
 Build and Install
 ~~~~~~~~~~~~~~~~~
@@ -59,8 +55,8 @@ Build and Install
 
 .. _install_pydasi:
 
-Install pydasi
---------------
+DASI Python
+-----------
 
 The Python interface to DASI is called **pydasi**.
 It uses the `cffi`_ Python package for interfacing with the DASI C API
@@ -74,8 +70,8 @@ Dependencies
 * `cffi`_
 
 
-Optional: Python Environment Setup
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Python Environment Setup
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is advised to create a virtual Python environment:
 

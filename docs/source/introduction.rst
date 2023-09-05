@@ -17,12 +17,12 @@ An example configuration in YAML format:
 .. code-block:: yaml
 
     ---
-    schema: /path_to_schema_file
+    schema: /path/to/schema/file
     catalogue: toc
     store: file
     spaces:
         - roots:
-            - path: /path_to_output_data
+            - path: /path/to/output/data
 
 
 Schema
@@ -36,7 +36,7 @@ An example schema describing a hierarchical taxonomy of metadata keys:
 .. code-block:: yaml
 
    [ User, Laboratory?, Project
-      [ DateTime, Processing
+      [ Date, Processing
          [ Type, Object ]]]
 
 .. rubric:: Footnotes
