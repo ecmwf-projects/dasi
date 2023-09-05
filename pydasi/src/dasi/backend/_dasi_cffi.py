@@ -123,9 +123,15 @@ class PatchedLib:
     """
 
     def __init__(self):
+        self.__loaded = False
         self._log = log.getLogger(__package__)
+        self._log.info("version: %s", version.__version__)
 
-        self._log.info("Initializing the interface to DASI C library...")
+    def load(self):
+        if self.__loaded:
+            return
+
+        self._log.info("Loading DASI C library...")
 
         # parse the C source; types, functions, globals, etc.
         with open(__source_file__) as sf:
@@ -154,10 +160,14 @@ class PatchedLib:
                 self._log.error(str(e))
                 self._log.error("Cannot set attribute ", f, " from library")
 
+        self.check_version()
+
         # Initialise and setup for python-appropriate behaviour
         self.__lib.dasi_initialise_api()
 
-        # check the version
+        self.__loaded = True
+
+    def check_version(self):
         version_ = read_lib_version(self.__lib)
         if version.is_newer(version_):
             self._log.info("- version: %s", version_)

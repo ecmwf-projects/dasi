@@ -42,6 +42,8 @@ class Dasi:
         """
         from dasi.utils import log
 
+        lib.load()
+
         self._log = log.getLogger(__name__)
 
         self._log.debug("Initialize Dasi...")
@@ -58,9 +60,7 @@ class Dasi:
 
         self._log.debug("Archiving...")
 
-        lib.dasi_archive(
-            self._cdata, Key(key).cdata, ffi.from_buffer(data), len(data)
-        )
+        lib.dasi_archive(self._cdata, Key(key).cdata, ffi.from_buffer(data), len(data))
 
     def list(self, query) -> List:
         """List data present and retrievable from the archive

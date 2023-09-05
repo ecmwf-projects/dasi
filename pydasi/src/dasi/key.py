@@ -23,6 +23,8 @@ class Key:
     def __init__(self, key=None):
         from dasi.utils import log
 
+        lib.load()
+
         log.getLogger(__name__).debug("init key: %s", key)
 
         if isinstance(key, Key):
