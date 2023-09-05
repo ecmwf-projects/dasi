@@ -17,8 +17,8 @@ sphinx:
   # fail_on_warning: true
 
 # Additional formats of the documentation to be built
-formats:
-  - pdf
+#formats:
+#  - pdf
 
 # Pin the version of Python and requirements required to build the docs.
 # Optionally declare the Python requirements required to build your docs
