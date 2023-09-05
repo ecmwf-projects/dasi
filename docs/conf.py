@@ -37,7 +37,7 @@ extensions = [
 
 autosummary_generate = True
 
-# autodoc_mock_imports = ["cffi"]
+autodoc_mock_imports = ["cffi", "dasi"]
 
 intersphinx_mapping = {
     "rtd": ("https://docs.readthedocs.io/en/stable/", None),
