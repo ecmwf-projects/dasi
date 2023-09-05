@@ -2,7 +2,7 @@ Usage
 =====
 
 Python Usage
----------------
+------------
 
 The Python interface to DASI is called **pydasi**.
 
@@ -21,7 +21,7 @@ We use the ``dasi.archive(key, data)`` function to save a simple data
 .. code-block:: python
 
    from dasi import Dasi
-   dasi = Dasi("config.yml")
+   dasi = Dasi("config.yaml")
    key=["User":"muster","Project":"simple","Date":"16-03-23","Type":"text"]
    data="SIMPLE_DATA"
    dasi.archive(key, data)
