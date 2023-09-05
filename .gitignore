@@ -35,3 +35,4 @@ dist/
 # auto-generated Sphinx api docs
 docs/_build/
 docs/contents/generated
+docs/source/gen_*
