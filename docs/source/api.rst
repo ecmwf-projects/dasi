@@ -4,4 +4,4 @@ API
 .. toctree::
    :maxdepth: 1
 
-   python_api
+   _autodoc/python
