@@ -4,7 +4,7 @@ Introduction
 DASI is built on top of FDB [#]_, which has been developed at ECMWF for previous EU projects (NEXTGenIO) and has been adapted to be highly configurable for different domains.
 Using FDB allows DASI to use many backends, such as high-performance POSIX backend, Ceph object-storage backend, and NVRAM backend.
 
-.. figure:: /_static/images/dasi-with-wps.png
+.. figure:: /_static/dasi-with-wps.png
 
    Relationship of DASI and the other applications.
 
