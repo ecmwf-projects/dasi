@@ -25,6 +25,3 @@ DASI is modular and is compatible with multiple backends (i.e., object stores or
    contacts
    acknowledgements
    genindex
-
-
-.. rubric:: Footnotes
