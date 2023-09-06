@@ -6,7 +6,7 @@ Using FDB allows DASI to use many backends, such as high-performance POSIX backe
 
 .. figure:: /_static/dasi-with-wps.png
 
-   Relationship of DASI and the other applications.
+   Relationship of DASI and the other applications in the IOSEA project.
 
 
 .. _dasi-config:
