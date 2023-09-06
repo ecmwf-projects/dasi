@@ -31,9 +31,7 @@ extensions = [
     "sphinx.ext.intersphinx",
 ]
 
-# autosummary_generate = True
-
-# autodoc_mock_imports = ["cffi", "dasi"]
+autosummary_generate = True
 
 intersphinx_mapping = {
     "rtd": ("https://docs.readthedocs.io/en/stable/", None),
@@ -43,7 +41,7 @@ intersphinx_mapping = {
 intersphinx_disabled_domains = ["std", "cffi"]
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["Thumbs.db", ".DS_Store"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -51,5 +49,5 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
-todo_include_todos = False
 html_show_sphinx = True
+todo_include_todos = False
