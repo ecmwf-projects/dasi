@@ -1,14 +1,13 @@
 Data Access and Storage Interface (DASI)
 ========================================
 
-**DASI** is a metadata-driven data store. It is a semantic interface for data, where the data is indexed
-and uniquely identified by sets of scientifically-meaningful metadata keys.
-DASI is modular and is compatible with multiple backends
-(i.e., object stores or POSIX) through diverse :doc:`api` (Python, C++, C).
+**DASI** is a metadata-driven data store developed by `ECMWF <https://www.ecmwf.int>`_ as part of the EuroHPC project `IO-SEA <https://iosea-project.eu/>`_.
+It is a semantic interface for data, where the data is indexed and uniquely identified by sets of scientifically-meaningful metadata keys.
+DASI is modular and is compatible with multiple backends (i.e., object stores or POSIX) through diverse :doc:`api` (Python, C++, C).
 
-.. attention::
+.. warning::
 
-   This project is developed as part of the EuroHPC project IO-SEA [#]_.
+   This software is BETA and still under development. DO NOT use this software in any project/software that is operational.
 
 
 .. index:: Contents
@@ -23,9 +22,9 @@ DASI is modular and is compatible with multiple backends
    usage
    api
    license
+   contacts
+   acknowledgements
    genindex
 
 
 .. rubric:: Footnotes
-
-.. [#] `Storage I/O and Data Management for Exascale Architectures <https://iosea-project.eu/>`_

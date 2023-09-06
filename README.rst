@@ -6,18 +6,20 @@ Data Access and Storage Interface (DASI)
     :alt: Documentation Status
 
 
-**DASI** is a metadata-driven data store. It is a semantic interface for data, where the data is indexed
-and uniquely identified by sets of scientifically-meaningful metadata keys.
-DASI is modular and is compatible with multiple backends
-(i.e., object stores or POSIX) through diverse frontends (Python, C++, C).
+**DASI** is a metadata-driven data store. It is a semantic interface for data, where the data is indexed and uniquely identified by sets of scientifically-meaningful metadata keys.
+DASI is modular and is compatible with multiple backends (i.e., object stores or POSIX) through diverse frontends (Python, C++, C).
 
-**Note** This project is developed as part of the EuroHPC project IO-SEA [#]_, and it is under active development.
+**Warning**
+This project is BETA and will be experimental for the foreseeable future. Interfaces and functionality are likely to change. DO NOT use this software in any project/software that is operational.
+
 
 Introduction
 ============
 
-DASI is built on top of FDB [#]_, which has been developed at ECMWF [#]_ for previous EU projects (NEXTGenIO) and has been adapted to be highly configurable for different domains.
-Using FDB allows DASI to use various backends, such as POSIX, Ceph object-storage, and NVRAM backend.
+DASI is built on top of FDB [1]_, which has been developed
+at ECMWF [2]_ for previous EU projects (see `Acknowledgements <https://github.com/ecmwf-projects/dasi/docs/acknowledgements.rst>`_) and
+has been adapted to be highly configurable for different domains.
+Using FDB allows DASI to use various backends, such as POSIX, Ceph and Cortx-Motr object-storage, and NVRAM backend.
 
 Configuration
 -------------
@@ -31,10 +33,10 @@ An example configuration:
    catalogue: toc
    store: file
    spaces:
-   - handler: Default
-   roots:
-   - path: path/to/data/output1
-   - path: path/to/data/output2
+      - handler: Default
+      roots:
+      - path: path/to/data/output1
+      - path: path/to/data/output2
 
 
 Schema
@@ -145,10 +147,27 @@ Installation
 .. _`cffi`: https://pypi.org/project/cffi/
 
 
-Have any feedback / questions / comments / issues ?
-===================================================
 
-You can post `here <https://github.com/ecmwf-projects/dasi/issues>`_.
+Contributions
+=============
+
+Have any feedback / questions / comments / issues ? You can post them `here <https://github.com/ecmwf-projects/dasi/issues>`_.
+
+The main repository is hosted on GitHub; testing, bug reports and contributions are highly welcomed and appreciated.
+
+See also the `contributors <https://github.com/ecmwf-projects/dasi/contributors>`_ for a more complete list.
+
+Contacts:
+
+- James Hawkes [2]_
+- Simon Smart [2]_
+- Tiago Quintino [2]_
+
+Acknowledgements
+================
+
+Past and current funding and support for this project are listed in the `Acknowledgements <https://github.com/ecmwf-projects/dasi/docs/acknowledgements.rst>`_.
+
 
 License
 =======
@@ -161,8 +180,9 @@ In applying this license, ECMWF does not waive the privileges and immunities gra
    :target: https://github.com/ecmwf/dasi/blob/develop/LICENSE
    :alt: Apache License
 
+
 Footnotes
 =========
-.. [#] `Storage I/O and Data Management for Exascale Architectures <https://iosea-project.eu/>`_
-.. [#] `Fields DataBase (FDB) is a domain-specific object store <https://github.com/ecmwf/fdb>`_
-.. [#] `ECMWF <https://www.ecmwf.int/>`_
+
+.. [1] "Fields DataBase (`FDB <https://github.com/ecmwf/fdb>`_) is a domain-specific object store"
+.. [2] "European Centre for Medium-Range Weather Forecasts (`ECMWF <https://www.ecmwf.int>`_)"
