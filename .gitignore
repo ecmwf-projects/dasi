@@ -36,3 +36,4 @@ dist/
 docs/_build/
 docs/contents/generated
 docs/source/gen_*
+docs/**/_autosummary
