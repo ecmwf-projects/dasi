@@ -66,8 +66,8 @@ It uses the `cffi`_ Python package for interfacing with the DASI C API
 Dependencies
 ~~~~~~~~~~~~
 
-* :ref:`install_libdasi`
 * `cffi`_
+* :ref:`install_libdasi`
 
 
 Python Environment Setup
@@ -101,5 +101,4 @@ Installation
 .. _`eckit`: https://github.com/ecmwf/eckit
 .. _`metkit`: https://github.com/ecmwf/metkit
 .. _`fdb`: https://github.com/ecmwf/fdb
-.. _`Doxygen`: https://www.doxygen.nl
 .. _`cffi`: https://pypi.org/project/cffi/
