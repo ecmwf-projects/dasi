@@ -6,16 +6,9 @@ and uniquely identified by sets of scientifically-meaningful metadata keys.
 DASI is modular and is compatible with multiple backends
 (i.e., object stores or POSIX) through diverse :doc:`api` (Python, C++, C).
 
-.. note::
-
-   Check out the :doc:`usage` section for further information, including
-   how to :ref:`installation` the project.
-
-
 .. attention::
 
-   This project is developed as part of the EuroHPC project IO-SEA [#]_,
-   and it is under active development.
+   This project is developed as part of the EuroHPC project IO-SEA [#]_.
 
 
 .. index:: Contents
@@ -30,14 +23,8 @@ DASI is modular and is compatible with multiple backends
    usage
    api
    license
+   genindex
 
-
-Indices
-=======
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
 .. rubric:: Footnotes
 

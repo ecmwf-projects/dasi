@@ -4,10 +4,12 @@ Introduction
 DASI is built on top of FDB [#]_, which has been developed at ECMWF for previous EU projects (NEXTGenIO) and has been adapted to be highly configurable for different domains.
 Using FDB allows DASI to use many backends, such as high-performance POSIX backend, Ceph object-storage backend, and NVRAM backend.
 
-.. figure:: /_static/dasi-with-wps.png
+.. figure:: /_static/images/dasi-with-wps.png
 
    Relationship of DASI and the other applications.
 
+
+.. _dasi-config:
 
 Configuration
 -------------
@@ -27,6 +29,8 @@ An example configuration in YAML format:
 
 Schema
 ------
+
+.. _dasi-schema:
 
 DASI is domain-agnostic, and is configured for each scientific domain using a schema.
 The schema defines the metadata keys which index and identify the data within a domain.

@@ -8,7 +8,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "pydasi", "src")))
+sys.path.insert(0, os.path.abspath(os.path.join("..", "pydasi", "src")))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "pydasi", "src")))
 project = "DASI"
 copyright = "2023, developed as part of the EuroHPC project IO-SEA"
 author = "ECMWF"
-version = "0.2"
+version = "0.2.1"
 release = "0.2.1"
 
 
@@ -34,6 +34,7 @@ extensions = [
 autosummary_generate = True
 
 intersphinx_mapping = {
+    "dasi": ("https://dasi.readthedocs.io/en/latest/", None),
     "rtd": ("https://docs.readthedocs.io/en/stable/", None),
     "python": ("https://docs.python.org/3/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
@@ -41,7 +42,7 @@ intersphinx_mapping = {
 intersphinx_disabled_domains = ["std", "cffi"]
 
 templates_path = ["_templates"]
-exclude_patterns = ["Thumbs.db", ".DS_Store"]
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -49,5 +50,5 @@ exclude_patterns = ["Thumbs.db", ".DS_Store"]
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
-html_show_sphinx = True
+html_show_sphinx = False
 todo_include_todos = False
