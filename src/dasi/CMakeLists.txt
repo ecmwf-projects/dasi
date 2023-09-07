@@ -1,6 +1,12 @@
 
 configure_file( lib/dasi_version.h.in lib/dasi_version.h )
 
+# fix for std::filesystem issue on gcc < 9
+set( libSTDFS "" )
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+    set( libSTDFS "stdc++fs" )
+endif()
+
 ecbuild_add_library(
     TARGET dasi
     TYPE SHARED
@@ -44,6 +50,7 @@ ecbuild_add_library(
 
     PUBLIC_LIBS
         eckit
+        ${libSTDFS}
 
     PRIVATE_LIBS
         fdb5
