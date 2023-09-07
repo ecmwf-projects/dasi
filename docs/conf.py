@@ -16,8 +16,8 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "pydasi", "src")))
 project = "DASI"
 copyright = "2023, ECMWF,  developed as part of the EuroHPC project IO-SEA"
 author = "ECMWF"
-version = "0.2.1"
-release = "0.2.1"
+version = "0.2.2"
+release = "0.2.2"
 
 
 # -- General configuration ---------------------------------------------------
