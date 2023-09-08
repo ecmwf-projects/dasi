@@ -1,4 +1,3 @@
-#
 # Copyright 2023- European Centre for Medium-Range Weather Forecasts (ECMWF)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,13 +18,13 @@
 
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-project(forecast VERSION 0.1 LANGUAGES C)
+project(example-weather VERSION 0.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 90)
 
-find_package(dasi REQUIRED)
-
 find_package(eckit 1.20 REQUIRED)
+
+find_package(dasi REQUIRED)
 
 # forecast
 
