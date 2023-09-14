@@ -26,31 +26,35 @@ class FindLib:
     def __init__(self, name: str, dir: str):
         self._log = log.getLogger(__package__)
 
-        # the env var overwrites built-in
-        for dir_ in ("DASI_DIR", "dasi_DIR"):
-            env_dir_ = os.environ.get(dir_)
-            if env_dir_ and os.path.exists(env_dir_):
-                dir = env_dir_
-                break
-
-        dir = os.path.join(dir, "lib")
-
-        self._log.info("Searching '%s' in '%s'", name, dir)
+        self._log.info("Searching '%s' ...", name)
 
         platform = p_system()
         self._log.debug("- platform: %s", platform)
 
-        self.__path = ""
         if platform == "Linux":
             self.__name = "lib" + name + ".so"
-            self.__path = os.path.join(dir, "linux", self.__name)
         elif platform == "Darwin":
             self.__name = "lib" + name + ".dylib"
-            self.__path = os.path.join(dir, "darwin", self.__name)
         elif platform == "Windows":
             raise NotImplementedError("Windows OS is not supported!")
 
         self._log.info("- name: %s", self.__name)
+
+        self.__path = ""
+        if platform == "Linux":
+            self.__path = os.path.join(dir, "lib", "linux", self.__name)
+        elif platform == "Darwin":
+            self.__path = os.path.join(dir, "lib", "darwin", self.__name)
+
+        # env vars take priority over dir
+        for env_var_ in ("DASI_DIR", "dasi_DIR", "LD_LIBRARY_PATH"):
+            env_path_ = os.getenv(env_var_)
+            if env_path_:
+                for edir_ in env_path_.split(":"):
+                    epath_ = os.path.join(edir_, self.__name)
+                    if os.path.isfile(epath_):
+                        self.__path = epath_
+                        break
 
         if not os.path.exists(self.__path):
             raise FileNotFoundError(
