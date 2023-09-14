@@ -15,7 +15,7 @@
 import yaml
 
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, TypeVar, List, Dict
 
 
 PathLike = TypeVar("PathLike", str, Path)
@@ -59,7 +59,7 @@ class Config(object):
         return "config:\n%s" % self.dump
 
     def load(self, config: str = __default_config__):
-        from dasi import DASIException
+        from dasi.backend import DASIException
 
         self._yaml = yaml.safe_load(config)
 
@@ -98,6 +98,6 @@ class Config(object):
         self._yaml["schema"] = value if isinstance(value, str) else str(value)
         return self
 
-    def roots(self, value: list[dict[str, Any]]):
+    def roots(self, value: List[Dict[str, Any]]):
         self._yaml["spaces"][0]["roots"] = value
         return self
