@@ -225,6 +225,9 @@ void DASISchema::list(const CmdArgs& args) {
 //----------------------------------------------------------------------------------------------------------------------
 
 int main(int argc, char** argv) {
+    ::setenv("AUTO_LOAD_PLUGINS", "false", true);
+
     dasi::tools::DASISchema app(argc, argv);
+
     return app.start();
 }
