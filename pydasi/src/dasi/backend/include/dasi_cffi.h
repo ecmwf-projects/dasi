@@ -14,8 +14,7 @@ struct dasi_list_t;
 typedef struct dasi_list_t dasi_list_t;
 struct dasi_retrieve_t;
 typedef struct dasi_retrieve_t dasi_retrieve_t;
-typedef enum dasi_error_values_t
-{
+typedef enum dasi_error_values_t {
   DASI_SUCCESS = 0,
   DASI_ITERATION_COMPLETE = 1,
   DASI_ERROR = 2,

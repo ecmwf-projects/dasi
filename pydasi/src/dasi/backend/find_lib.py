@@ -38,7 +38,7 @@ class FindLib:
         elif platform == "Windows":
             raise NotImplementedError("Windows OS is not supported!")
 
-        self._log.info("- name: %s", self.__name)
+        self._log.debug("- name: %s", self.__name)
 
         self.__path = ""
         if platform == "Linux":
@@ -47,21 +47,29 @@ class FindLib:
             self.__path = os.path.join(dir, "lib", "darwin", self.__name)
 
         # env vars take priority over dir
+        paths_ = [""]
         for env_var_ in ("DASI_DIR", "dasi_DIR", "LD_LIBRARY_PATH"):
             env_path_ = os.getenv(env_var_)
             if env_path_:
-                for edir_ in env_path_.split(":"):
-                    epath_ = os.path.join(edir_, self.__name)
-                    if os.path.isfile(epath_):
-                        self.__path = epath_
-                        break
+                for epath_ in env_path_.split(":"):
+                    if os.path.exists(epath_):
+                        paths_.append(epath_)
+        paths_.append("/usr/local/lib64")
+        paths_.append("/usr/local/lib")
+
+        for path_ in paths_:
+            p_ = os.path.join(path_, self.__name)
+            self._log.debug("- library ... [%s] ", p_)
+            if os.path.isfile(p_):
+                self.__path = p_
+                break
 
         if not os.path.exists(self.__path):
             raise FileNotFoundError(
                 errno.ENOENT, os.strerror(errno.ENOENT), self.__path
             )
 
-        self._log.debug("- path: %s", self.__path)
+        self._log.info("- path: %s", self.__path)
 
     @property
     def path(self):

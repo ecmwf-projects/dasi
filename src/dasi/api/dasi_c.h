@@ -59,8 +59,7 @@ typedef struct dasi_retrieve_t dasi_retrieve_t;
 
 /* DASI Error Codes */
 
-typedef enum dasi_error_values_t
-{
+typedef enum dasi_error_values_t {
     DASI_SUCCESS            = 0, /* Operation succeded. */
     DASI_ITERATION_COMPLETE = 1, /* All elements have been returned */
     DASI_ERROR              = 2, /* Operation failed. */
@@ -121,8 +120,7 @@ int dasi_close(const dasi_t* dasi);
  * @param data Pointer to the read-only data
  * @param length Length of "data" in bytes
  */
-int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data,
-                 long length);
+int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data, long length);
 
 int dasi_flush(dasi_t* dasi);
 
@@ -136,14 +134,12 @@ int dasi_list_count(const dasi_list_t* list, long* count);
 
 int dasi_list_next(dasi_list_t* list);
 
-int dasi_list_attrs(const dasi_list_t* list, dasi_key_t** key,
-                    dasi_time_t* timestamp, const char** uri, long* offset,
+int dasi_list_attrs(const dasi_list_t* list, dasi_key_t** key, dasi_time_t* timestamp, const char** uri, long* offset,
                     long* length);
 
 /* *** Retrieve functionality */
 
-int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query,
-                  dasi_retrieve_t** retrieve);
+int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve);
 
 int dasi_free_retrieve(const dasi_retrieve_t* retrieve);
 
@@ -153,8 +149,8 @@ int dasi_retrieve_count(const dasi_retrieve_t* retrieve, long* count);
 
 int dasi_retrieve_next(dasi_retrieve_t* retrieve);
 
-int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key,
-                        dasi_time_t* timestamp, long* offset, long* length);
+int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, dasi_time_t* timestamp, long* offset,
+                        long* length);
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * KEY
@@ -184,8 +180,7 @@ int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value);
 int dasi_key_compare(dasi_key_t* key, dasi_key_t* other, int* result);
 
 /** Get the name of a numbered key */
-int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword,
-                       const char** value);
+int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword, const char** value);
 
 /**
  * Get the value of a specified keyword in a key
@@ -216,19 +211,15 @@ int dasi_new_query_from_string(dasi_query_t** query, const char* str);
 
 int dasi_free_query(const dasi_query_t* query);
 
-int dasi_query_set(dasi_query_t* query, const char* keyword,
-                   const char* values[], int num);
+int dasi_query_set(dasi_query_t* query, const char* keyword, const char* values[], int num);
 
-int dasi_query_append(dasi_query_t* query, const char* keyword,
-                      const char* value);
+int dasi_query_append(dasi_query_t* query, const char* keyword, const char* value);
 
 int dasi_query_keyword_count(dasi_query_t* query, long* count);
 
-int dasi_query_value_count(dasi_query_t* query, const char* keyword,
-                           long* count);
+int dasi_query_value_count(dasi_query_t* query, const char* keyword, long* count);
 
-int dasi_query_get(dasi_query_t* query, const char* keyword, int num,
-                   const char** value);
+int dasi_query_get(dasi_query_t* query, const char* keyword, int num, const char** value);
 
 int dasi_query_has(dasi_query_t* query, const char* keyword, dasi_bool_t* has);
 
