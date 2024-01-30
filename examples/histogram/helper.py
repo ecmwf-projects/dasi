@@ -65,7 +65,8 @@ class DirectoryStore:
         for path in self.__filepaths:
             if ospath.exists(path):
                 with open(path, "rb") as f:
-                    yield ospath.basename(path), f.read()
+                    name, ext = ospath.splitext(ospath.basename(path))
+                    yield name, ext[1:], f.read()
 
     @property
     def metadata(self):

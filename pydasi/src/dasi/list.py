@@ -15,10 +15,11 @@
 from dasi.backend import FFI, ffi, lib, ffi_decode, new_list
 
 from dasi.key import Key
+from dasi.query import Query
 
 
 class List:
-    def __init__(self, dasi: FFI.CData, query: FFI.CData):
+    def __init__(self, dasi: FFI.CData, query):
         from dasi.utils import log
 
         self._log = log.getLogger(__name__)
@@ -30,7 +31,7 @@ class List:
         self.__time = ffi.new("dasi_time_t *", 0)
         self.__offset = ffi.new("long *", 0)
         self.__length = ffi.new("long *", 0)
-        self._cdata = new_list(dasi, query)
+        self._cdata = new_list(dasi, Query(query).cdata)
 
     def __str__(self) -> str:
         return "{}, uri: {}, time: {}, offset: {}, length: {}".format(

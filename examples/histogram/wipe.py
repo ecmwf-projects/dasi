@@ -12,24 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .dasi import Dasi
-from .key import Key
-from .query import Query
-from .wipe import Wipe
-from .list import List
-from .retrieve import Retrieve
-from .backend import DASIException
-from .utils.config import Config
-from .utils.version import __version__
+
+from helper import cmdline_args
+
+from dasi import Dasi
 
 
-__all__ = [
-    "Dasi",
-    "Key",
-    "Query",
-    "Wipe",
-    "List",
-    "Retrieve",
-    "DASIException",
-    "Config",
-]
+if __name__ == "__main__":
+    args = cmdline_args()
+
+    query = {
+        "UserID": [args.UserID],
+        "Institute": [args.Institute],
+        "Project": [args.Project],
+        "Type": [args.Type],
+    }
+
+    session = Dasi("./dasi.yml")
+
+    # Setup query
+    query["Type"] = ["tif"]
+    query["Name"] = []
+    for item in session.list(query):
+        query["Name"].append(item.key["Name"])
+
+    # Wipe data
+    for item in session.wipe(query, True):
+        print("wiped: ", item.value)
+
+    print("Finished!")
