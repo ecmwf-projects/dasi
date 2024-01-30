@@ -34,31 +34,45 @@ extern "C" {
  * TYPES
  * -----*/
 
+/** DASI bool type */
 typedef int dasi_bool_t;
 
+/** DASI time type */
 typedef long dasi_time_t;
 
 struct Dasi;
+/** DASI instance type */
 typedef struct Dasi dasi_t;
 
 struct Key;
+/** DASI key type */
 typedef struct Key dasi_key_t;
 
 struct Query;
+/** DASI query type */
 typedef struct Query dasi_query_t;
 
+struct dasi_wipe_t;
+/** DASI wipe type */
+typedef struct dasi_wipe_t dasi_wipe_t;
+
+struct dasi_purge_t;
+/** DASI purge type */
+typedef struct dasi_purge_t dasi_purge_t;
+
 struct dasi_list_t;
+/** DASI list type */
 typedef struct dasi_list_t dasi_list_t;
 
 struct dasi_retrieve_t;
+/** DASI retrieve type */
 typedef struct dasi_retrieve_t dasi_retrieve_t;
 
 /* ---------------------------------------------------------------------------------------------------------------------
  * ERROR HANDLING
  * -------------- */
 
-/* DASI Error Codes */
-
+/** DASI Error Codes */
 typedef enum dasi_error_values_t {
     DASI_SUCCESS            = 0, /* Operation succeded. */
     DASI_ITERATION_COMPLETE = 1, /* All elements have been returned */
@@ -70,32 +84,33 @@ typedef enum dasi_error_values_t {
 } dasi_error_enum_t;
 
 const char* dasi_get_error_string(int err);
+/** Returns pointer to a globally allocated string.
+ * DO NOT modify/free the returned pointer.
+ */
 
 /* -----------------------------------------------------------------------------
  * HELPERS
  * ------- */
 
 /**
- * @brief Set DASI version.
- *
- * @param version Version string
- * @return int Error code
+ * Gets version.
+ * @param version Version string. DO NOT modify/free the returned pointer.
+ * @return dasi error code, see dasi_error_enum_t.
  */
 int dasi_version(const char** version);
 
 /**
- * @brief Set DASI git sha1 version.
- *
- * @param sha1 SHA1 version string
- * @return int Error code
+ * Gets git sha1 version.
+ * @param sha1 SHA1 version string. DO NOT modify/free the returned pointer.
+ * @return dasi error code, see dasi_error_enum_t.
  */
 int dasi_vcs_version(const char** sha1);
 
 /**
- * @brief Initialise Main() context.
- *
+ * Initialise Main() context.
  * @note This is ONLY required when Main() is NOT initialised, such as loading
  * the DASI as shared library in Python.
+ * @return dasi error code, see dasi_error_enum_t.
  */
 int dasi_initialise_api();
 
@@ -103,28 +118,38 @@ int dasi_initialise_api();
  * DASI SESSION
  * ------------ */
 
-/** Create a new session object using the given configuration file. */
-int dasi_open(dasi_t** dasi, const char* filename);
+/**
+ * Creates a new dasi object using the given configuration file.
+ * @param dasi output dasi object
+ * @param config input file or string to dasi configuration (yaml format)
+ * @return dasi error code, see dasi_error_enum_t.
+ */
+int dasi_open(dasi_t** dasi, const char* config);
 
-/** Release the session and delete the object. */
+/**
+ * Deletes the dasi object.
+ * @param dasi object to delete
+ * @return dasi error code, see dasi_error_enum_t.
+ */
 int dasi_close(const dasi_t* dasi);
 
 /**
- * @brief Writes data to the object store.
+ * Writes data to the object store.
  *
  * @note Data is not guaranteed accessible nor persisted (wrt. failure),
  * until dasi_flush() is called.
  *
- * @param dasi Dasi session
+ * @param dasi dasi object
  * @param key Metadata description of the data to store and index
  * @param data Pointer to the read-only data
  * @param length Length of "data" in bytes
+ * @return dasi error code, see dasi_error_enum_t.
  */
 int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data, long length);
 
 int dasi_flush(dasi_t* dasi);
 
-/* *** List functionality */
+/* List functionality */
 
 int dasi_list(dasi_t* dasi, const dasi_query_t* query, dasi_list_t** list);
 
@@ -137,7 +162,7 @@ int dasi_list_next(dasi_list_t* list);
 int dasi_list_attrs(const dasi_list_t* list, dasi_key_t** key, dasi_time_t* timestamp, const char** uri, long* offset,
                     long* length);
 
-/* *** Retrieve functionality */
+/* Retrieve functionality */
 
 int dasi_retrieve(dasi_t* dasi, const dasi_query_t* query, dasi_retrieve_t** retrieve);
 
@@ -152,28 +177,80 @@ int dasi_retrieve_next(dasi_retrieve_t* retrieve);
 int dasi_retrieve_attrs(const dasi_retrieve_t* retrieve, dasi_key_t** key, dasi_time_t* timestamp, long* offset,
                         long* length);
 
+/* Wipe functionality */
+
+/**
+ * Deletes the data that matches the query.
+ * @param dasi dasi object
+ * @param query metadata description of the data
+ * @param doit true: wipe, false: simulate
+ * @param all wipe all (unowned) contents of an unclean database
+ * @param wipe new wipe object
+ * @return dasi error code, see dasi_error_enum_t.
+ */
+int dasi_wipe(dasi_t* dasi, const dasi_query_t* query, const dasi_bool_t* doit, const dasi_bool_t* all,
+              dasi_wipe_t** wipe);
+
+int dasi_free_wipe(const dasi_wipe_t* wipe);
+
+int dasi_wipe_next(dasi_wipe_t* wipe);
+
+/**
+ * Gets the output value of wipe.
+ * @param value pointer to value of wipe.
+ * DO NOT modify/free the returned pointer.
+ * @return dasi error code, see dasi_error_enum_t.
+ */
+int dasi_wipe_get_value(const dasi_wipe_t* wipe, const char** value);
+
+/* Purge functionality */
+
+int dasi_purge(dasi_t* dasi, const dasi_query_t* query, const dasi_bool_t* doit, dasi_purge_t** purge);
+
+int dasi_free_purge(const dasi_purge_t* purge);
+
+int dasi_purge_next(dasi_purge_t* purge);
+
+/**
+ * Gets the output value of wipe.
+ * @param value Pointer to value of wipe.
+ * DO NOT modify/free the returned pointer.
+ * @return dasi error code, see dasi_error_enum_t.
+ */
+int dasi_purge_get_value(const dasi_purge_t* purge, const char** value);
+
 /* ---------------------------------------------------------------------------------------------------------------------
  * KEY
  * --- */
 
 /**
- * @brief Construct a new Dasi key object
- * @param Key instance. Returned value must be freed using dasi_free_key
- * @return Return code (#dasi_error_values_t)
+ * Constructs a new dasi key object.
+ * @param key pointer to new object. Returned value must be freed via dasi_free_...
+ * @return dasi error code, see dasi_error_enum_t.
  */
 int dasi_new_key(dasi_key_t** key);
 
 /**
- * Construct a Dasi key from a string
+ * Constructs a new dasi key from a string.
+ * @param str input string.
+ * @return dasi error code, see dasi_error_enum_t.
  */
 int dasi_new_key_from_string(dasi_key_t** key, const char* str);
 
-/** Release the key and delete the object. */
+/**
+ * Deletes the key object.
+ * @param key input key.
+ * @return dasi error code, see dasi_error_enum_t.
+ */
 int dasi_free_key(const dasi_key_t* key);
 
 /**
- * Set the value of the specified keyword.
+ * Sets the value of the specified keyword.
  * @note The keyword is added if it's missing.
+ * @param key input key.
+ * @param keyword input keyword.
+ * @param value input value.
+ * @return dasi error code, see dasi_error_enum_t.
  */
 int dasi_key_set(dasi_key_t* key, const char* keyword, const char* value);
 
@@ -183,9 +260,12 @@ int dasi_key_compare(dasi_key_t* key, dasi_key_t* other, int* result);
 int dasi_key_get_index(dasi_key_t* key, int n, const char** keyword, const char** value);
 
 /**
- * Get the value of a specified keyword in a key
- * @param value The value to be returned. This will point towards an internal
- * character buffer with a lifetime equal to that of the key
+ * Gets the value of a specified keyword in a key.
+ * @param key input key.
+ * @param keyword input keyword.
+ * @param value pointer to key value.
+ * DO NOT modify/free the returned pointer.
+ * @return dasi error code, see dasi_error_enum_t.
  */
 int dasi_key_get(dasi_key_t* key, const char* keyword, const char** value);
 
