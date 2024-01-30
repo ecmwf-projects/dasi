@@ -32,7 +32,8 @@ if __name__ == "__main__":
 
     session = Dasi("./dasi.yml")
 
-    for name, ext, data in dir.files():
+    for name, data in dir.files():
+        print("Archiving: %s" % name)
         key["Name"] = name
         key["Type"] = ext
         session.archive(key, data)
