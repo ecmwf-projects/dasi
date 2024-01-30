@@ -101,7 +101,6 @@ public:
         std::unique_ptr<dasi_list_t> ldeleter(list);
 
         int rc;
-        int cnt = 0;
         while ((rc = dasi_list_next(list)) == DASI_SUCCESS) {
 
             /// @todo - test all the return values in list, PROPERLY

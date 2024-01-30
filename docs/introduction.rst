@@ -35,13 +35,23 @@ Schema
 DASI is domain-agnostic, and is configured for each scientific domain using a schema.
 The schema defines the metadata keys which index and identify the data within a domain.
 
-An example schema describing a hierarchical taxonomy of metadata keys:
+In a *schema* file, we define *rule(s)* using attributes in 3-levels, as shown below.
 
 .. code-block:: yaml
 
-   [ User, Laboratory?, Project
-      [ Date, Processing
-         [ Type, Object ]]]
+   # rule 1
+   [ class, experiment
+      [ type, date?
+         [step, name ] ] ]
+   # rule 2
+   [a1, a2, a3 ...[b1, b2, b3... [c1, c2, c3...]]]
+
+- Attributes can be set *optional* by using "?", which will be replaced internally by an empty value.
+- The first level (a) defines which attributes are used to name the top level directory
+- The second level (b) defines which attributes are used to name the data files
+- The third level (c) defines which attributes are used as index keys
+
+
 
 .. rubric:: Footnotes
 

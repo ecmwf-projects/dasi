@@ -53,9 +53,9 @@ def read_lib_version(lib) -> str:
 
 
 def new_dasi(config: str) -> FFI.CData:
-    cobj = ffi.new("dasi_t **")
-    lib.dasi_open(cobj, ffi_encode(config))
-    return ffi.gc(cobj[0], lib.dasi_close)
+    cdasi = ffi.new("dasi_t **")
+    lib.dasi_open(cdasi, ffi_encode(config))
+    return ffi.gc(cdasi[0], lib.dasi_close)
 
 
 def new_key(key=None) -> FFI.CData:
@@ -76,10 +76,21 @@ def new_query(query=None) -> FFI.CData:
     return ffi.gc(cquery[0], lib.dasi_free_query)
 
 
+def new_wipe(
+    cdasi: FFI.CData, cquery: FFI.CData, cdoit: FFI.CData, call: FFI.CData
+) -> FFI.CData:
+    check_type(cdasi, "dasi_t *")
+    check_type(cquery, "dasi_query_t *")
+    check_type(cdoit, "int *")
+    check_type(call, "int *")
+    cwipe = ffi.new("dasi_wipe_t **")
+    lib.dasi_wipe(cdasi, cquery, cdoit, call, cwipe)
+    return ffi.gc(cwipe[0], lib.dasi_free_wipe)
+
+
 def new_list(cdasi: FFI.CData, cquery: FFI.CData) -> FFI.CData:
     check_type(cdasi, "dasi_t *")
     check_type(cquery, "dasi_query_t *")
-    # allocate an instance
     clist = ffi.new("dasi_list_t **")
     lib.dasi_list(cdasi, cquery, clist)
     return ffi.gc(clist[0], lib.dasi_free_list)
@@ -96,7 +107,7 @@ def new_retrieve(cdasi: FFI.CData, cquery: FFI.CData) -> FFI.CData:
 def check_type(cobj: FFI.CData, name: str):
     cname = ffi.typeof(cobj).cname
     if cname != name:
-        raise DASIException("Type error!", "object: " + cname + " != " + name)
+        raise DASIException("Type error!", cname + " != " + name)
 
 
 class DASIException(RuntimeError):
@@ -105,6 +116,9 @@ class DASIException(RuntimeError):
     def __init__(self, message: str, error: str = ""):
         super().__init__(message)
         self.error = error
+
+    def __str__(self) -> str:
+        return super().__str__() + ": " + self.error
 
 
 class CFFIModuleLoadFailed(ImportError):
@@ -188,7 +202,7 @@ class PatchedLib:
                 self.__lib.DASI_SUCCESS,
                 self.__lib.DASI_ITERATION_COMPLETE,
             ):
-                err = ffi_decode(self.__lib.dasi_get_error_string(retval))
+                err = ffi_decode(self.__lib.dasi_get_error_string())
                 msg = "Error in function '{}': {}".format(name, err)
                 raise DASIException(msg, err)
             return retval

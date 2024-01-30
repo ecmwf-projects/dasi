@@ -63,16 +63,21 @@ if __name__ == "__main__":
 
     session = Dasi("./dasi.yml")
 
-    query["Name"] = query_names(session, query)
+    # Setup query
+    query["Type"] = ["tif", "mdoc"]
 
-    files = retrieve_files(session, query)
+    query["Name"] = []
+    for item in session.list(query):
+        query["Name"].append(item.key["Name"])
 
-    # Work with the files
-    for name, data in files.items():
+    # Retrieve data
+    for item in session.retrieve(query):
+        name = item.key["Name"]
+        ext = item.key["Type"]
         print("--- [%s] ---" % name)
-        if name.endswith("mdoc"):  # mdoc file
-            print("Content: %s" % data.decode())
-        elif name.endswith("tif"):  # image file
-            plot_histogram(data, name)
+        if ext == "mdoc":  # mdoc file
+            print("Content: %s" % item.data.decode())
+        elif ext == "tif":  # image file
+            plot_histogram(item.data, name)
 
     print("Finished!")

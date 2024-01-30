@@ -35,6 +35,24 @@ struct Query : public dasi::Query {
     using dasi::Query::Query;
 };
 
+struct dasi_wipe_t {
+    dasi_wipe_t(dasi::WipeGenerator&& gen): first(true), generator(std::move(gen)), iterator(generator.begin()) { }
+
+    bool                                first;
+    dasi::WipeGenerator                 generator;
+    dasi::WipeGenerator::const_iterator iterator;
+    std::string                         value;
+};
+
+struct dasi_purge_t {
+    dasi_purge_t(dasi::PurgeGenerator&& gen): first(true), generator(std::move(gen)), iterator(generator.begin()) { }
+
+    bool                                 first;
+    dasi::PurgeGenerator                 generator;
+    dasi::PurgeGenerator::const_iterator iterator;
+    std::string                          value;
+};
+
 struct dasi_list_t {
     dasi_list_t(dasi::ListGenerator&& gen) :
         first(true), generator(std::move(gen)), iterator(generator.begin()) {}
@@ -64,7 +82,7 @@ struct dasi_retrieve_t {
 
 static thread_local std::string g_current_error_string;
 
-const char* dasi_get_error_string(int) {
+const char* dasi_get_error_string() {
     return g_current_error_string.c_str();
 }
 
@@ -132,7 +150,7 @@ int dasi_vcs_version(const char** sha1) {
     return DASI_SUCCESS;
 }
 
-int dasi_initialise_api() {
+int dasi_initialise_api(void) {
     return tryCatch([] {
         static bool initialised = false;
 
@@ -153,11 +171,11 @@ int dasi_initialise_api() {
 //                           SESSION
 // -----------------------------------------------------------------------------
 
-int dasi_open(dasi_t** dasi, const char* filename) {
-    return tryCatch([dasi, filename] {
+int dasi_open(dasi_t** dasi, const char* config) {
+    return tryCatch([dasi, config] {
         ASSERT(dasi);
-        ASSERT(filename);
-        *dasi = new Dasi(filename);
+        ASSERT(config);
+        *dasi = new Dasi(config);
     });
 }
 
@@ -176,6 +194,84 @@ int dasi_archive(dasi_t* dasi, const dasi_key_t* key, const void* data,
         ASSERT(data);
         ASSERT(length >= 0);
         dasi->archive(*key, data, length);
+    });
+}
+
+int dasi_wipe(dasi_t* dasi, const dasi_query_t* query, const dasi_bool_t* doit, const dasi_bool_t* all,
+              dasi_wipe_t** wipe) {
+    return tryCatch([dasi, query, doit, all, wipe] {
+        ASSERT(dasi);
+        ASSERT(query);
+        ASSERT(doit);
+        ASSERT(all);
+        ASSERT(wipe);
+        *wipe = new dasi_wipe_t(dasi->wipe(*query, *doit, true, *all));
+    });
+}
+
+int dasi_free_wipe(const dasi_wipe_t* wipe) {
+    return tryCatch([wipe] {
+        ASSERT(wipe);
+        delete wipe;
+    });
+}
+
+int dasi_wipe_next(dasi_wipe_t* wipe) {
+    return tryCatch(std::function<int()> {[wipe] {
+        ASSERT(wipe);
+        if (wipe->first) {
+            wipe->first = false;
+        } else {
+            ++wipe->iterator;
+        }
+        if (wipe->iterator == wipe->generator.end()) { return DASI_ITERATION_COMPLETE; }
+        return DASI_SUCCESS;
+    }});
+}
+
+int dasi_wipe_get_value(const dasi_wipe_t* wipe, const char** value) {
+    return tryCatch([wipe, value] {
+        ASSERT(wipe);
+        ASSERT(wipe->iterator != wipe->generator.end());
+        if (value) { *value = wipe->iterator->c_str(); }
+    });
+}
+
+int dasi_purge(dasi_t* dasi, const dasi_query_t* query, const dasi_bool_t* doit, dasi_purge_t** purge) {
+    return tryCatch([dasi, query, doit, purge] {
+        ASSERT(dasi);
+        ASSERT(query);
+        ASSERT(doit);
+        ASSERT(purge);
+        *purge = new dasi_purge_t(dasi->purge(*query, *doit, true));
+    });
+}
+
+int dasi_free_purge(const dasi_purge_t* purge) {
+    return tryCatch([purge] {
+        ASSERT(purge);
+        delete purge;
+    });
+}
+
+int dasi_purge_next(dasi_purge_t* purge) {
+    return tryCatch(std::function<int()> {[purge] {
+        ASSERT(purge);
+        if (purge->first) {
+            purge->first = false;
+        } else {
+            ++purge->iterator;
+        }
+        if (purge->iterator == purge->generator.end()) { return DASI_ITERATION_COMPLETE; }
+        return DASI_SUCCESS;
+    }});
+}
+
+int dasi_purge_get_value(const dasi_purge_t* purge, const char** value) {
+    return tryCatch([purge, value] {
+        ASSERT(purge);
+        ASSERT(purge->iterator != purge->generator.end());
+        if (value) { *value = purge->iterator->c_str(); }
     });
 }
 
@@ -430,8 +526,7 @@ int dasi_query_set(dasi_query_t* query, const char* keyword,
     });
 }
 
-int dasi_query_append(dasi_query_t* query, const char* keyword,
-                      const char* value) {
+int dasi_query_append(dasi_query_t* query, const char* keyword, const char* value) {
     return tryCatch([query, keyword, value] {
         ASSERT(query);
         ASSERT(keyword);

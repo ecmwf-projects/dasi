@@ -35,6 +35,8 @@ if __name__ == "__main__":
     for name, data in dir.files():
         print("Archiving: %s" % name)
         key["Name"] = name
+        key["Type"] = ext
         session.archive(key, data)
+        print("Archived: %s.%s" % (name, ext))
 
     print("Finished!")
