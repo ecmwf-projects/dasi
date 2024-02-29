@@ -15,23 +15,12 @@ int main(int argc, char** argv) {
     const char* config_path = NULL;
     const char* str_query   = NULL;
 
-    // const int   n_params       = 0;
-    // const char* param_names[4] = {"p", "t", "u", "v"};
-    // int         num_nums       = 0;
-    // int         num_steps      = 0;
-    // int         num_levels     = 0;
     int stat = DASI_ERROR_UNKNOWN;
 
     char**      argp;
-    // const char* arg;
     const char* kv;
 
-    // int    number;
-    // int    level;
-    // int    par;
-    // char   sbuf[5];
-    int    count = 0;
-    // double mean   = 0;
+    int    count  = 0;
     long   length = 0;
     double value  = 0;
     char   buffer[128];
@@ -77,15 +66,7 @@ int main(int argc, char** argv) {
 
     printf("Querying ...\n");
 
-    // const char* sbuf_p[] = {sbuf}; /* not C90 */
-
     ASSERT_SUCCESS(stat, dasi_retrieve(dasi, query, &ret));
-    // if (stat != DASI_SUCCESS) {
-    //     fprintf(stderr, "Could not find anything for query=%s\n", str_query);
-    //     ASSERT_SUCCESS(stat, dasi_free_query(query));
-    //     ASSERT_SUCCESS(stat, dasi_close(dasi));
-    //     return 1;
-    // }
     assert(ret != NULL);
     ASSERT_SUCCESS(stat, dasi_retrieve_count(ret, &length));
     if (length < 1) {
@@ -104,8 +85,6 @@ int main(int argc, char** argv) {
     while ((stat = dasi_retrieve_next(ret)) == DASI_SUCCESS) {
         ASSERT_SUCCESS(stat, dasi_retrieve_attrs(ret, &key, NULL, NULL, &length));
         assert(length > 0);
-        // ASSERT_SUCCESS(stat, dasi_key_get(key, "number", &kv));
-        // sscanf(kv, "%d", &number);
 
         buffer[length] = 0;
         ASSERT_SUCCESS(stat, dasi_retrieve_read(ret, buffer, &length));
