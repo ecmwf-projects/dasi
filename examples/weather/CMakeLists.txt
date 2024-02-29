@@ -37,3 +37,15 @@ target_link_libraries( forecast PUBLIC dasi )
 add_executable( mean mean.c )
 
 target_link_libraries( mean PUBLIC dasi )
+
+# query
+
+add_executable( query query.c )
+
+target_link_libraries( query PUBLIC dasi )
+
+# list
+
+add_executable( list list.c )
+
+target_link_libraries( list PUBLIC dasi )
