@@ -3,7 +3,7 @@
 configure_file(dasi.in ${CMAKE_BINARY_DIR}/bin/dasi @ONLY)
 install(PROGRAMS ${CMAKE_BINARY_DIR}/bin/dasi DESTINATION ${INSTALL_BIN_DIR} )
 
-foreach( _tool info list put get policy schema )
+foreach( _tool info list put get wipe policy schema )
     ecbuild_add_executable( TARGET     dasi-${_tool}
                             SOURCES    DASITool.cc
                                        DASITool.h

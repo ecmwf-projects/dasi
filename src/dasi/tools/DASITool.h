@@ -5,9 +5,8 @@
 #pragma once
 
 #include "dasi/api/Dasi.h"
-
-#include "eckit/runtime/Tool.h"
 #include "eckit/filesystem/PathName.h"
+#include "eckit/runtime/Tool.h"
 #include "eckit/utils/Optional.h"
 
 #include <vector>
@@ -55,6 +54,17 @@ protected:  // members
     eckit::PathName configPath_;
 
     eckit::Optional<dasi::Dasi> dasi_;
+};
+
+//-------------------------------------------------------------------------------------------------
+
+class DASIToolException: public eckit::Exception {
+public:
+    explicit DASIToolException(const std::ostringstream& message);
+
+    explicit DASIToolException(const std::string& message);
+
+    DASIToolException(const std::string& message, const eckit::CodeLocation& location);
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -16,7 +16,7 @@ static DASITool* instance_ = nullptr;
 DASITool::DASITool(int argc, char** argv): eckit::Tool(argc, argv) {
     ASSERT(instance_ == nullptr);
     instance_ = this;
-    options_.push_back(new SimpleOption<std::string>("config", "DASI Configuration file (yaml)"));
+    options_.push_back(new eckit::option::SimpleOption<std::string>("config", "DASI Configuration file (yaml)"));
 }
 
 static void usage(const std::string& tool) {
@@ -25,8 +25,7 @@ static void usage(const std::string& tool) {
 }
 
 void DASITool::run() {
-    eckit::option::CmdArgs args(&dasi::tools::usage, options_, numberOfPositionalArguments(),
-                                minimumPositionalArguments());
+    CmdArgs args(&dasi::tools::usage, options_, numberOfPositionalArguments(), minimumPositionalArguments());
 
     initInternal(args);
     init(args);
@@ -34,7 +33,7 @@ void DASITool::run() {
     finish(args);
 }
 
-void DASITool::initInternal(const eckit::option::CmdArgs& args) {
+void DASITool::initInternal(const CmdArgs& args) {
     configPath_ = args.getString("config", "./dasi.yml");
 }
 
@@ -42,6 +41,15 @@ Dasi& DASITool::dasi() {
     if (!dasi_) { dasi_.emplace(configPath_.localPath()); }
     return dasi_.value();
 }
+
+//-------------------------------------------------------------------------------------------------
+
+DASIToolException::DASIToolException(const std::string& message): eckit::Exception(message) { }
+
+DASIToolException::DASIToolException(const std::ostringstream& message): DASIToolException(message.str()) { }
+
+DASIToolException::DASIToolException(const std::string& message, const eckit::CodeLocation& location):
+    eckit::Exception(message, location) { }
 
 //-------------------------------------------------------------------------------------------------
 
