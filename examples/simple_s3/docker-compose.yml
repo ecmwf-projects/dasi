@@ -13,17 +13,9 @@ services:
       MINIO_ROOT_PASSWORD: minio1234
 
     volumes:
-      - "s3-data:/minio/data"
+      - ./minio/data:/data
+      - ./minio/certs:/root/.minio/certs
 
-    command: minio server /minio/data --console-address ":9090"
+    command: minio server /data --console-address ":9090"
 
-    restart: always
-
-    networks:
-      default:
-        aliases:
-          - test-bucket.s3.minio.ecmwf.int
-
-volumes:
-  s3-data:
-    driver: local
+    restart: unless-stopped
