@@ -81,7 +81,7 @@ void DASIWipe::execute(const eckit::option::CmdArgs& args) {
         int count = 0;
         for (auto&& entry : dasi().wipe(query, doit_, porcelain_, all_)) {
             count++;
-            eckit::Log::info() << " wipe: " << entry << "\n";
+            eckit::Log::info() << entry << "\n";
         }
 
         if (count == 0) {
