@@ -9,14 +9,14 @@ using namespace eckit::option;
 
 namespace dasi::tools {
 
-//-------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 
 static DASITool* instance_ = nullptr;
 
 DASITool::DASITool(int argc, char** argv): eckit::Tool(argc, argv) {
     ASSERT(instance_ == nullptr);
     instance_ = this;
-    options_.push_back(new eckit::option::SimpleOption<std::string>("config", "DASI Configuration file (yaml)"));
+    options_.push_back(new SimpleOption<std::string>("config", "Configuration file"));
 }
 
 static void usage(const std::string& tool) {
@@ -42,7 +42,7 @@ Dasi& DASITool::dasi() {
     return dasi_.value();
 }
 
-//-------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 
 DASIToolException::DASIToolException(const std::string& message): eckit::Exception(message) { }
 
@@ -51,6 +51,6 @@ DASIToolException::DASIToolException(const std::ostringstream& message): DASIToo
 DASIToolException::DASIToolException(const std::string& message, const eckit::CodeLocation& location):
     eckit::Exception(message, location) { }
 
-//-------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 
 }  // namespace dasi::tools

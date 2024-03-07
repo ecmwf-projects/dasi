@@ -34,15 +34,15 @@ class DASIWipe: public DASITool {
 public:  // methods
     DASIWipe(int argc, char** argv): DASITool(argc, argv) {
         options_.push_back(new SimpleOption<bool>("doit", "Delete the data and indexes"));
-        options_.push_back(new SimpleOption<bool>("all", "Delete all (unowned) contents in a dirty database"));
+        options_.push_back(new SimpleOption<bool>("all", "Delete all (unowned) contents of a dirty database"));
         options_.push_back(new SimpleOption<bool>("porcelain", "List only the deleted"));
-        options_.push_back(new SimpleOption<bool>("throw", "Throws when no data found"));
+        options_.push_back(new SimpleOption<bool>("throw", "Throws when data cannot be found"));
     }
 
 private:  // methods
     void usage(const std::string& tool) const override;
-    void init(const eckit::option::CmdArgs& args) override;
-    void execute(const eckit::option::CmdArgs& args) override;
+    void init(const CmdArgs& args) override;
+    void execute(const CmdArgs& args) override;
 
     [[nodiscard]]
     int numberOfPositionalArguments() const override {
@@ -65,14 +65,14 @@ void DASIWipe::usage(const std::string& tool) const {
     DASITool::usage(tool);
 }
 
-void DASIWipe::init(const eckit::option::CmdArgs& args) {
-    doit_      = args.getBool("doit", false);
-    all_       = args.getBool("all", false);
-    porcelain_ = args.getBool("porcelain", false);
-    throw_     = args.getBool("throw", false);
+void DASIWipe::init(const CmdArgs& args) {
+    doit_      = args.getBool("doit", doit_);
+    all_       = args.getBool("all", all_);
+    porcelain_ = args.getBool("porcelain", porcelain_);
+    throw_     = args.getBool("throw", throw_);
 }
 
-void DASIWipe::execute(const eckit::option::CmdArgs& args) {
+void DASIWipe::execute(const CmdArgs& args) {
     for (size_t i = 0; i < args.count(); ++i) {
         dasi::Query query(args(i));
 
@@ -81,17 +81,15 @@ void DASIWipe::execute(const eckit::option::CmdArgs& args) {
         int count = 0;
         for (auto&& entry : dasi().wipe(query, doit_, porcelain_, all_)) {
             count++;
-            eckit::Log::info() << entry << "\n";
+            eckit::Log::info() << entry << std::endl;
         }
 
         if (count == 0) {
             std::ostringstream oss;
             oss << "No data found for query: " << query;
-            if (throw_) { throw DASIToolException(oss); }
-            eckit::Log::info() << oss.str() << std::endl;
+            if (doit_ && throw_) { throw DASIToolException(oss); }
+            eckit::Log::error() << oss.str() << std::endl;
         }
-
-        eckit::Log::info() << "Bye!" << std::endl;
     }
 }
 
