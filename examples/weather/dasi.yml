@@ -1,14 +1,14 @@
 ---
-schema: /Users/macm/dev/DASI/examples/weather/schema
+schema: ./schema
 catalogue: toc
 store: file
 spaces:
 - handler: Default
   roots:
-  - path: /Users/macm/dev/DASI/examples/weather/root1
+  - path: ./root1
     writable: true
     visit: true
-  - path: /Users/macm/dev/DASI/examples/weather/root2
+  - path: ./root2
     wipe: true
     archive: false
     list: true

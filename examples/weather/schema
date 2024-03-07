@@ -1,3 +1,4 @@
 [ type, version, date, time
-    [ number?, step [ level, param ]]
-]
+    [ number?, step
+        [ level, param
+]]]

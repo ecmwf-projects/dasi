@@ -22,6 +22,7 @@ examples/**/*.data
 examples/**/*.index
 examples/**/toc
 examples/**/schema
+examples/**/minio/data
 *.so
 *.dylib
 # python stuff

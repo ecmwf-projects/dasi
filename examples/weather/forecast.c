@@ -16,9 +16,9 @@ int main(int argc, char** argv) {
     const char type[]          = "ensemble";
     const int n_params         = 4;
     const char* param_names[4] = {"p", "t", "u", "v"};
-    int num_members            = 5;
-    int num_steps              = 10;
-    int num_levels             = 20;
+    int num_members            = 3;
+    int num_steps              = 5;
+    int num_levels             = 10;
     int stat                   = DASI_ERROR_UNKNOWN;
     char version[5]            = "0001";
     char fc_date[9]            = "12345678";
