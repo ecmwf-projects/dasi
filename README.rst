@@ -69,6 +69,7 @@ Dependencies
 * `eckit`_
 * `metkit`_
 * `fdb`_
+* `AWS SDK C++<https://github.com/aws/aws-sdk-cpp>`_ (only if S3 enabled)
 
 Build and Install
 ~~~~~~~~~~~~~~~~~
@@ -101,6 +102,9 @@ Build and Install
    # Check installation
    $INSTALL_DIR/bin/dasi --version
 
+
+**Note** To enable S3 support, use the following cmake options:
+`-DENABLE_AWS_S3:BOOL=TRUE -DAWSSDK_ROOT:STRING=/path/to/AWSSDK`
 
 Install pydasi
 --------------
